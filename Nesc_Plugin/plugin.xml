@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="pl.edu.mimuw.nesc.editor.NescEditor"
+            default="true"
+            extensions="nc"
+            icon="icons/sample.gif"
+            id="pl.edu.mimuw.nesc.NesCEditor"
+            name="NesC Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="pl.edu.mimuw.nesc.category.wizards.new"
+            name="NesC">
+      </category>
+      <wizard
+            category="pl.edu.mimuw.nesc.category.wizards.new"
+            class="pl.edu.mimuw.nesc.wizards.NescProjectWizard"
+            id="pl.edu.mimuw.nesc.wizards.new.NescProjectWizard"
+            name="NesC Project"
+            project="true">
+      </wizard>
+   </extension>
+   <extension
+         id="pl.edu.mimuw.nesc.projectNature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="pl.edu.mimuw.nesc.natures.NescProjectNature">
+         </run>
+      </runtime>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="pl.edu.mimuw.nesc.category.wizards.import"
+            class="pl.edu.mimuw.nesc.wizards.NescImportWizard"
+            id="pl.edu.mimuw.nesc.wizards.new.NescImportWizard"
+            name="NesC Project">
+      </wizard>
+      <category
+            id="pl.edu.mimuw.nesc.category.wizards.import"
+            name="NesC">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="pl.edu.mimuw.nesc.projects.NescProjectPage"
+            id="pl.edu.mimuw.nesc.projects.NescProjectPage"
+            name="Nesc Project">
+            <enabledWhen>
+            	<adapt type="org.eclipse.core.resources.IProject">
+                   <test property="org.eclipse.core.resources.projectNature" value="pl.edu.mimuw.nesc.projectNature"/>
+            	</adapt>
+            </enabledWhen>
+      </page>
+   </extension>
+
+</plugin>
