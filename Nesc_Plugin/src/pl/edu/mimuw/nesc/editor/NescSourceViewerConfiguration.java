@@ -6,6 +6,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
@@ -27,20 +28,23 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import pl.edu.mimuw.nesc.editor.PartitionDamager;
+import pl.edu.mimuw.nesc.editor.contentassist.PreprocessorCompletionProcessor;
 import pl.edu.mimuw.nesc.partitioning.INCPartitions;
 import pl.edu.mimuw.nesc.scanners.NescWordDetector;
 
 public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration {
+
+	private static final int AUTO_ACTIVATION_DELAY = 400;
+
 	protected ITextEditor textEditor;
-	
+
 	protected RuleBasedScanner stringScanner;
 	protected ITokenScanner multilineCommentScanner;
 	protected ITokenScanner singlelineCommentScanner;
 	protected RuleBasedScanner preprocessorScanner;
 	protected RuleBasedScanner codeScanner;
 	protected String documentPartitioning;
-	
+
 	protected final int scannerBufferSize = 10;
 
 	public NescSourceViewerConfiguration(IPreferenceStore preferenceStore, ITextEditor editor, String partitioning) {
@@ -48,9 +52,9 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		textEditor = editor;
 		documentPartitioning = partitioning;
 		initializeScanners();
-		
+
 	}
-	
+
 	@Override
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler= new PresentationReconciler();
@@ -62,7 +66,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-		
+
 		dr= new DefaultDamagerRepairer(getSinglelineCommentScanner());
 		reconciler.setDamager(dr, INCPartitions.NC_SINGLE_LINE_COMMENT);
 		reconciler.setRepairer(dr, INCPartitions.NC_SINGLE_LINE_COMMENT);
@@ -70,26 +74,26 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		dr= new DefaultDamagerRepairer(getMultilineCommentScanner());
 		reconciler.setDamager(dr, INCPartitions.NC_MULTI_LINE_COMMENT);
 		reconciler.setRepairer(dr, INCPartitions.NC_MULTI_LINE_COMMENT);
-		
+
 		dr= new DefaultDamagerRepairer(getStringScanner());
 		reconciler.setDamager(dr, INCPartitions.NC_STRING);
 		reconciler.setRepairer(dr, INCPartitions.NC_STRING);
-		
+
 		dr= new DefaultDamagerRepairer(getStringScanner());
 		reconciler.setDamager(dr, INCPartitions.NC_CHARACTER);
 		reconciler.setRepairer(dr, INCPartitions.NC_CHARACTER);
-		
+
 		dr= new DefaultDamagerRepairer(getPreprocessorScanner());
 		reconciler.setDamager(new PartitionDamager(), INCPartitions.NC_PREPROCESSOR);
 		reconciler.setRepairer(dr, INCPartitions.NC_PREPROCESSOR);
-		
+
 		return reconciler;
 	}
-	
+
 	public ITextEditor getEditor() {
 		return textEditor;
 	}
-	
+
 	protected void initializeScanners() {
 		initializeStringScanner();
 		initalizeSingelneCommentScanner();
@@ -102,32 +106,32 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IRule[] rules = { new SingleLineRule("\"", "\"", textToken),
 				          new SingleLineRule("'", "'", textToken) };
 		((BufferedRuleBasedScanner)stringScanner).setRules(rules);
-		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));		
+		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
 		//((BufferedRuleBasedScanner)multilineCommentScanner).setDefaultReturnToken(defaultToken);
 	}
-	
+
 	protected void initalizeSingelneCommentScanner() {
 		singlelineCommentScanner = new BufferedRuleBasedScanner(scannerBufferSize);
 		IToken textToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xA5, 0xA8, 0xB8)));
 		IRule[] rules = { new EndOfLineRule("//", textToken)};
 		((BufferedRuleBasedScanner)singlelineCommentScanner).setRules(rules);
-		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));		
+		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
 		//((BufferedRuleBasedScanner)multilineCommentScanner).setDefaultReturnToken(defaultToken);
 	}
-	
+
 	protected void initializeMultilineCommentScanner() {
 		multilineCommentScanner = new BufferedRuleBasedScanner(scannerBufferSize);
 		IToken textToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xA5, 0xA8, 0xB8)));
 		IRule[] rules = { new MultiLineRule("/*", "*/", textToken, '\0', true) };
 		((BufferedRuleBasedScanner)multilineCommentScanner).setRules(rules);
-		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));		
+		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
 		//((BufferedRuleBasedScanner)multilineCommentScanner).setDefaultReturnToken(defaultToken);
 	}
-	
+
 	protected RuleBasedScanner getStringScanner() {
 		return stringScanner;
 	}
-	
+
 	protected ITokenScanner getMultilineCommentScanner() {
 		return multilineCommentScanner;
 	}
@@ -135,12 +139,12 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 	protected ITokenScanner getSinglelineCommentScanner() {
 		return singlelineCommentScanner;
 	}
-	
+
 	public void resetScanners() {
 		preprocessorScanner = null;
 		codeScanner = null;
 	}
-	
+
 	protected RuleBasedScanner getPreprocessorScanner() {
 		if (preprocessorScanner != null) {
 			return preprocessorScanner;
@@ -150,13 +154,13 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IRule[] rules = { new EndOfLineRule("#", textToken, '\\', true) };
 		scanner.setRules(rules);
 
-		IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));		
+		IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
 		scanner.setDefaultReturnToken(defaultToken);
-		
+
 		preprocessorScanner = scanner;
 		return preprocessorScanner;
 	}
-	
+
 	protected RuleBasedScanner getCodeScanner() {
 		if (codeScanner != null) {
 			return codeScanner;
@@ -258,13 +262,13 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		words.addWord("__typeof__", keywordToken);
 		words.addWord("__volatile", keywordToken);
 		words.addWord("__volatile__", keywordToken);
-		
+
 		IRule[] rules = { words,};
 		scanner.setRules(rules);
-		
-		IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));		
+
+		IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
 		scanner.setDefaultReturnToken(defaultToken);
-		
+
 		codeScanner = scanner;
 		return scanner;
 	}
@@ -273,16 +277,16 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
 		return new String[] { "//", "//!", "" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	@Override
 	public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType) {
 		return getIndentPrefixesForSpaces(4);
 	}
-	
+
 	protected String[] getIndentPrefixesForSpaces(int tabWidth) {
 		String[] indentPrefixes= new String[tabWidth + 2];
 		indentPrefixes[0]= getStringWithSpaces(tabWidth);
-		
+
 		for (int i= 0; i < tabWidth; i++) {
 			String spaces= getStringWithSpaces(i);
 			if (i < tabWidth)
@@ -290,18 +294,18 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 			else
 				indentPrefixes[i+1]= new String(spaces);
 		}
-		
+
 		indentPrefixes[tabWidth + 1]= ""; //$NON-NLS-1$
 
 		return indentPrefixes;
 	}
-	
+
 	protected static String getStringWithSpaces(int count) {
 		char[] spaceChars= new char[count];
 		Arrays.fill(spaceChars, ' ');
 		return new String(spaceChars);
 	}
-	
+
 	@Override
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		return new String[] {
@@ -313,14 +317,28 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 				INCPartitions.NC_PREPROCESSOR,
 		};
 	}
-	
+
+	@Override
+	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		final ContentAssistant contentAssistant = new ContentAssistant();
+		final IContentAssistProcessor preprocessorAssistant = new PreprocessorCompletionProcessor();
+
+		contentAssistant.enableAutoActivation(true);
+		contentAssistant.setAutoActivationDelay(AUTO_ACTIVATION_DELAY);
+
+		contentAssistant.setContentAssistProcessor(preprocessorAssistant, INCPartitions.NC_PREPROCESSOR);
+
+		contentAssistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+		return contentAssistant;
+	}
+
 	/*@Override
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
-		
+
 		final MultiPassContentFormatter formatter =
 			new MultiPassContentFormatter(getConfiguredDocumentPartitioning(sourceViewer),
 				IDocument.DEFAULT_CONTENT_TYPE);
-		
+
 		//formatter.setMasterStrategy(new CFormattingStrategy()); //TODO
 		return formatter;
 	}*/
