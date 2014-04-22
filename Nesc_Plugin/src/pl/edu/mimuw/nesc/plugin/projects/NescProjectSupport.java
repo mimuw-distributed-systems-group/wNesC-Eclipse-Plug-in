@@ -1,15 +1,19 @@
 package pl.edu.mimuw.nesc.plugin.projects;
 
+import java.io.InputStream;
 import java.net.URI;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 
 import pl.edu.mimuw.nesc.plugin.natures.NescProjectNature;
@@ -29,6 +33,32 @@ public class NescProjectSupport {
 		}
 
 		return project;
+	}
+
+	/**
+	 * Creates a new file in a nesC project. The correctness of the path
+	 * (whether it really begins with a nesC project and the file does not
+	 * exist) is not checked by this method. It should be checked before
+	 * calling it.
+	 *
+	 * @param fullPath Full path of the file to create (in the Eclipse
+	 *        "filesystem")
+	 * @param contents Stream to read the contents of the newly created file
+	 *                 from.
+	 * @return Object that represents the newly created file or null if the
+	 *         creation fails.
+	 */
+	public static IFile createFile(String fullPath, InputStream contents) {
+		final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		final IFile newFile = root.getFile(new Path(fullPath));
+
+		try {
+			// Create the file
+			newFile.create(contents, true, null);
+			return newFile;
+		} catch(CoreException e) {
+			return null;
+		}
 	}
 
 	private static IProject createBaseProject(String projectName, URI location) {
@@ -86,15 +116,15 @@ public class NescProjectSupport {
 			project.setDescription(description, monitor);
 		}
 	}
-	
+
 	public static QualifiedName getProjectMainConfQualName(String projectName) {
 		return new QualifiedName("pl.edu.mimuw.nesc.project." + projectName, "main-configuration");
 	}
-	
+
 	public static QualifiedName getProjectIsTinyOsProjQualName(String projectName) {
 		return new QualifiedName("pl.edu.mimuw.nesc.project." + projectName, "is-TinyOS-project");
 	}
-	
+
 	public static QualifiedName getProjectTinyOsPlatformQualName(String projectName) {
 		return new QualifiedName("pl.edu.mimuw.nesc.project." + projectName, "TinyOS-platform");
 	}

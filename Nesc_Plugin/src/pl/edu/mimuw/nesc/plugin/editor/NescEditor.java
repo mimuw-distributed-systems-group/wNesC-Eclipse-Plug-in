@@ -44,6 +44,8 @@ import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
 
 public class NescEditor extends TextEditor {
 
+	public static final String EDITOR_ID = "pl.edu.mimuw.nesc.NesCEditor";
+	
 	private final NescFrontend frontend;
 	private ContextRef context = null;
 	private NescSourceViewerConfiguration sourceViewerConfiguration = null;

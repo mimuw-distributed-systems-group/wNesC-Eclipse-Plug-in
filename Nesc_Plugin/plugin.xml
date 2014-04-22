@@ -25,6 +25,13 @@
             name="NesC Project"
             project="true">
       </wizard>
+      <wizard
+         category="pl.edu.mimuw.nesc.category.wizards.new"
+         class="pl.edu.mimuw.nesc.plugin.wizards.NescInterfaceWizard"
+         id="pl.edu.mimuw.nesc.wizards.new.NescInterfaceWizard"
+         name="NesC Interface"
+         project="false">
+      </wizard>
    </extension>
    <extension
          id="pl.edu.mimuw.nesc.projectNature"
