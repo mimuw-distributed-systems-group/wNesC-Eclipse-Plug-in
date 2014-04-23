@@ -100,8 +100,7 @@ public class NescInterfaceWizardPage extends WizardPage {
     private final IInputValidator validator = new TypeParameterNameValidator();
 
     NescInterfaceWizardPage() {
-        super(PAGE_NAME);
-        setTitle(PAGE_NAME);
+        super(PAGE_NAME, PAGE_NAME, getPageIcon());
         setDescription(PAGE_DESCRIPTION);
     }
 
@@ -127,7 +126,6 @@ public class NescInterfaceWizardPage extends WizardPage {
         // Final operations
         setControl(composite);
         setPageComplete(false);
-        setPageIcon();
     }
 
     @Override
@@ -140,14 +138,16 @@ public class NescInterfaceWizardPage extends WizardPage {
     }
 
     /**
-     * Loads and sets icon for this page of the wizard.
+     * Returns the image descriptor with icon for this wizard or null if an
+     * error happens.
      */
-    private void setPageIcon() {
+    private static ImageDescriptor getPageIcon() {
         try {
             final URL iconURL = NescWizardSupport.getPluginResourceURL(ICON_PATH);
-            setImageDescriptor(ImageDescriptor.createFromURL(iconURL));
+            return ImageDescriptor.createFromURL(iconURL);
         } catch(MalformedURLException e) {
             /* the exception is ignored and the page will not have an icon */
+            return null;
         }
     }
 
