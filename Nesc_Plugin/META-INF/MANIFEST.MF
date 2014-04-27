@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: NesC_Plugin
 Bundle-SymbolicName: Nesc_Plugin;singleton:=true
 Bundle-Version: 0.1.1.testing_telepath
-Bundle-Activator: pl.edu.mimuw.nesc.NescPlugin
+Bundle-Activator: pl.edu.mimuw.nesc.plugin.NescPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jface.text,
@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.views;bundle-version="3.6.100",
  org.eclipse.core.resources;bundle-version="3.8.101",
  org.eclipse.ui.ide;bundle-version="3.9.1",
- org.eclipse.core.filesystem;bundle-version="1.4.0"
+ org.eclipse.core.filesystem;bundle-version="1.4.0",
+ org.eclipse.ui.workbench.texteditor;bundle-version="3.8.101"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: jars/nesc-frontend-1.0-SNAPSHOT-jar-with-dependencies.jar,

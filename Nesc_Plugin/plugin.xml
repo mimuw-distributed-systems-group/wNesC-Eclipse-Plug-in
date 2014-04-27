@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="pl.edu.mimuw.nesc.editor.NescEditor"
+            class="pl.edu.mimuw.nesc.plugin.editor.NescEditor"
             default="true"
             extensions="nc"
             icon="icons/sample.gif"
@@ -20,7 +20,7 @@
       </category>
       <wizard
             category="pl.edu.mimuw.nesc.category.wizards.new"
-            class="pl.edu.mimuw.nesc.wizards.NescProjectWizard"
+            class="pl.edu.mimuw.nesc.plugin.wizards.NescProjectWizard"
             id="pl.edu.mimuw.nesc.wizards.new.NescProjectWizard"
             name="NesC Project"
             project="true">
@@ -31,7 +31,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="pl.edu.mimuw.nesc.natures.NescProjectNature">
+               class="pl.edu.mimuw.nesc.plugin.natures.NescProjectNature">
          </run>
       </runtime>
    </extension>
@@ -39,7 +39,7 @@
          point="org.eclipse.ui.importWizards">
       <wizard
             category="pl.edu.mimuw.nesc.category.wizards.import"
-            class="pl.edu.mimuw.nesc.wizards.NescImportWizard"
+            class="pl.edu.mimuw.nesc.plugin.wizards.NescImportWizard"
             id="pl.edu.mimuw.nesc.wizards.new.NescImportWizard"
             name="NesC Project">
       </wizard>
@@ -51,7 +51,7 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="pl.edu.mimuw.nesc.projects.NescProjectPage"
+            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectPage"
             id="pl.edu.mimuw.nesc.projects.NescProjectPage"
             name="Nesc Project">
             <enabledWhen>
