@@ -1,4 +1,4 @@
-package pl.edu.mimuw.nesc.wizards.fields;
+package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Composite;

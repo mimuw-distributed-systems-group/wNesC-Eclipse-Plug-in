@@ -34,7 +34,7 @@
       </wizard>
       <wizard
          category="pl.edu.mimuw.nesc.category.wizards.new"
-         class="pl.edu.mimuw.nesc.wizards.NescHeaderFileWizard"
+         class="pl.edu.mimuw.nesc.plugin.wizards.NescHeaderFileWizard"
          id="pl.edu.mimuw.nesc.wizards.new.NescHeaderFileWizard"
          name="Header File"
          project="false">

@@ -1,4 +1,4 @@
-package pl.edu.mimuw.nesc.wizards.fields;
+package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;

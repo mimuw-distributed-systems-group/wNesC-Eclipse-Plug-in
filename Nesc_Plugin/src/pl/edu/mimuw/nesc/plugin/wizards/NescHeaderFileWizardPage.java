@@ -1,6 +1,7 @@
-package pl.edu.mimuw.nesc.wizards;
+package pl.edu.mimuw.nesc.plugin.wizards;
 
-import pl.edu.mimuw.nesc.wizards.fields.*;
+import pl.edu.mimuw.nesc.plugin.wizards.fields.FileNameField;
+import pl.edu.mimuw.nesc.plugin.wizards.fields.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
