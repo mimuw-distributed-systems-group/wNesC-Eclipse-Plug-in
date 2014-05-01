@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import pl.edu.mimuw.nesc.plugin.editor.contentassist.NescCompletionProcessor;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.PreprocessorCompletionProcessor;
 import pl.edu.mimuw.nesc.plugin.editor.util.NescAutoIndentStrategy;
 import pl.edu.mimuw.nesc.plugin.editor.util.NumberRule;
@@ -97,7 +98,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		return reconciler;
 	}
-	
+
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		System.err.println("getting reconciler");
@@ -193,7 +194,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 			return codeScanner;
 		}
 		IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
-		
+
 		RuleBasedScanner scanner = new BufferedRuleBasedScanner(scannerBufferSize);
 		IWordDetector wordDetector = new NescWordDetector();
 		WordRule words  = new WordRule(wordDetector, defaultToken);
@@ -291,7 +292,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		words.addWord("__typeof__", keywordToken);
 		words.addWord("__volatile", keywordToken);
 		words.addWord("__volatile__", keywordToken);
-		
+
 		// Additional words. should be deleted when semantic highlighting is available
 		IToken preprocessorToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xE1, 0x9D, 0x1E)));
 		words.addWord("TRUE", preprocessorToken);
@@ -314,7 +315,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		words.addWord("nx_uint32_t", typedefToken);
 		words.addWord("nx_uint64_t", typedefToken);
 		// end of additional words
-		
+
 		IToken numberToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x30, 0x30, 0xD0)));
 		NumberRule number = new NumberRule(numberToken);
 
@@ -374,13 +375,16 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		final NescEditor nescEditor = (NescEditor) getEditor();
 		final ContentAssistant contentAssistant = new ContentAssistant();
 		final IContentAssistProcessor preprocessorAssistant = new PreprocessorCompletionProcessor();
+		final IContentAssistProcessor defaultAssistant = new NescCompletionProcessor(nescEditor);
 
 		contentAssistant.enableAutoActivation(true);
 		contentAssistant.setAutoActivationDelay(AUTO_ACTIVATION_DELAY);
 
 		contentAssistant.setContentAssistProcessor(preprocessorAssistant, INCPartitions.NC_PREPROCESSOR);
+		contentAssistant.setContentAssistProcessor(defaultAssistant, IDocument.DEFAULT_CONTENT_TYPE);
 
 		contentAssistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		return contentAssistant;
@@ -396,7 +400,6 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		}
 		return new IAutoEditStrategy[] { strategy };
 	}
-	
 	/* TODO: Currently this breaks colouring. It should be enabled at some point. Probably...
 	@Override
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {

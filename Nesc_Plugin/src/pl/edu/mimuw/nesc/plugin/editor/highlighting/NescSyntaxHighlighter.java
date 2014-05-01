@@ -2,8 +2,8 @@ package pl.edu.mimuw.nesc.plugin.editor.highlighting;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -14,8 +14,29 @@ import org.eclipse.swt.widgets.Display;
 import pl.edu.mimuw.nesc.FileData;
 import pl.edu.mimuw.nesc.ast.Location;
 import pl.edu.mimuw.nesc.lexer.Comment;
-import pl.edu.mimuw.nesc.preprocessor.directive.*;
-import pl.edu.mimuw.nesc.token.*;
+import pl.edu.mimuw.nesc.preprocessor.directive.DefineDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.ElifDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.ElseDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.EndifDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.ErrorDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.IfDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.IfdefDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.IfndefDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.IncludeDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.LineDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.PragmaDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.PreprocessorDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.UndefDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.UnknownDirective;
+import pl.edu.mimuw.nesc.preprocessor.directive.WarningDirective;
+import pl.edu.mimuw.nesc.token.CharacterToken;
+import pl.edu.mimuw.nesc.token.IdToken;
+import pl.edu.mimuw.nesc.token.KeywordToken;
+import pl.edu.mimuw.nesc.token.MacroToken;
+import pl.edu.mimuw.nesc.token.NumberToken;
+import pl.edu.mimuw.nesc.token.PunctuationToken;
+import pl.edu.mimuw.nesc.token.StringToken;
+import pl.edu.mimuw.nesc.token.Token;
 
 public class NescSyntaxHighlighter {
 
@@ -48,6 +69,7 @@ public class NescSyntaxHighlighter {
 		loadColours();
 	}
 
+	@Override
 	protected void finalize() {
 		if (inactiveBlock != null) {
 			inactiveBlock.dispose();
@@ -77,8 +99,8 @@ public class NescSyntaxHighlighter {
 		stringConstant = new Color(display, 0x25, 0x88, 0x28);
 		numberConstant = new Color(display, 0x30, 0x30, 0xD0);
 		keyword = new Color(display, 0x47, 0x30, 0xBB);
-		
-		
+
+
 	}
 
 	public static NescSyntaxHighlighter getInstance() {
@@ -89,14 +111,14 @@ public class NescSyntaxHighlighter {
 			List<StyleRange> styles) {
 		List<PreprocessorDirective> directives = fileData.getPreprocessorDirectives();
 		boolean inactiveBlock = false;
-		
+
 		if (directives.size() > 0) {
 			PreprocessorDirective previousDirective = directives.get(0);
-	
+
 			/**
 			 * First we highlight the preprocessor directives and inactive
 			 * preprocessor blocks
-			**/ 
+			**/
 			for (PreprocessorDirective directive : directives) {
 				PreprocessorDirective.LineRange range = directive.getLineRange();
 				if (range.getStart() > lineNum && !previousDirective.isActiveBlock() && directive != previousDirective) {
@@ -121,7 +143,7 @@ public class NescSyntaxHighlighter {
 				}
 			}
 		}
-		
+
 		Collections.sort(styles, new Comparator<StyleRange>() {
 			@Override
 			public int compare(StyleRange first, StyleRange second) {
@@ -221,6 +243,11 @@ public class NescSyntaxHighlighter {
 
 		@Override
 		public List<StyleRange> visit(IdToken token, Integer offset) {
+			return new ArrayList<>();
+		}
+
+		@Override
+		public List<StyleRange> visit(MacroToken arg0, Integer arg1) {
 			return new ArrayList<>();
 		}
 

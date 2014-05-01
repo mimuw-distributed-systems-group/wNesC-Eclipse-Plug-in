@@ -1,5 +1,6 @@
 package pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner;
 
+
 /**
  *
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
@@ -8,7 +9,7 @@ package pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner;
 public class Token {
 
 	public static enum Type {
-		IDENTIFIER, WHITESPACE,
+		UNKNOWN, IDENTIFIER, WHITESPACE, NEWLINE, DOT, LEFT_ARROW, RIGHT_ARROW,
 	};
 
 	private final String value;
@@ -21,6 +22,10 @@ public class Token {
 		this.type = type;
 		this.offset = offset;
 		this.length = length;
+	}
+
+	public Token(String value, Type type) {
+		this(value, type, -1, -1);
 	}
 
 	public String getValue() {
@@ -41,7 +46,7 @@ public class Token {
 
 	@Override
 	public String toString() {
-		return "{ Token; {value=" + value + ", type=" + type + ", offset=" + offset + ", length=" + length + "}}";
+		return "{ Token; {value='" + value + "', type=" + type + ", offset=" + offset + ", length=" + length + "}}";
 	}
 
 }
