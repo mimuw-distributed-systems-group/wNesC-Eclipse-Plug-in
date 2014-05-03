@@ -1,6 +1,5 @@
 package pl.edu.mimuw.nesc.plugin.wizards;
 
-import pl.edu.mimuw.nesc.plugin.wizards.fields.FileNameField;
 import pl.edu.mimuw.nesc.plugin.wizards.fields.*;
 
 import java.io.ByteArrayInputStream;
@@ -31,7 +30,7 @@ public class NescHeaderFileWizardPage extends WizardPage {
     /**
      * Extension that is recommended for nesC header files.
      */
-    private static final String RECOMMENDED_EXTENSION = ".h";
+    private static final String HEADER_FILE_EXTENSION = ".h";
 
     /**
      * Path to this plug-in resource with icon for this wizard.
@@ -45,10 +44,9 @@ public class NescHeaderFileWizardPage extends WizardPage {
     private static final String PAGE_DESCRIPTION = "Create a new nesC header file.";
     private static final String LABEL_FILENAME = "Header file name";
     private static final String LABEL_GUARD_CHECKBOX = "Add header guard";
-    private static final String ERR_MSG_FILE_EXISTS = "A file with given name already exists in "
-            + "the selected source folder.";
-    private static final String WARN_MSG_EXTENSION = "Entered header file name is not recommended - "
-            + RECOMMENDED_EXTENSION + " extension is missing.";
+    private static final String LABEL_COMMENTS_CHECKBOX = "Generate comments";
+    private static final String INFO_MSG_EXTENSION = "'" + HEADER_FILE_EXTENSION + "' extension will "
+            + "be appended to the entered header file name.";
 
     /**
      * The source folder field for this wizard.
@@ -64,6 +62,12 @@ public class NescHeaderFileWizardPage extends WizardPage {
      * The control for choosing if the header guard will be created.
      */
     private Button headerGuardCheckbox;
+
+    /**
+     * The control that allows choosing if the comments will be added to the
+     * generated file.
+     */
+    private Button commentsCheckbox;
 
     /**
      * Array with all fields from this wizard for quick iteration.
@@ -109,6 +113,11 @@ public class NescHeaderFileWizardPage extends WizardPage {
         headerGuardCheckbox.setText(LABEL_GUARD_CHECKBOX);
         headerGuardCheckbox.setSelection(true);
 
+        // Create the comments checkbox
+        commentsCheckbox = new Button(pageComposite, CHECK);
+        commentsCheckbox.setText(LABEL_COMMENTS_CHECKBOX);
+        commentsCheckbox.setSelection(true);
+
         // Final actions
         registerCompletionListeners();
         setPageComplete(false);
@@ -130,14 +139,32 @@ public class NescHeaderFileWizardPage extends WizardPage {
      *         "filesystem".
      */
     public String getNewHeaderFileFullPath() {
-        return sourceFolderField.getValue() + fileNameField.getValue();
+        return sourceFolderField.getValue() + getNewHeaderFileName();
     }
 
     /**
-     * @return True if and only if the user have chosen to add the guard header.
+     * @return Only the name of the header file to be created by this wizard.
+     */
+    public String getNewHeaderFileName() {
+        final String enteredValue = fileNameField.getValue();
+
+        return     enteredValue.endsWith(HEADER_FILE_EXTENSION)
+                ?  enteredValue
+                :  enteredValue + HEADER_FILE_EXTENSION;
+    }
+
+    /**
+     * @return True if and only if the user has chosen to add the guard header.
      */
     public boolean getHeaderGuardFlag() {
         return headerGuardCheckbox.getSelection();
+    }
+
+    /**
+     * @return True if and only if the user has chosen to add the comments.
+     */
+    public boolean getCommentsFlag() {
+       return commentsCheckbox.getSelection();
     }
 
     /**
@@ -147,6 +174,12 @@ public class NescHeaderFileWizardPage extends WizardPage {
         // Create all needed output streams
         final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         final PrintStream out = new PrintStream(byteOut);
+
+        // Add the comments if the user has chosen to do so
+        if (getCommentsFlag()) {
+            out.println(NescWizardSupport.generateHeadComment());
+            out.println();
+        }
 
         // Create initial contents
         final String headerGuardDefine = generateHeaderGuardName();
@@ -176,7 +209,7 @@ public class NescHeaderFileWizardPage extends WizardPage {
      *         the selected file name.
      */
     private String generateHeaderGuardName() {
-        final String fileName = fileNameField.getValue().toUpperCase();
+        final String fileName = getNewHeaderFileName().toUpperCase();
         final String afterDotsChanged = fileName.replace('.', '_');
         final String afterCleanup = afterDotsChanged.replaceAll("\\W+", "");
 
@@ -200,11 +233,12 @@ public class NescHeaderFileWizardPage extends WizardPage {
             }
         }
 
-        final String selectedFileName = fileNameField.getValue();
+        final String newHeaderFileName = getNewHeaderFileName();
 
         // Check if the file name is unique
-        if (sourceFolderField.fileExists(selectedFileName)) {
-            setErrorMessage(ERR_MSG_FILE_EXISTS);
+        if (sourceFolderField.fileExists(newHeaderFileName)) {
+            setErrorMessage("'" + newHeaderFileName + "' already exists in "
+                    + "the selected source folder.");
             setPageComplete(false);
             return;
         }
@@ -213,14 +247,14 @@ public class NescHeaderFileWizardPage extends WizardPage {
         setErrorMessage(null);
         setPageComplete(true);
 
-        // Look for warnings - check if the file name is recommended
-        if (!selectedFileName.endsWith(RECOMMENDED_EXTENSION)) {
-            setMessage(WARN_MSG_EXTENSION, WARNING);
+        // Look for other things - check if the file name is alright
+        if (!fileNameField.getValue().endsWith(HEADER_FILE_EXTENSION)) {
+            setMessage(INFO_MSG_EXTENSION, INFORMATION);
             return;
         }
 
         // No warnings
-        setMessage(null, WARNING);
+        setMessage(null, INFORMATION);
     }
 
     /**

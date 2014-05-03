@@ -52,6 +52,7 @@ public class NescInterfaceWizardPage extends WizardPage {
     private static final String LABEL_BUTTON_ADD = "Add...";
     private static final String LABEL_BUTTON_EDIT = "Edit...";
     private static final String LABEL_BUTTON_REMOVE = "Remove";
+    private static final String LABEL_COMMENTS_CHECKBOX = "Generate comments";
     private static final String TITLE_NEW_TYPE_PARAM = "New type parameter";
     private static final String TITLE_EDIT_TYPE_PARAM = "Edit type parameter";
     private static final String BODY_NEW_TYPE_PARAM = "Enter a new type parameter name:";
@@ -95,6 +96,12 @@ public class NescInterfaceWizardPage extends WizardPage {
     private Button btnRemove;
 
     /**
+     * Control that allows the user to select the option to automatically
+     * add comments with some information to the new file.
+     */
+    private Button commentsCheckbox;
+
+    /**
      * Object used to check the name of type parameters when adding them.
      */
     private final IInputValidator validator = new TypeParameterNameValidator();
@@ -121,6 +128,9 @@ public class NescInterfaceWizardPage extends WizardPage {
         interfaceNameField = new IdentifierField(composite, NAME_INTERFACE_NAME_FIELD, gridData);
         interfaceNameField.addModifyListener(errorStatusUpdater);
         createTypeParametersField();
+        commentsCheckbox = new Button(composite, CHECK);
+        commentsCheckbox.setText(LABEL_COMMENTS_CHECKBOX);
+        commentsCheckbox.setSelection(true);
         fields = new WizardField[] { sourceFolderField, interfaceNameField };
 
         // Final operations
@@ -168,6 +178,14 @@ public class NescInterfaceWizardPage extends WizardPage {
     }
 
     /**
+     * @return True if and only if the user has chosen to generate comments for
+     *         the new file.
+     */
+    public boolean getCommentsFlag() {
+        return commentsCheckbox.getSelection();
+    }
+
+    /**
      * @return A stream that contain initial contents of the new interface
      *         file.
      */
@@ -175,6 +193,12 @@ public class NescInterfaceWizardPage extends WizardPage {
         // Prepare output streams
         final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
         final PrintStream output = new PrintStream(byteOutput);
+
+        // Add the comments if the user has chosen to do it
+        if (getCommentsFlag()) {
+            output.println(NescWizardSupport.generateHeadComment());
+            output.println();
+        }
 
         // Write the initial contents of the interface file
         output.print("interface ");
@@ -196,7 +220,7 @@ public class NescInterfaceWizardPage extends WizardPage {
 
         // Other part of the interface
         output.println(" {");
-        output.print("   ");
+        output.print(NescWizardSupport.getIndentationStep());
         final int cursorOffset = byteOutput.size();
         output.println();
         output.println('}');
