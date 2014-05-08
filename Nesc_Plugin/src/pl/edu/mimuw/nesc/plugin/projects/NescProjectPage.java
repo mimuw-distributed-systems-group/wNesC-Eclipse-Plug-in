@@ -15,6 +15,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.osgi.service.prefs.BackingStoreException;
+
+import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
+import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
 
 public class NescProjectPage extends PropertyPage implements IWorkbenchPropertyPage {
 	private boolean isProjectLevel;
@@ -124,19 +128,14 @@ public class NescProjectPage extends PropertyPage implements IWorkbenchPropertyP
 		IProject project = getProject();
 		if (project != null) {
 			try {
-				project.setPersistentProperty(
-						NescProjectSupport.getProjectMainConfQualName(project.getName()),
-						mainConfiguration.getText());
-				project.setPersistentProperty(
-						NescProjectSupport.getProjectIsTinyOsProjQualName(project.getName()),
-						Boolean.toString(isTinyOsProject.getSelection()));
-				project.setPersistentProperty(
-						NescProjectSupport.getProjectTinyOsPlatformQualName(project.getName()),
-						tinyOsPlatform.getText());
+				ProjectUtil.setProjectPreferenceValue(project, NescProjectPreferences.MAIN_CONFIGURATION, mainConfiguration.getText());
+				ProjectUtil.setProjectPreferenceValue(project, NescProjectPreferences.TINY_OS_PROJECT, isTinyOsProject.getSelection());
+				ProjectUtil.setProjectPreferenceValue(project, NescProjectPreferences.TINY_OS_PLATFORM, tinyOsPlatform.getText());
 				this.setErrorMessage(null);
-			} catch (CoreException e) {
-				this.setErrorMessage("Failed to save changes.");
+			} catch (BackingStoreException e) {
+				this.setErrorMessage("Failed to save changes to project properties");
 			}
+			
 		} else {
 			System.err.println("No project found!");
 		}
@@ -145,17 +144,10 @@ public class NescProjectPage extends PropertyPage implements IWorkbenchPropertyP
 	private void setProjectData() {
 		IProject project = getProject();
 		if (project != null) {
-			try {
-				mainConfiguration.setText(project.getPersistentProperty(
-						NescProjectSupport.getProjectMainConfQualName(project.getName())));
-				isTinyOsProject.setSelection(Boolean.valueOf(project.getPersistentProperty(
-						NescProjectSupport.getProjectIsTinyOsProjQualName(project.getName()))));
-				tinyOsPlatform.setText(project.getPersistentProperty(
-						NescProjectSupport.getProjectTinyOsPlatformQualName(project.getName())));
-				tinyOsPlatform.setEnabled(isTinyOsProject.getSelection());
-			} catch (CoreException e) {
-				this.setErrorMessage("Failed to get project settings.");
-			}
+			mainConfiguration.setText(ProjectUtil.getProjectPreferenceValue(project, NescProjectPreferences.MAIN_CONFIGURATION));
+			isTinyOsProject.setSelection(ProjectUtil.getProjectPreferenceValueB(project, NescProjectPreferences.TINY_OS_PROJECT));
+			tinyOsPlatform.setText(ProjectUtil.getProjectPreferenceValue(project, NescProjectPreferences.TINY_OS_PLATFORM));
+			tinyOsPlatform.setEnabled(isTinyOsProject.getSelection());
 		}
 	}
 

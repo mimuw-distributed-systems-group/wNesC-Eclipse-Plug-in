@@ -9,8 +9,11 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.osgi.service.prefs.BackingStoreException;
 
 import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
+import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
+import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
 
 public class NescProjectWizard extends Wizard implements INewWizard {
 
@@ -61,23 +64,15 @@ public class NescProjectWizard extends Wizard implements INewWizard {
 		IProject project = NescProjectSupport.createProject(name, location);
 		
 		try {
-			project.setPersistentProperty(
-					NescProjectSupport.getProjectMainConfQualName(project.getName()),
-					_pageTwo.getMainConfiguration());
-			project.setPersistentProperty(
-					NescProjectSupport.getProjectIsTinyOsProjQualName(project.getName()),
-					Boolean.toString(_pageTwo.getTinyOsProject()));
-			project.setPersistentProperty(
-					NescProjectSupport.getProjectTinyOsPlatformQualName(project.getName()),
-					_pageTwo.getTinyOsPlatform());
+			ProjectUtil.setProjectPreferenceValue(project, NescProjectPreferences.MAIN_CONFIGURATION, _pageTwo.getMainConfiguration());
+			ProjectUtil.setProjectPreferenceValue(project, NescProjectPreferences.TINY_OS_PROJECT, _pageTwo.getTinyOsProject());
+			ProjectUtil.setProjectPreferenceValue(project, NescProjectPreferences.TINY_OS_PLATFORM, _pageTwo.getTinyOsPlatform());
+			
 			_pageOne.setErrorMessage(null);
 			_pageTwo.setErrorMessage(null);
-			
-		} catch (CoreException e) {
-			String error = "Failed to set project information!";
-			_pageOne.setErrorMessage(error);
-			_pageTwo.setErrorMessage(error);
-			return false;
+		} catch (BackingStoreException e) {
+			_pageOne.setErrorMessage("Failed to write project configuration to disk");
+			_pageTwo.setErrorMessage("Failed to write project configuration to disk");
 		}
 
 		return true;
