@@ -1,10 +1,17 @@
 package pl.edu.mimuw.nesc.plugin;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import pl.edu.mimuw.nesc.ContextRef;
+import pl.edu.mimuw.nesc.Frontend;
+import pl.edu.mimuw.nesc.NescFrontend;
+import pl.edu.mimuw.nesc.ProjectData;
 import pl.edu.mimuw.nesc.plugin.editor.util.AutosaveListener;
 
 /**
@@ -17,20 +24,27 @@ public class NescPlugin extends AbstractUIPlugin {
 
 	// The shared instance
 	private static NescPlugin plugin;
+	
+	// Frontend data
+	private static ConcurrentMap<String, ContextRef> projectContext = new ConcurrentHashMap<String, ContextRef>();
+	private static ConcurrentMap<String, ProjectData> projectData = new ConcurrentHashMap<String, ProjectData>();
+	
+	private static Frontend nescFrontend = NescFrontend.builder().build();
 
 	/**
 	 * The constructor
 	 */
 	public NescPlugin() {
+		plugin = this;
 	}
 
 	/*
 	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
-	 * )
+	 * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		// Adds document auto-save on active document change
 		this.getWorkbench().addWindowListener(AutosaveListener.getInstance());
 		for (IWorkbenchWindow window : this.getWorkbench().getWorkbenchWindows()) {
 			window.addPageListener(AutosaveListener.getInstance());
@@ -59,6 +73,26 @@ public class NescPlugin extends AbstractUIPlugin {
 	 */
 	public static NescPlugin getDefault() {
 		return plugin;
+	}
+	
+	public ContextRef getProjectContext(String projectName) {
+		return projectContext.get(projectName);
+	}
+	
+	public void setProjectContext(String projectName, ContextRef projectContextRef) {
+		projectContext.put(projectName, projectContextRef);
+	}
+	
+	public ProjectData getProjectData(String projectName) {
+		return projectData.get(projectName);
+	}
+	
+	public void setProjectData(String projectName, ProjectData newProjectData) {
+		projectData.put(projectName, newProjectData);
+	}
+	
+	public Frontend getNescFrontend() {
+		return nescFrontend;
 	}
 
 }

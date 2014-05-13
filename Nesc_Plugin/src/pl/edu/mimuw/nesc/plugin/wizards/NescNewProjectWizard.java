@@ -3,7 +3,6 @@ package pl.edu.mimuw.nesc.plugin.wizards;
 import java.net.URI;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -15,14 +14,14 @@ import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
 import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
 import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
 
-public class NescProjectWizard extends Wizard implements INewWizard {
+public class NescNewProjectWizard extends Wizard implements INewWizard {
 
 	private static String PAGE_NAME = "New nesC Project";
 	private static String WIZARD_NAME = "nesC Project Wizard";
 	private WizardNewProjectCreationPage _pageOne;
 	private NescWizardNewProjectMainConfiguartionPage _pageTwo;
 
-	public NescProjectWizard() {
+	public NescNewProjectWizard() {
 		setWindowTitle(WIZARD_NAME);
 	}
 

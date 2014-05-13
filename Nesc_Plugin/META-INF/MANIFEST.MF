@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: NesC_Plugin
 Bundle-SymbolicName: Nesc_Plugin;singleton:=true
-Bundle-Version: 0.1.1.testing_telepath
+Bundle-Version: 0.1.2.pretty_princess
 Bundle-Activator: pl.edu.mimuw.nesc.plugin.NescPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

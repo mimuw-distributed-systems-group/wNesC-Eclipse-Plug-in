@@ -37,18 +37,18 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.filesystem.URIUtil;
 
 import pl.edu.mimuw.nesc.ContextRef;
-import pl.edu.mimuw.nesc.NescFrontend;
-import pl.edu.mimuw.nesc.exception.InvalidOptionsException;
+import pl.edu.mimuw.nesc.FileData;
+import pl.edu.mimuw.nesc.plugin.NescPlugin;
 import pl.edu.mimuw.nesc.plugin.partitioning.FastNescPartitioner;
 import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
+import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
 
 public class NescEditor extends TextEditor {
 
 	public static final String EDITOR_ID = "pl.edu.mimuw.nesc.NesCEditor";
 	
-	private final NescFrontend frontend;
-	private ContextRef context = null;
 	private NescSourceViewerConfiguration sourceViewerConfiguration = null;
+	private FileData fileData = null;
 	
 	private class ExitPolicy implements IExitPolicy {
 		final char fExitCharacter;
@@ -334,7 +334,6 @@ public class NescEditor extends TextEditor {
 
 	public NescEditor() {
 		super();
-		frontend = NescFrontend.builder().build();
 		sourceViewerConfiguration = new NescSourceViewerConfiguration(null, this, INCPartitions.NC_PARTITIONING);
 	}
 
@@ -391,33 +390,25 @@ public class NescEditor extends TextEditor {
 	}
 
 	public ContextRef getNescContext() {
-		// TODO: Context needed!
-		// Later we will want to get the context from the project,
-		// For now we will create it every time for each file.
-
+		ProjectUtil.ensureContext(getOpenFileProject());
+		return ProjectUtil.getProjectContext(getOpenFileProject());
+	}
+	
+	public void updateFileData() {
+		ContextRef context = getNescContext();
 		if (context == null) {
-			String file = this.getFileLocation();
-			IPath filePath = URIUtil.toPath(URIUtil.toURI(file));
-			String location = filePath.removeLastSegments(1).makeAbsolute().toOSString();
-			String fileName = filePath.removeFileExtension().lastSegment();
-
-			String options[] = { "-m", fileName, "-p", location };
-
-			try {
-				System.out.println("FRONTEND");
-				context = frontend.createContext(options);
-				System.out.println("FRONTEND END");
-			} catch (InvalidOptionsException e) {
-			} catch (Throwable e) {
-				e.printStackTrace();
+			return;
+		}
+		fileData = NescPlugin.getDefault().getNescFrontend().update(context, getFileLocation());
+	}
+	
+	public FileData getFileData() {
+		if (fileData == null) {
+			if (getOpenFileProject() != null) {
+				updateFileData();
 			}
 		}
-
-		if (context == null) {
-			System.err.println("no context for you");
-		}
-
-		return context;
+		return fileData;
 	}
 	
 	private static char getPeerCharacter(char character) {

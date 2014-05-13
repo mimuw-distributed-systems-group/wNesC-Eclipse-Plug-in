@@ -12,6 +12,9 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.BufferedRuleBasedScanner;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.EndOfLineRule;
@@ -93,6 +96,25 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		reconciler.setRepairer(dr, INCPartitions.NC_PREPROCESSOR);
 
 		return reconciler;
+	}
+	
+	@Override
+	public IReconciler getReconciler(ISourceViewer sourceViewer) {
+		System.err.println("getting reconciler");
+		if (textEditor != null) {
+			//Delay changed and non-incremental reconciler used due to
+			//PR 130089
+			CompositeReconcilingStrategy strategy= new CompositeReconcilingStrategy();
+			// A spelling reconcile strategy can be inserted here for spelling reconciling
+			// Should we copy it fromn CDT?
+			strategy.setReconcilingStrategies(new IReconcilingStrategy[] {new NescReconcilingStrategy(textEditor)} );
+			MonoReconciler reconciler= new NescReconciler(textEditor, strategy);
+			reconciler.setIsIncrementalReconciler(false);
+			//reconciler.setProgressMonitor(new ProgressMonitorAndCanceler());
+			reconciler.setDelay(500);
+			return reconciler;
+		}
+		return null;
 	}
 
 	public ITextEditor getEditor() {
@@ -375,7 +397,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		return new IAutoEditStrategy[] { strategy };
 	}
 	
-	/* TODO: Currently this breaks colouring. It should be enabled at some point.
+	/* TODO: Currently this breaks colouring. It should be enabled at some point. Probably...
 	@Override
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
 		if (documentPartitioning != null)

@@ -20,7 +20,7 @@
       </category>
       <wizard
             category="pl.edu.mimuw.nesc.category.wizards.new"
-            class="pl.edu.mimuw.nesc.plugin.wizards.NescProjectWizard"
+            class="pl.edu.mimuw.nesc.plugin.wizards.NescNewProjectWizard"
             id="pl.edu.mimuw.nesc.wizards.new.NescProjectWizard"
             name="NesC Project"
             project="true">
