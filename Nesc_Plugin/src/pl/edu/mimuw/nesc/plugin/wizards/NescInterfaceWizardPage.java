@@ -5,20 +5,19 @@ import pl.edu.mimuw.nesc.plugin.wizards.fields.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
 import static org.eclipse.swt.SWT.*;
@@ -36,11 +35,6 @@ public class NescInterfaceWizardPage extends WizardPage {
      * the page.
      */
     private static final String ICON_PATH = "icons/interfaceWizardIcon.png";
-
-    /**
-     * Extension of the interface file that will be created.
-     */
-    private static final String NESC_SOURCE_EXTENSION = ".nc";
 
     /**
      * Texts shown in various places on this wizard page.
@@ -107,7 +101,7 @@ public class NescInterfaceWizardPage extends WizardPage {
     private final IInputValidator validator = new TypeParameterNameValidator();
 
     NescInterfaceWizardPage() {
-        super(PAGE_NAME, PAGE_NAME, getPageIcon());
+        super(PAGE_NAME, PAGE_NAME, NescWizardSupport.getImageDescriptorForResource(ICON_PATH));
         setDescription(PAGE_DESCRIPTION);
     }
 
@@ -115,9 +109,7 @@ public class NescInterfaceWizardPage extends WizardPage {
     public void createControl(Composite parent) {
         // Create the composite and set the grid layout
         composite = new Composite(parent, NONE);
-        final GridLayout layout = new GridLayout();
-        layout.numColumns = 1;
-        composite.setLayout(layout);
+        composite.setLayout(new GridLayout());
 
         // Create controls for all data that will be gathered
         final GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
@@ -134,6 +126,7 @@ public class NescInterfaceWizardPage extends WizardPage {
         fields = new WizardField[] { sourceFolderField, interfaceNameField };
 
         // Final operations
+        sourceFolderField.align(new AbstractField[] { interfaceNameField });
         setControl(composite);
         setPageComplete(false);
     }
@@ -144,20 +137,6 @@ public class NescInterfaceWizardPage extends WizardPage {
 
         if (!sourceFolderField.isEmpty()) {
             interfaceNameField.setFocus();
-        }
-    }
-
-    /**
-     * Returns the image descriptor with icon for this wizard or null if an
-     * error happens.
-     */
-    private static ImageDescriptor getPageIcon() {
-        try {
-            final URL iconURL = NescWizardSupport.getPluginResourceURL(ICON_PATH);
-            return ImageDescriptor.createFromURL(iconURL);
-        } catch(MalformedURLException e) {
-            /* the exception is ignored and the page will not have an icon */
-            return null;
         }
     }
 
@@ -174,7 +153,7 @@ public class NescInterfaceWizardPage extends WizardPage {
      *         extension).
      */
     public String getNewInterfaceFileName() {
-        return interfaceNameField.getValue() + NESC_SOURCE_EXTENSION;
+        return interfaceNameField.getValue() + NescWizardSupport.NESC_SOURCE_EXTENSION;
     }
 
     /**
@@ -269,10 +248,7 @@ public class NescInterfaceWizardPage extends WizardPage {
 
         // Composite for buttons
         final Composite cstButtons = new Composite(typeParamsComposite, NONE);
-        final RowLayout buttonsLayout = new RowLayout(VERTICAL);
-        buttonsLayout.spacing = 0;
-        buttonsLayout.center = buttonsLayout.fill = true;
-        cstButtons.setLayout(buttonsLayout);
+        cstButtons.setLayout(new FillLayout(VERTICAL));
 
         // Buttons
         btnAdd = new Button(cstButtons, NONE);
@@ -406,29 +382,41 @@ public class NescInterfaceWizardPage extends WizardPage {
 
         @Override
         public String isValid(String text) {
-            if (text == null || "".equals(text)) {
+            if (text == null) {
                 return ERR_MSG_TYPE_PARAM_EMPTY;
             }
 
-            if (!text.matches("^[A-Za-z_]\\w*$")) {
-                if (Character.isDigit(text.charAt(0))) {
-                    return ERR_MSG_TYPE_PARAM_FIRST_CHAR_DIGIT;
-                } else {
-                    return ERR_MSG_TYPE_PARAM_DENIED_CHAR;
-                }
+            // Create the list of forbidden identifiers
+            final java.util.List<String> immutableIds = Arrays.asList(lstTypeParameters.getItems());
+            final java.util.List<String> wrongIdsList = new ArrayList<>(immutableIds);
+            if (editedName != null) {
+                wrongIdsList.removeAll(Arrays.asList(editedName));
+            }
+            final String[] wrongIds = wrongIdsList.toArray(new String[wrongIdsList.size()]);
+
+            // Validate the argument
+            String result;
+            switch (new IdentifierValidator(wrongIds).validate(text)) {
+            case EMPTY:
+                result = ERR_MSG_TYPE_PARAM_EMPTY;
+                break;
+            case FIRST_CHAR_DIGIT:
+                result = ERR_MSG_TYPE_PARAM_FIRST_CHAR_DIGIT;
+                break;
+            case FORBIDDEN_CHAR:
+                result = ERR_MSG_TYPE_PARAM_DENIED_CHAR;
+                break;
+            case DUPLICATE:
+                result = ERR_MSG_TYPE_PARAM_DUPLICATE;
+                break;
+            case SUCCESS:
+                result = null;
+                break;
+            default:
+                throw new RuntimeException("Unsupported identifier validation result.");
             }
 
-            if (editedName != null && editedName.equals(text)) {
-                return null;
-            }
-
-            for (String typeParam : lstTypeParameters.getItems()) {
-                if (typeParam.equals(text)) {
-                    return ERR_MSG_TYPE_PARAM_DUPLICATE;
-                }
-            }
-
-            return null;
+            return result;
         }
     }
 }

@@ -1,5 +1,6 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -60,6 +61,11 @@ public class SourceFolderField extends AbstractField {
     private final Text text;
 
     /**
+     * Button that allows the user to browse for a source folder.
+     */
+    private final Button browseButton;
+
+    /**
      * Initializes the field with given values.
      *
      * @param parent Composite that this field will be contained in.
@@ -79,7 +85,7 @@ public class SourceFolderField extends AbstractField {
 
         text = createText(getComposite(), defaultValue);
         this.shell = shell;
-        createButton();
+        browseButton = createButton();
     }
 
     @Override
@@ -99,7 +105,7 @@ public class SourceFolderField extends AbstractField {
             final IResource container = root.findMember(value);
 
             if (container == null) {
-                return "Folder '" + value + "' does not exit.";
+                return "Folder '" + value + "' does not exist.";
             } else if (container.getType() != IResource.FOLDER
                     && container.getType() != IResource.PROJECT) {
                 return "'" + value + "' must be a project or a folder.";
@@ -128,6 +134,13 @@ public class SourceFolderField extends AbstractField {
         return new Path(text.getText()).addTrailingSeparator().toString();
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        text.setEnabled(enabled);
+        browseButton.setEnabled(enabled);
+    }
+
     /**
      * @return True if and only if this field is empty.
      */
@@ -146,8 +159,30 @@ public class SourceFolderField extends AbstractField {
             throw new NullPointerException("SourceFolderField.fileExists: null argument");
         }
 
+        // Get the container
         final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        return root.exists(new Path(getValue() + fileName));
+        final IResource sourceResource = root.findMember(new Path(getValue()), false);
+        if (sourceResource == null || sourceResource.getType() != IResource.PROJECT
+                && sourceResource.getType() != IResource.FOLDER) {
+            return false;
+        }
+        final IContainer container = (IContainer) sourceResource;
+
+        try {
+            /* Iterate over all files in the selected folder (other methods are
+               case-sensitive which is wrong on some systems while creating a new
+               file). */
+            for (IResource resource : container.members()) {
+                if (resource.getName().toLowerCase().equals(fileName.toLowerCase())) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (CoreException e) {
+            // If an error happens, try the case-sensitive method
+            return root.exists(new Path(getValue() + fileName));
+        }
     }
 
     /**

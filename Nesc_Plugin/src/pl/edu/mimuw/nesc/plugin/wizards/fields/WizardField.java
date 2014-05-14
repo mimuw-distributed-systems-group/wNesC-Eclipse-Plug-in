@@ -14,6 +14,13 @@ public interface WizardField {
     void setFocus();
 
     /**
+     * Lets the user enter a value to the field or not.
+     *
+     * @param enabled Specifies whether the field will be enabled or disabled.
+     */
+    void setEnabled(boolean enabled);
+
+    /**
      * @return String describing why the value of the field is invalid. If it is
      *         valid, null should be returned.
      */

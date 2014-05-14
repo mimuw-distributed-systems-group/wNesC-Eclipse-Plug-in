@@ -9,11 +9,6 @@ import org.eclipse.swt.widgets.Composite;
  * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
  */
 public final class IdentifierField extends TextField {
-    /**
-     * Regular expression that defines the language of the valid values in this
-     * field.
-     */
-    private static final String IDENTIFIER_REGEXP = "^[A-Za-z_]\\w*$";
 
     /**
      * Initializes the field with given values and creates its controls.
@@ -35,17 +30,18 @@ public final class IdentifierField extends TextField {
         final String fieldName = getName();
         final String value = getValue();
 
-        if (!value.matches(IDENTIFIER_REGEXP)) {
-            if (value.isEmpty()) {
-                return fieldName + " cannot be empty.";
-            } else if (Character.isDigit(value.charAt(0))) {
-                return "The first character of the " + fieldName.toLowerCase() + " cannot be a digit.";
-            } else {
-                return "Only letters, digits and underscores are allowed in the "
-                        + fieldName.toLowerCase() + ".";
-            }
+        switch(IdentifierValidator.getSyntaxInstance().validate(value)) {
+        case SUCCESS:
+            return null;
+        case EMPTY:
+            return fieldName + " cannot be empty.";
+        case FIRST_CHAR_DIGIT:
+            return "The first character of the " + fieldName.toLowerCase() + " cannot be a digit.";
+        case FORBIDDEN_CHAR:
+            return "Only letters, digits and underscores are allowed in the "
+                + fieldName.toLowerCase() + ".";
+        default:
+            throw new RuntimeException("Unsupported identifier validation result.");
         }
-
-        return null;
     }
 }

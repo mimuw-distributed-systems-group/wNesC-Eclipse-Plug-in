@@ -50,6 +50,12 @@ public abstract class TextField extends AbstractField {
         return text.getText();
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        text.setEnabled(enabled);
+    }
+
     /**
      * Adds a modify listener that will be notified when the value in this field
      * changed.

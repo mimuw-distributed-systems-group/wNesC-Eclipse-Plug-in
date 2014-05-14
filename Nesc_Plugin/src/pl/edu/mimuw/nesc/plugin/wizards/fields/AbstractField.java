@@ -1,5 +1,6 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -18,6 +19,11 @@ public abstract class AbstractField implements WizardField {
      * Composite that contains all controls for this field. Never null.
      */
     private final Composite composite;
+
+    /**
+     * Label for this field.
+     */
+    private final Label label;
 
     /**
      * Name of the value that this field will allow to enter. Never null.
@@ -47,7 +53,7 @@ public abstract class AbstractField implements WizardField {
         }
 
         this.name = fieldName;
-        createLabel(composite, fieldName);
+        this.label = createLabel(composite, fieldName);
     }
 
     @Override
@@ -55,8 +61,59 @@ public abstract class AbstractField implements WizardField {
         return name;
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        composite.setEnabled(enabled);
+        label.setEnabled(enabled);
+    }
+
     protected Composite getComposite() {
         return composite;
+    }
+
+    /**
+     * After this call this field and those from the given array are aligned,
+     * i.e. their controls after label begin in the same position.
+     *
+     * @param fields Array with fields to be aligned with.
+     * @throws NullPointerException Argument is null.
+     * @throws IllegalArgumentException One of the elements of the given
+     *                                  array is null or this.
+     */
+    public void align(AbstractField[] fields) {
+       // Validate argument
+        if (fields == null) {
+            throw new NullPointerException("Fields array is null");
+        }
+        for (AbstractField field : fields) {
+            if (field == this || field == null) {
+                throw new IllegalArgumentException("One of the array elements is this field or null.");
+            }
+        }
+
+        align(fields, 0, 0);
+    }
+
+    /**
+     * Method that realizes the alignment.
+     *
+     * @return Maximum width of a label including this and fields from given
+     *         array.
+     */
+    private int align(AbstractField[] fields, int nextIndex, int curMax) {
+        // Compute the maximum width
+        getComposite().pack();
+        curMax = Math.max(curMax, label.getSize().x);
+        if (nextIndex < fields.length) {
+            curMax = Math.max(curMax, fields[nextIndex].align(fields, nextIndex + 1, curMax));
+        }
+
+        // Do the alignment
+        final GridData layoutData = new GridData(LEFT, CENTER, false, false);
+        layoutData.widthHint = curMax;
+        label.setLayoutData(layoutData);
+
+        return curMax;
     }
 
     /**

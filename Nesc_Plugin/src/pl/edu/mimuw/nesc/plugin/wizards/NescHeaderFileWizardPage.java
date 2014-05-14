@@ -5,10 +5,7 @@ import pl.edu.mimuw.nesc.plugin.wizards.fields.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -75,31 +72,15 @@ public class NescHeaderFileWizardPage extends WizardPage {
     private WizardField[] fields;
 
     NescHeaderFileWizardPage() {
-        super(PAGE_NAME, PAGE_NAME, getPageIcon());
+        super(PAGE_NAME, PAGE_NAME, NescWizardSupport.getImageDescriptorForResource(ICON_PATH));
         setDescription(PAGE_DESCRIPTION);
-    }
-
-    /**
-     * @return Image descriptor with icon for this wizard or null if an error
-     *         happens.
-     */
-    private static ImageDescriptor getPageIcon() {
-        try {
-            final URL iconURL = NescWizardSupport.getPluginResourceURL(ICON_PATH);
-            return ImageDescriptor.createFromURL(iconURL);
-        } catch(MalformedURLException e) {
-            /* if an error happens, the wizard will not have any icon */
-            return null;
-        }
     }
 
     @Override
     public void createControl(Composite parent) {
         // Create the composite for this page
         final Composite pageComposite = new Composite(parent, NONE);
-        final GridLayout pageLayout = new GridLayout();
-        pageLayout.numColumns = 1;
-        pageComposite.setLayout(pageLayout);
+        pageComposite.setLayout(new GridLayout());
 
         // Create all fields
         final GridData layoutObject = new GridData(GridData.FILL_HORIZONTAL);
@@ -119,6 +100,7 @@ public class NescHeaderFileWizardPage extends WizardPage {
         commentsCheckbox.setSelection(true);
 
         // Final actions
+        sourceFolderField.align(new AbstractField[] { fileNameField });
         registerCompletionListeners();
         setPageComplete(false);
         setControl(pageComposite);

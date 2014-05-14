@@ -39,6 +39,13 @@
          name="Header File"
          project="false">
       </wizard>
+      <wizard
+         category="pl.edu.mimuw.nesc.category.wizards.new"
+         class="pl.edu.mimuw.nesc.plugin.wizards.NescComponentWizard"
+         id="pl.edu.mimuw.nesc.wizards.new.NescComponentWizard"
+         name="NesC Component"
+         project="false">
+      </wizard>
    </extension>
    <extension
          id="pl.edu.mimuw.nesc.projectNature"
