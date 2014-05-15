@@ -3,7 +3,6 @@ package pl.edu.mimuw.nesc.plugin.editor.contentassist;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -11,12 +10,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * <p>
@@ -56,40 +49,6 @@ public abstract class CompletionProcessorBase extends TemplateCompletionProcesso
 	@Override
 	public String getErrorMessage() {
 		return null;
-	}
-
-	/**
-	 * Gets current file.
-	 *
-	 * @return current file
-	 */
-	protected IFile getCurrentFile() {
-		final IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-
-		final IWorkbenchPage page = win.getActivePage();
-		if (page != null) {
-			final IEditorPart editor = page.getActiveEditor();
-			if (editor != null) {
-				final IEditorInput input = editor.getEditorInput();
-				if (input instanceof IFileEditorInput) {
-					return ((IFileEditorInput) input).getFile();
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Gets full path of current file.
-	 *
-	 * @return file path
-	 */
-	protected String getCurrentFilePath() {
-		final IFile currentFile = getCurrentFile();
-		if (currentFile == null) {
-			throw new IllegalStateException();
-		}
-		return currentFile.getLocation().toOSString();
 	}
 
 	/**

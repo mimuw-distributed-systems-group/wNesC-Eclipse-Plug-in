@@ -2,14 +2,16 @@ package pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import com.google.common.collect.Lists;
+
 /**
- * Scanner that only tries to recognize last identifier.
+ * Scanner that tries to recognize identifiers, whitespace blocks, arrows and
+ * dots until newline or other character is met.
  *
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  *
@@ -20,13 +22,7 @@ public class DefaultPartitionScanner implements ContextScanner {
 		INITIAL, TERMINAL, IDENTIFIER, WHITESPACE,
 	};
 
-	@SuppressWarnings("serial")
-	private static final List<Character> NEWLINE_CHARACTER = new LinkedList<Character>() {
-		{
-			add('\n');
-			add('\r');
-		}
-	};
+	private static final List<Character> NEWLINE_CHARACTER = Lists.newArrayList('\r', '\n');
 
 	private IDocument doc;
 	private int currentPos;

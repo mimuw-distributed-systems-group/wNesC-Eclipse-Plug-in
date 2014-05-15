@@ -1,11 +1,14 @@
 package pl.edu.mimuw.nesc.plugin.editor.contentassist;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.swt.graphics.Image;
 
+import pl.edu.mimuw.nesc.ast.Location;
+import pl.edu.mimuw.nesc.declaration.Declaration;
 import pl.edu.mimuw.nesc.environment.ScopeType;
 import pl.edu.mimuw.nesc.plugin.editor.ImageManager;
 
@@ -16,6 +19,8 @@ import pl.edu.mimuw.nesc.plugin.editor.ImageManager;
  *
  */
 public abstract class ProposalBuilder {
+
+	private static final int DESCRIPTION_MAX_LENGTH_SOFT = 40;
 
 	protected final List<NescCompletionProposal> proposals;
 	protected final List<NescTemplateProposal> templates;
@@ -35,7 +40,7 @@ public abstract class ProposalBuilder {
 		return templates;
 	}
 
-	protected NescCompletionProposal buildProposal(String replacementString, int offset, int length, Image image) {
+	protected NescCompletionProposal addProposal(String replacementString, int offset, int length, Image image) {
 		final NescCompletionProposal proposal = new NescCompletionProposal(replacementString, offset, length, image);
 		this.proposals.add(proposal);
 		return proposal;
@@ -48,7 +53,7 @@ public abstract class ProposalBuilder {
 		return nescTemplate;
 	}
 
-	protected void buildNescTemplateProposal(Template template, int offset, int length) {
+	protected void addNescTemplateProposal(Template template, int offset, int length) {
 		final NescTemplateProposal proposal = new NescTemplateProposal(template, offset, length);
 		this.templates.add(proposal);
 	}
@@ -119,6 +124,40 @@ public abstract class ProposalBuilder {
 	 */
 	protected Image imageForScope(ScopeType scopeType) {
 		return getVisibilityImage(scopeToVisibility(scopeType));
+	}
+
+	protected String buildLocationDescription(Declaration declaration) {
+		final Location location = declaration.getLocation();
+		final String[] parts = location.getFilePath().split(File.separator);
+		System.out.println("PATH SEPARATOR '" + File.pathSeparator + "'");
+		for (String p : parts) {
+			System.out.print(", " + p);
+		}
+		System.out.println();
+		final List<String> acceptedParts = new ArrayList<>();
+		final StringBuilder builder = new StringBuilder();
+
+		int currentLength = 0;
+		boolean wholePath = true;
+		for (int i = parts.length - 1; i >= 0; --i) {
+			if (parts[i].length() + 1 + currentLength < DESCRIPTION_MAX_LENGTH_SOFT) {
+				currentLength += parts[i].length() + 1;
+				acceptedParts.add(parts[i]);
+			} else {
+				wholePath = false;
+				break;
+			}
+		}
+
+		if (!wholePath) {
+			builder.append("...");
+		}
+		for (int i = acceptedParts.size() - 1; i >= 0; --i) {
+			builder.append(File.separator);
+			builder.append(acceptedParts.get(i));
+		}
+
+		return builder.toString();
 	}
 
 }

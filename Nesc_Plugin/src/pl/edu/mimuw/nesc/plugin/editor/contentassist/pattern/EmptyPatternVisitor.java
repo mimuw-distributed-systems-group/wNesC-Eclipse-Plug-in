@@ -15,4 +15,9 @@ public abstract class EmptyPatternVisitor<R, A> implements Pattern.Visitor<R, A>
 		return null;
 	}
 
+	@Override
+	public R visit(CommandEventPattern pattern, A arg) {
+		return null;
+	}
+
 }

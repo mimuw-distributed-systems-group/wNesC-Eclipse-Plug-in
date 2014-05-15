@@ -377,6 +377,8 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		final NescEditor nescEditor = (NescEditor) getEditor();
 		final ContentAssistant contentAssistant = new ContentAssistant();
+		// TODO: Register ICompletionListener in ContentAssistant which will
+		// disable reconciling during completion proposal session.
 		final IContentAssistProcessor preprocessorAssistant = new PreprocessorCompletionProcessor();
 		final IContentAssistProcessor defaultAssistant = new NescCompletionProcessor(nescEditor);
 

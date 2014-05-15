@@ -61,7 +61,6 @@ public class ImageManager {
 			final URL iconUrl = getPluginResourceURL(path);
 			return ImageDescriptor.createFromURL(iconUrl);
 		} catch (MalformedURLException e) {
-			/* if an error happens, the wizard will not have any icon */
 			return null;
 		}
 	}

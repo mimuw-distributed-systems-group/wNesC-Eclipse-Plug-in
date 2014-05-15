@@ -57,6 +57,8 @@ public interface Pattern {
 
 	public interface Visitor<R, A> {
 		R visit(VariablePattern pattern, A arg);
+
+		R visit(CommandEventPattern pattern, A arg);
 	}
 
 }

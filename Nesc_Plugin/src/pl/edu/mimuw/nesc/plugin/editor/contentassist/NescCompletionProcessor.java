@@ -26,6 +26,7 @@ import pl.edu.mimuw.nesc.ast.Location;
 import pl.edu.mimuw.nesc.environment.Environment;
 import pl.edu.mimuw.nesc.plugin.editor.ImageManager;
 import pl.edu.mimuw.nesc.plugin.editor.NescEditor;
+import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.CommandEventPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.Pattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.VariablePattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.ContextScanner;
@@ -43,13 +44,12 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 	private static final TemplateContextType NESC_CONTEXT_TYPE = new NescContextType();
 	private static final char[] AUTO_ACTIVATION_CHARACTERS = new char[] { '.', '>' };
 
-	private static final Pattern[] PATTERNS = new Pattern[] { new VariablePattern() };
+	private static final Pattern[] PATTERNS = new Pattern[] { new VariablePattern(), new CommandEventPattern() };
 
 	private static final NescProposalsComparator COMPARATOR = new NescProposalsComparator();
 
 	private final NescEditor nescEditor;
 	private final ContextScanner scanner;
-
 
 	public NescCompletionProcessor(NescEditor nescEditor) {
 		this.nescEditor = nescEditor;
@@ -113,17 +113,17 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 		final List<ICompletionProposal> result = new ArrayList<>();
 
 		/* Prepare flattened environment. */
-		final Location location = new Location(getCurrentFilePath(), getLine(viewer, offset),
-				getColumn(viewer, offset));
+		final Location location = new Location(nescEditor.getFileLocation(), getLine(viewer, offset), getColumn(viewer,
+				offset));
 		final Environment environment = getEnvironment(fileData.getEnvironment(), location);
 		final Environment flattenedEnvironment = flattenEnvironment(environment);
 
 		/* Find matching patterns. */
 		final List<Pattern> matchingPatterns = getMatchingPatterns(tokens, offset);
 
-		/* Collect proposals */
-		final ObjectProposalBuilder objectProposalBuilder = new ObjectProposalBuilder(offset,
-				flattenedEnvironment, matchingPatterns);
+		/* Collect proposals. */
+		final ObjectProposalBuilder objectProposalBuilder = new ObjectProposalBuilder(offset, flattenedEnvironment,
+				environment.getScopeType(), matchingPatterns);
 		objectProposalBuilder.buildProposals();
 		addProposals(viewer, result, objectProposalBuilder.getProposals(), objectProposalBuilder.getTemplates());
 		return result;
@@ -156,7 +156,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 	}
 
 	/**
-	 * Gets patterns that matches given token list.
+	 * Gets patterns that match given token list.
 	 *
 	 * @param tokens
 	 *            tokens

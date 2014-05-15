@@ -63,15 +63,53 @@ public final class EnvironmentUtils {
 	 * @return the most nested environment in given location
 	 */
 	public static Environment getEnvironment(Environment environment, Location location) {
+		// TODO: log!
+		Environment closestEnv = null;
 		for (Environment nested : environment.getEnclosedEnvironments()) {
 			if (nested.getScopeType().equals(ScopeType.OTHER)) {
 				continue;
 			}
-			if (isInRange(location, nested.getStartLocation().get(), nested.getEndLocation().get())) {
+
+			if (!nested.getStartLocation().isPresent()) {
+				// FIXME: use logger
+				System.err.println("start location is empty!");
+				continue;
+			}
+			/*
+			 * Skip environment that starts after given location.
+			 */
+			else if (!nested.getStartLocation().get().isSmallerOrEqual(location)) {
+				continue;
+			}
+			/*
+			 * Due to syntax error end location may not be set, so the "closest"
+			 * environment to the given location should be selected. We can
+			 * assume that the syntax error caused that current environment was
+			 * not properly "closed", so that we can deduce that given location
+			 * is in currently investigated scope or in some further environment
+			 * on the same level. Example:
+			 *
+			 * int foo() { int bar; someerroneousstring }
+			 *
+			 * The "someerroneousstring" causes syntax error, so that the
+			 * following '}' is eaten hence the function is not properly closed.
+			 */
+			else if (!nested.getEndLocation().isPresent()) {
+				closestEnv = nested;
+			}
+			/*
+			 * Environment is properly built.
+			 */
+			else if (isInRange(location, nested.getStartLocation().get(), nested.getEndLocation().get())) {
 				return getEnvironment(nested, location);
 			}
 		}
-		/* This is the most nested environment */
+
+		if (closestEnv != null) {
+			return getEnvironment(closestEnv, location);
+		}
+
+		/* This is the most nested environment. */
 		return environment;
 	}
 

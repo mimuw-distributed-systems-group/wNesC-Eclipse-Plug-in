@@ -5,7 +5,8 @@ import org.eclipse.jface.text.templates.Template;
 
 /**
  * <p>
- * Template completion proposal.
+ * Template completion proposal. Object of this class contains only data to be
+ * used to build final proposal, but it is not a proposal itself.
  * </p>
  * <p>
  * Note that this class does not implements {@link ICompletionProposal}.
