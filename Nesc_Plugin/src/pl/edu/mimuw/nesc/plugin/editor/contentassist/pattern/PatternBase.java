@@ -1,5 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern;
 
+import pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token;
+
 /**
  * Pattern base class.
  *
@@ -41,5 +43,17 @@ public abstract class PatternBase implements Pattern {
 		this.replacementString = replacementString;
 		this.length = length;
 		this.offset = offset;
+	}
+
+	protected void setData(int currentOffset, Token... tokens) {
+		final StringBuilder builder = new StringBuilder();
+		final int offset = tokens.length == 0 ? currentOffset : tokens[0].getOffset();
+
+		for (Token token : tokens) {
+			builder.append(token.getValue());
+		}
+
+		final String replacementString = builder.toString();
+		setData(replacementString, offset, replacementString.length());
 	}
 }

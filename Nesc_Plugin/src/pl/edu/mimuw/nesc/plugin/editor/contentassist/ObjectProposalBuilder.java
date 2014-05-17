@@ -15,6 +15,7 @@ import pl.edu.mimuw.nesc.declaration.nesc.InterfaceDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.ComponentRefDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.ConstantDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.FunctionDeclaration;
+import pl.edu.mimuw.nesc.declaration.object.FunctionDeclaration.FunctionType;
 import pl.edu.mimuw.nesc.declaration.object.InterfaceRefDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.ObjectDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.TypenameDeclaration;
@@ -25,6 +26,7 @@ import pl.edu.mimuw.nesc.plugin.editor.ImageManager;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.CommandEventPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.EmptyPatternVisitor;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.Pattern;
+import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.TaskPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.VariablePattern;
 
 /**
@@ -142,7 +144,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 
 		@Override
 		public Void visit(final ConstantDeclaration declaration, Void arg) {
-			final ScopeType currentScopeType = declaration.getEnvironment().getScopeType();
+			final ScopeType declarationScopeType = declaration.getEnvironment().getScopeType();
 			// TODO: determine allowed scopes
 			final EmptyPatternVisitor<Void, Void> visitor = new EmptyPatternVisitor<Void, Void>() {
 
@@ -150,7 +152,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 				public Void visit(VariablePattern pattern, Void arg) {
 					final String name = declaration.getName();
 					if (name.startsWith(pattern.getName())) {
-						final Image image = imageForScope(currentScopeType);
+						final Image image = imageForScope(declarationScopeType);
 						addProposal(name, pattern.getOffset(), pattern.getLength(), image);
 					}
 					return null;
@@ -162,16 +164,37 @@ class ObjectProposalBuilder extends ProposalBuilder {
 
 		@Override
 		public Void visit(final FunctionDeclaration declaration, Void arg) {
-			final ScopeType currentScopeType = declaration.getEnvironment().getScopeType();
+			final ScopeType declarationScopeType = declaration.getEnvironment().getScopeType();
 			// TODO: determine allowed scopes
 			final EmptyPatternVisitor<Void, Void> visitor = new EmptyPatternVisitor<Void, Void>() {
 
 				@Override
 				public Void visit(VariablePattern pattern, Void arg) {
+					/* Tasks are handled somewhere else. */
+					if (declaration.getFunctionType() == FunctionType.TASK) {
+						return null;
+					}
+
 					final String name = declaration.getName();
 					// TODO skip function with present interface
 					if (name.startsWith(pattern.getName())) {
 						final Template template = buildFunctionTemplate(declaration);
+						addNescTemplateProposal(template, currentOffset, pattern.getLength());
+					}
+					return null;
+				}
+
+				@Override
+				public Void visit(TaskPattern pattern, Void arg) {
+					if (currentScopeType != ScopeType.COMPOUND) {
+						return null;
+					}
+					if (declaration.getFunctionType() != FunctionType.TASK) {
+						return null;
+					}
+					final String name = declaration.getName();
+					if (!pattern.getName().isPresent() || name.startsWith(pattern.getName().get())) {
+						final Template template = buildTaskTemplate(declaration);
 						addNescTemplateProposal(template, currentOffset, pattern.getLength());
 					}
 					return null;
@@ -260,7 +283,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 
 		@Override
 		public Void visit(final VariableDeclaration declaration, Void arg) {
-			final ScopeType currentScopeType = declaration.getEnvironment().getScopeType();
+			final ScopeType declarationScopeType = declaration.getEnvironment().getScopeType();
 			// TODO: determine allowed scopes
 			final EmptyPatternVisitor<Void, Void> visitor = new EmptyPatternVisitor<Void, Void>() {
 
@@ -268,7 +291,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 				public Void visit(VariablePattern pattern, Void arg) {
 					final String name = declaration.getName();
 					if (name.startsWith(pattern.getName())) {
-						final Image image = imageForScope(currentScopeType);
+						final Image image = imageForScope(declarationScopeType);
 						addProposal(name, pattern.getOffset(), pattern.getLength(), image);
 					}
 					return null;
@@ -317,11 +340,38 @@ class ObjectProposalBuilder extends ProposalBuilder {
 		 * @return function proposal template
 		 */
 		private Template buildFunctionTemplate(FunctionDeclaration declaration) {
+			return buildFunctionTemplate("", declaration);
+		}
+
+		/**
+		 * Build task proposal template from given function declaration.
+		 *
+		 * @param declaration
+		 *            task declaration
+		 * @return task proposal template
+		 */
+		private Template buildTaskTemplate(FunctionDeclaration declaration) {
+			return buildFunctionTemplate("post ", declaration);
+		}
+
+		/**
+		 * Build function proposal template from given function declaration.
+		 *
+		 * @param prefix
+		 *            prefix of proposal name and pattern
+		 * @param declaration
+		 *            function declaration
+		 * @return function proposal template
+		 */
+		private Template buildFunctionTemplate(String prefix, FunctionDeclaration declaration) {
 			final String name = declaration.getName();
 			final StringBuilder nameBuilder = new StringBuilder();
 			final String templateDesc = "";
 			final String contextTypeId = NescContextType.NESC_CONTEXT_TYPE;
 			final StringBuilder patternBuilder = new StringBuilder();
+
+			nameBuilder.append(prefix);
+			patternBuilder.append(prefix);
 
 			nameBuilder.append(name);
 			nameBuilder.append('(');

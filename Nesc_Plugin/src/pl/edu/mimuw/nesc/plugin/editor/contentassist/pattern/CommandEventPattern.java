@@ -146,15 +146,7 @@ public class CommandEventPattern extends PatternBase {
 		this.interfaceName = ifaceName;
 		this.functionName = functionName;
 
-		final StringBuilder builder = new StringBuilder();
-		final int offset = tokens.length == 0 ? currentOffset : tokens[0].getOffset();
-
-		for (Token token : tokens) {
-			builder.append(token.getValue());
-		}
-
-		final String replacementString = builder.toString();
-		setData(replacementString, offset, replacementString.length());
+		setData(currentOffset, tokens);
 	}
 
 	@Override

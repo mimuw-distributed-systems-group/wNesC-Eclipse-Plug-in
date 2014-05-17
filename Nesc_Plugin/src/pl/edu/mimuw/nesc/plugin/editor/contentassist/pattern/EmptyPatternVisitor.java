@@ -8,7 +8,7 @@ package pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern;
  * @param <R>
  * @param <A>
  */
-public abstract class EmptyPatternVisitor<R, A> implements Pattern.Visitor<R, A> {
+public class EmptyPatternVisitor<R, A> implements Pattern.Visitor<R, A> {
 
 	@Override
 	public R visit(VariablePattern pattern, A arg) {
@@ -20,4 +20,8 @@ public abstract class EmptyPatternVisitor<R, A> implements Pattern.Visitor<R, A>
 		return null;
 	}
 
+	@Override
+	public R visit(TaskPattern pattern, A arg) {
+		return null;
+	}
 }
