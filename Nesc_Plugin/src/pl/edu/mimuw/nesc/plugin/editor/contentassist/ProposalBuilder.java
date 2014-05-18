@@ -129,11 +129,6 @@ public abstract class ProposalBuilder {
 	protected String buildLocationDescription(Declaration declaration) {
 		final Location location = declaration.getLocation();
 		final String[] parts = location.getFilePath().split(File.separator);
-		System.out.println("PATH SEPARATOR '" + File.pathSeparator + "'");
-		for (String p : parts) {
-			System.out.print(", " + p);
-		}
-		System.out.println();
 		final List<String> acceptedParts = new ArrayList<>();
 		final StringBuilder builder = new StringBuilder();
 

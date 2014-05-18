@@ -27,6 +27,7 @@ import pl.edu.mimuw.nesc.environment.Environment;
 import pl.edu.mimuw.nesc.plugin.editor.ImageManager;
 import pl.edu.mimuw.nesc.plugin.editor.NescEditor;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.CommandEventPattern;
+import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.IdentifierChainPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.Pattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.TaskPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.VariablePattern;
@@ -47,7 +48,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 
 	// TODO: for each scope type provide different set of patterns
 	private static final Pattern[] PATTERNS = new Pattern[] { new VariablePattern(), new CommandEventPattern(),
-			new TaskPattern() };
+			new TaskPattern(), new IdentifierChainPattern() };
 
 	private static final NescProposalsComparator COMPARATOR = new NescProposalsComparator();
 

@@ -24,4 +24,9 @@ public class EmptyPatternVisitor<R, A> implements Pattern.Visitor<R, A> {
 	public R visit(TaskPattern pattern, A arg) {
 		return null;
 	}
+
+	@Override
+	public R visit(IdentifierChainPattern pattern, A arg) {
+		return null;
+	}
 }

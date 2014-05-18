@@ -4,7 +4,6 @@ import static pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.PatternUtils
 import static pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token.Type.DOT;
 import static pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token.Type.IDENTIFIER;
 import static pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token.Type.NEWLINE;
-import static pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token.Type.RIGHT_ARROW;
 import static pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token.Type.UNKNOWN;
 import static pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token.Type.WHITESPACE;
 
@@ -26,7 +25,6 @@ public class VariablePattern extends PatternBase {
 
 	private static final List<Token> FORBIDDEN_PRECEDING_TOKENS = Lists.newArrayList(
 			new Token(".", DOT),
-			new Token("->", RIGHT_ARROW),
 			new Token("call", IDENTIFIER),
 			new Token("signal", IDENTIFIER));
 
@@ -93,6 +91,11 @@ public class VariablePattern extends PatternBase {
 
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	protected void resetData() {
+		this.name = null;
 	}
 
 	private boolean isForbidden(Token token) {

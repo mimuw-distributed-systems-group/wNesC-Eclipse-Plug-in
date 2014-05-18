@@ -76,6 +76,12 @@ public class TaskPattern extends PatternBase {
 		return name;
 	}
 
+	@Override
+	protected void resetData() {
+		super.resetData();
+		this.name = null;
+	}
+
 	private void setData(Optional<String> taskName, int currentOffset, Token... tokens) {
 		this.name = taskName;
 		setData(currentOffset, tokens);

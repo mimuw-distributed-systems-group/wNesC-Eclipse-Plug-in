@@ -130,6 +130,14 @@ public class CommandEventPattern extends PatternBase {
 		return functionName;
 	}
 
+	@Override
+	protected void resetData() {
+		super.resetData();
+		this.functionName = null;
+		this.interfaceName = null;
+		this.type = null;
+	}
+
 	private FunctionType getFunctionType(Token token) {
 		final String value = token.getValue();
 		if ("call".startsWith(value)) {

@@ -3,6 +3,7 @@ package pl.edu.mimuw.nesc.plugin.editor.contentassist;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.swt.graphics.Image;
@@ -11,7 +12,10 @@ import pl.edu.mimuw.nesc.ast.gen.DataDecl;
 import pl.edu.mimuw.nesc.ast.gen.Declaration;
 import pl.edu.mimuw.nesc.ast.gen.ExceptionVisitor;
 import pl.edu.mimuw.nesc.ast.gen.VariableDecl;
+import pl.edu.mimuw.nesc.declaration.nesc.ConfigurationDeclaration;
 import pl.edu.mimuw.nesc.declaration.nesc.InterfaceDeclaration;
+import pl.edu.mimuw.nesc.declaration.nesc.ModuleDeclaration;
+import pl.edu.mimuw.nesc.declaration.nesc.NescDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.ComponentRefDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.ConstantDeclaration;
 import pl.edu.mimuw.nesc.declaration.object.FunctionDeclaration;
@@ -25,9 +29,13 @@ import pl.edu.mimuw.nesc.environment.ScopeType;
 import pl.edu.mimuw.nesc.plugin.editor.ImageManager;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.CommandEventPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.EmptyPatternVisitor;
+import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.IdentifierChainPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.Pattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.TaskPattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.VariablePattern;
+import pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token;
+
+import com.google.common.base.Optional;
 
 /**
  * Proposal builder of object declarations (variables, functions, enum
@@ -103,7 +111,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 			if (variableDecl.getDeclaration() == null) {
 				// FIXME: declaration should not be null, but frontend
 				// does not handle properly e.g. forward declarations such
-				// as "int foo(int, int);
+				// as "int foo(int, int)";
 				appendDefaultParameter();
 				return null;
 			}
@@ -137,8 +145,103 @@ class ObjectProposalBuilder extends ProposalBuilder {
 	private final class ObjectDeclarationVisitor implements ObjectDeclaration.Visitor<Void, Void> {
 
 		@Override
-		public Void visit(ComponentRefDeclaration declaration, Void arg) {
-			// TODO
+		public Void visit(final ComponentRefDeclaration declaration, Void arg) {
+			if (currentScopeType != ScopeType.CONFIGURATION_IMPLEMENTATION) {
+				return null;
+			}
+
+			final EmptyPatternVisitor<Void, Void> visitor = new EmptyPatternVisitor<Void, Void>() {
+
+				@Override
+				public Void visit(VariablePattern pattern, Void arg) {
+					/*
+					 * Try to suggest component references.
+					 */
+					final String name = declaration.getName();
+					if (name.startsWith(pattern.getName())) {
+						final Image image = imageForScope(ScopeType.SPECIFICATION);
+						addProposal(name, pattern.getOffset(), pattern.getLength(), image);
+					}
+					return null;
+				}
+
+				@Override
+				public Void visit(IdentifierChainPattern pattern, Void arg) {
+					/*
+					 * Try to suggest any of component's member, i.e.
+					 * interfaces, enum constants, typedefs.
+					 *
+					 * There are some slightly problematical cases: C1.Iface1 ->
+					 * C2.Iface2; This is all recognized as identifier chain but
+					 * we take into account only a part of it.
+					 */
+					final List<Token> tokens = pattern.getTokensList();
+					final Optional<Token> lastId = pattern.getLastIdToken();
+
+					final String guessedComponentRefName;
+					final String guessedMemberNamePrefix;
+					if (lastId.isPresent() && tokens.size() >= 3) {
+						guessedComponentRefName = tokens.get(tokens.size() - 3).getValue();
+						guessedMemberNamePrefix = lastId.get().getValue();
+					} else if (!lastId.isPresent() && tokens.size() >= 2) {
+						guessedComponentRefName = tokens.get(tokens.size() - 2).getValue();
+						guessedMemberNamePrefix = "";
+					} else {
+						return null;
+					}
+
+					/* Check if name of component reference matches. */
+					final String componentRefName = declaration.getName();
+					if (!componentRefName.equals(guessedComponentRefName)) {
+						return null;
+					}
+
+					final Optional<? extends NescDeclaration> componentDeclaration =
+							declaration.getComponentDeclaration();
+					/* Check if component exists. */
+					if (!componentDeclaration.isPresent()) {
+						return null;
+					}
+
+					/* Extract component's specification environment. */
+					final Environment specificationEnvironment = componentDeclaration.get().accept(
+							new NescDeclaration.Visitor<Environment, Void>() {
+								@Override
+								public Environment visit(ConfigurationDeclaration configurationDecl, Void arg) {
+									return configurationDecl.getAstConfiguration().getSpecificationEnvironment();
+								}
+
+								@Override
+								public Environment visit(InterfaceDeclaration interfaceDecl, Void arg) {
+									// TODO: error
+									return null;
+								}
+
+								@Override
+								public Environment visit(ModuleDeclaration moduleDecl, Void arg) {
+									return moduleDecl.getAstModule().getSpecificationEnvironment();
+								}
+							}, null);
+
+					if (specificationEnvironment == null) {
+						return null;
+					}
+
+					/* Iterate over all declarations in component specification. */
+					final Set<Map.Entry<String, ObjectDeclaration>> specificationEntries = specificationEnvironment
+							.getObjects().getAll();
+					final Image image = imageForScope(ScopeType.SPECIFICATION);
+					for (Map.Entry<String, ObjectDeclaration> entry : specificationEntries) {
+						final String name = entry.getKey();
+						if (name.startsWith(guessedMemberNamePrefix)) {
+							addProposal(name, pattern.getOffset(), pattern.getLength(), image);
+						}
+					}
+
+					return null;
+				}
+			};
+			iteratePatterns(visitor);
 			return null;
 		}
 
@@ -164,12 +267,12 @@ class ObjectProposalBuilder extends ProposalBuilder {
 
 		@Override
 		public Void visit(final FunctionDeclaration declaration, Void arg) {
-			final ScopeType declarationScopeType = declaration.getEnvironment().getScopeType();
-			// TODO: determine allowed scopes
 			final EmptyPatternVisitor<Void, Void> visitor = new EmptyPatternVisitor<Void, Void>() {
-
 				@Override
 				public Void visit(VariablePattern pattern, Void arg) {
+					if (currentScopeType != ScopeType.COMPOUND) {
+						return null;
+					}
 					/* Tasks are handled somewhere else. */
 					if (declaration.getFunctionType() == FunctionType.TASK) {
 						return null;
@@ -206,19 +309,17 @@ class ObjectProposalBuilder extends ProposalBuilder {
 
 		@Override
 		public Void visit(final InterfaceRefDeclaration declaration, Void arg) {
+			/*
+			 * Commands and events can be proposed only inside
+			 * functions.
+			 */
+			if (currentScopeType != ScopeType.COMPOUND) {
+				return null;
+			}
+
 			final EmptyPatternVisitor<Void, Void> visitor = new EmptyPatternVisitor<Void, Void>() {
-
-				// TODO: proposals in configuration implementation.
-
 				@Override
 				public Void visit(CommandEventPattern pattern, Void arg) {
-					/*
-					 * Commands and events can be proposed only inside
-					 * functions.
-					 */
-					if (currentScopeType != ScopeType.COMPOUND) {
-						return null;
-					}
 					/*
 					 * Probably due to syntax errors, ast tree for component was
 					 * not built. Skip.
