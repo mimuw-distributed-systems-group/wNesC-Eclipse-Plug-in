@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 
 import pl.edu.mimuw.nesc.plugin.natures.NescProjectNature;
-import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
 
 public class NescProjectSupport {
 
@@ -32,8 +31,6 @@ public class NescProjectSupport {
 			e.printStackTrace();
 			return null;
 		}
-		
-		ProjectUtil.ensureContext(project);
 
 		return project;
 	}

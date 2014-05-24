@@ -1,11 +1,13 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
+import static org.eclipse.swt.SWT.CENTER;
+import static org.eclipse.swt.SWT.LEFT;
+import static org.eclipse.swt.SWT.NONE;
+
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-
-import static org.eclipse.swt.SWT.*;
 
 /**
  * Abstract class that represents a wizard field. It creates a composite and
@@ -134,12 +136,17 @@ public abstract class AbstractField implements WizardField {
      * Creates and returns a label for this field. It is created as a child of
      * the given composite.
      *
-     * @param fieldName Text in this label (a colon will be appended).
+     * @param fieldName Text in this label (a colon will be appended if text
+     * 					is not empty).
      * @return Label for this field.
      */
     private static Label createLabel(Composite parent, String fieldName) {
         final Label result = new Label(parent, NONE);
-        result.setText(fieldName + ":");
+        if ("".equals(fieldName)) {
+        	result.setText(fieldName);
+        } else {
+        	result.setText(fieldName + ":");
+        }
 
         return result;
     }
