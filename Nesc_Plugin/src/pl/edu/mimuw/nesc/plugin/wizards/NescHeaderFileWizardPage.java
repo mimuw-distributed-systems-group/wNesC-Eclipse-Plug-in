@@ -37,8 +37,8 @@ public class NescHeaderFileWizardPage extends WizardPage {
     /**
      * Various texts that appear in the wizard interface.
      */
-    private static final String PAGE_NAME = "New nesC header file";
-    private static final String PAGE_DESCRIPTION = "Create a new nesC header file.";
+    private static final String PAGE_NAME = "New NesC header file";
+    private static final String PAGE_DESCRIPTION = "Create a new NesC header file.";
     private static final String LABEL_FILENAME = "Header file name";
     private static final String LABEL_GUARD_CHECKBOX = "Add header guard";
     private static final String LABEL_COMMENTS_CHECKBOX = "Generate comments";

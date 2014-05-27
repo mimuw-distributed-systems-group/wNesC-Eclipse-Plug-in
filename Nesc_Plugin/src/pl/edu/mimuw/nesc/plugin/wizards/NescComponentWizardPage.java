@@ -52,8 +52,8 @@ public final class NescComponentWizardPage extends WizardPage {
     /**
      * Texts that appear in the page.
      */
-    private static final String PAGE_NAME = "New nesC component";
-    private static final String PAGE_DESCRIPTION = "Create a new nesC component.";
+    private static final String PAGE_NAME = "New NesC component";
+    private static final String PAGE_DESCRIPTION = "Create a new NesC component.";
     private static final String NAME_COMPONENT_NAME_FIELD = "Component name";
     private static final String LABEL_COMMENTS_CHECKBOX = "Generate comments";
     private static final String ERR_MSG_COMPONENT_EXISTS = "A component with given name "

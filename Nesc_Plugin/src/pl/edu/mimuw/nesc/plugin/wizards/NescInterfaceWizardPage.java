@@ -39,8 +39,8 @@ public class NescInterfaceWizardPage extends WizardPage {
     /**
      * Texts shown in various places on this wizard page.
      */
-    private static final String PAGE_NAME = "New nesC interface";
-    private static final String PAGE_DESCRIPTION = "Create a new nesC interface.";
+    private static final String PAGE_NAME = "New NesC interface";
+    private static final String PAGE_DESCRIPTION = "Create a new NesC interface.";
     private static final String NAME_INTERFACE_NAME_FIELD = "Interface name";
     private static final String LABEL_TYPE_PARAMETERS = "Type parameters:";
     private static final String LABEL_BUTTON_ADD = "Add...";

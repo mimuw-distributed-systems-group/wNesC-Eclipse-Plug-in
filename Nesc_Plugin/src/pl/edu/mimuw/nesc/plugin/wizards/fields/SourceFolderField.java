@@ -115,7 +115,7 @@ public class SourceFolderField extends AbstractField {
 
                 try {
                     if (!project.hasNature(NescProjectNature.NATURE_ID)) {
-                        return "Source folder is not a nesC project.";
+                        return "Source folder is not a NesC project.";
                     }
                 } catch(CoreException e) {
                     return "Cannot identify source folder '" + project.getName() + "'.";

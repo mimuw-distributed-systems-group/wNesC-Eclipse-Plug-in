@@ -39,8 +39,8 @@ import com.google.common.base.Optional;
  */
 public class NescNewProjectWizard extends Wizard implements INewWizard {
 
-	private static String PAGE_NAME = "New nesC Project";
-	private static String WIZARD_NAME = "nesC Project Wizard";
+	private static String PAGE_NAME = "New NesC Project";
+	private static String WIZARD_NAME = "NesC Project Wizard";
 	private WizardNewProjectCreationPage _pageOne;
 	private NescWizardNewProjectGeneralSettingsPage _pageTwo;
 	private NescWizardNewProjectAdditionalPaths _pageThree;
@@ -61,8 +61,8 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 		super.addPages();
 
 		_pageOne = new WizardNewProjectCreationPage(PAGE_NAME);
-		_pageOne.setTitle("nesC Project");
-		_pageOne.setDescription("New nesC project.");
+		_pageOne.setTitle("NesC Project");
+		_pageOne.setDescription("New NesC project.");
 		addPage(_pageOne);
 
 		_pageTwo = new NescWizardNewProjectGeneralSettingsPage(PAGE_NAME);

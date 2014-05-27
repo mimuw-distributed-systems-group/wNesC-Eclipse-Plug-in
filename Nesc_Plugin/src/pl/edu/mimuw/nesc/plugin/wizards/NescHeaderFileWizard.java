@@ -14,7 +14,7 @@ import org.eclipse.ui.IWorkbench;
  * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
  */
 public class NescHeaderFileWizard extends Wizard implements INewWizard {
-    private static final String WIZARD_TITLE = "nesC Header File Wizard";
+    private static final String WIZARD_TITLE = "NesC Header File Wizard";
     private final NescHeaderFileWizardPage page = new NescHeaderFileWizardPage();
 
     public NescHeaderFileWizard() {
