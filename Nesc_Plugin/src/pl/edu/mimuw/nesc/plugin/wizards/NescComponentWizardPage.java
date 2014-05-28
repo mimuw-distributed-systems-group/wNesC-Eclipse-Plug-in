@@ -177,15 +177,16 @@ public final class NescComponentWizardPage extends WizardPage {
         }
 
         // Write the uses/provides items
-        out.println(" {");
+        out.println();
+        out.println('{');
         writeUsesProvides(out);
         out.println('}');
 
         // Write the implementation section
         int cursorOffset = byteOut.size();
         if (componentInfo.containsImplementation) {
-            out.println();
-            out.println(KEYWORD_IMPLEMENTATION + " {");
+            out.println(KEYWORD_IMPLEMENTATION);
+            out.println('{');
             out.print(NescWizardSupport.getIndentationStep());
             cursorOffset = byteOut.size();
             out.println();
@@ -202,16 +203,21 @@ public final class NescComponentWizardPage extends WizardPage {
      * there is no whitespace.
      */
     private void writeGenericParameters(PrintStream out) {
-        out.print('(');
+        final String indent = NescWizardSupport.getIndentationStep();
         boolean first = true;
+
+        out.print('(');
 
         // Iterate over all chosen parameters and write them
         for (GenericParameter param : genericParametersField.getValue()) {
             if (first) {
                 first = false;
             } else {
-                out.print(", ");
+                out.print(',');
             }
+
+            out.println();
+            out.print(indent);
 
             switch (param.getType()) {
             case CONSTANT_PARAM:
@@ -230,6 +236,11 @@ public final class NescComponentWizardPage extends WizardPage {
                 }
                 break;
             }
+        }
+
+        // Add a new line if there were some generic parameters
+        if (!first) {
+            out.println();
         }
 
         out.print(')');

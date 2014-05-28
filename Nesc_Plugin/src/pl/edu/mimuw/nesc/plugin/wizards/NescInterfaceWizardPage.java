@@ -198,7 +198,8 @@ public class NescInterfaceWizardPage extends WizardPage {
         }
 
         // Other part of the interface
-        output.println(" {");
+        output.println();
+        output.println('{');
         output.print(NescWizardSupport.getIndentationStep());
         final int cursorOffset = byteOutput.size();
         output.println();

@@ -193,11 +193,10 @@ public class NescHeaderFileWizardPage extends WizardPage {
     private String generateHeaderGuardName() {
         final String fileName = getNewHeaderFileName().toUpperCase();
         final String afterDotsChanged = fileName.replace('.', '_');
-        final String afterCleanup = afterDotsChanged.replaceAll("\\W+", "");
+        final String afterCleanup = afterDotsChanged.replaceAll("\\W+", ""),
+                     frame = "__";
 
-        return     !afterCleanup.isEmpty() && !Character.isDigit(afterCleanup.charAt(0))
-                ?  afterCleanup
-                :  "_" + afterCleanup;
+        return frame + afterCleanup + frame;
     }
 
     /**
