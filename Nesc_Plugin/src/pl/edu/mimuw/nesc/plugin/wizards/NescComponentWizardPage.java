@@ -10,6 +10,8 @@ import pl.edu.mimuw.nesc.plugin.wizards.fields.UsesProvidesField.UsesProvides.Us
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.events.ModifyEvent;
@@ -56,6 +58,7 @@ public final class NescComponentWizardPage extends WizardPage {
     private static final String PAGE_DESCRIPTION = "Create a new NesC component.";
     private static final String NAME_COMPONENT_NAME_FIELD = "Component name";
     private static final String LABEL_COMMENTS_CHECKBOX = "Generate comments";
+    private static final String LABEL_GROUP_CHECKBOX = "Group uses/provides";
     private static final String ERR_MSG_COMPONENT_EXISTS = "A component with given name "
             + "already exists in the source folder.";
 
@@ -77,6 +80,7 @@ public final class NescComponentWizardPage extends WizardPage {
      * Additional controls that are on this page.
      */
     private Button commentsCheckbox;
+    private Button groupCheckbox;
 
     NescComponentWizardPage() {
         super(PAGE_NAME, PAGE_NAME, NescWizardSupport.getImageDescriptorForResource(ICON_PATH));
@@ -104,11 +108,7 @@ public final class NescComponentWizardPage extends WizardPage {
                 getShell());
         fields = new WizardField[] { sourceFolderField, componentNameField,
                 componentKindField, genericParametersField, usesProvidesField };
-
-        // Create the checkbox for choosing comments generation option
-        commentsCheckbox = new Button(pageComposite, CHECK);
-        commentsCheckbox.setText(LABEL_COMMENTS_CHECKBOX);
-        commentsCheckbox.setSelection(true);
+        createCheckboxes(pageComposite);
 
         // Final actions
         sourceFolderField.align(new AbstractField[] { componentNameField, componentKindField,
@@ -116,6 +116,24 @@ public final class NescComponentWizardPage extends WizardPage {
         registerAllListeners();
         setPageComplete(false);
         setControl(pageComposite);
+    }
+
+    /**
+     * Creates and configures checkboxes that are on this wizard page.
+     *
+     * @param pageComposite The created checkboxes will be placed in this
+     *                      composite.
+     */
+    private void createCheckboxes(Composite pageComposite) {
+        // Create the checkbox for choosing comments generation option
+        commentsCheckbox = new Button(pageComposite, CHECK);
+        commentsCheckbox.setText(LABEL_COMMENTS_CHECKBOX);
+        commentsCheckbox.setSelection(true);
+
+        // Create the checkbox for choosing if uses/provides are to be grouped
+        groupCheckbox = new Button(pageComposite, CHECK);
+        groupCheckbox.setText(LABEL_GROUP_CHECKBOX);
+        groupCheckbox.setSelection(true);
     }
 
     @Override
@@ -149,6 +167,14 @@ public final class NescComponentWizardPage extends WizardPage {
      */
     public boolean getCommentsFlag() {
         return commentsCheckbox.getSelection();
+    }
+
+    /**
+     * @return True if and only if the user has chosen to group uses/provides
+     *         entries.
+     */
+    public boolean getGroupFlag() {
+        return groupCheckbox.getSelection();
     }
 
     /**
@@ -247,11 +273,78 @@ public final class NescComponentWizardPage extends WizardPage {
     }
 
     /**
-     * Writes uses/provides entries to the given stream with one indentation
-     * step. Starting and ending braces are not written. Each entry is followed
-     * by a newline character.
+     * Writes uses/provides entries to the given stream. They are grouped if the
+     * user has chosen such option. Starting and ending braces are not written.
+     * Each entry is followed by a newline character.
      */
-    private void writeUsesProvides(final PrintStream out) {
+    private void writeUsesProvides(PrintStream out) {
+        if (getGroupFlag()) {
+            writeUsesProvidesGrouped(out);
+        } else {
+            writeUsesProvidesSimple(out);
+        }
+    }
+
+    /**
+     * Writes uses/provides entries to the given stream. All 'provides' entries
+     * and 'uses' entries are grouped and written together.
+     */
+    private void writeUsesProvidesGrouped(PrintStream out) {
+        /* Local class that is used to group uses/provides entries. */
+        class UsesProvidesResolver implements UsesProvides.Type.Visitor {
+            private final List<UsesProvides> uses = new ArrayList<>();
+            private final List<UsesProvides> provides = new ArrayList<>();
+            private UsesProvides nextEntry;
+
+            @Override
+            public void visit(Uses marker) {
+                uses.add(nextEntry);
+            }
+
+            @Override
+            public void visit(Provides marker) {
+                provides.add(nextEntry);
+            }
+        }
+
+        // Group the uses/provides entries
+        final UsesProvidesResolver resolver = new UsesProvidesResolver();
+        for (UsesProvides item : usesProvidesField.getValue()) {
+            resolver.nextEntry = item;
+            item.getType().accept(resolver);
+        }
+
+        // Write the entries
+        writeUsesProvidesGroup(out, KEYWORD_PROVIDES, resolver.provides);
+        writeUsesProvidesGroup(out, KEYWORD_USES, resolver.uses);
+    }
+
+    /**
+     * Writes the given uses/provides group to the given stream. Something is
+     * written if and only if the given group is not empty.
+     */
+    private void writeUsesProvidesGroup(PrintStream out, String keyword, List<UsesProvides> group) {
+        if (!group.isEmpty()) {
+            final String indent = NescWizardSupport.getIndentationStep();
+            final String squareIndent = indent + indent;
+
+            out.println(indent + keyword);
+            out.println(indent + "{");
+
+            // Write all entries
+            for (UsesProvides item : group) {
+                out.print(squareIndent);
+                finishUsesProvidesLine(out, item);
+            }
+
+            out.println(indent + "}");
+        }
+    }
+
+    /**
+     * Writes uses/provides entries to the given stream without grouping them.
+     */
+    private void writeUsesProvidesSimple(final PrintStream out) {
         /* Local class that writes the type of the uses/provides entry to
            the stream. */
         class UsesProvidesResolver implements UsesProvides.Type.Visitor {
@@ -271,19 +364,28 @@ public final class NescComponentWizardPage extends WizardPage {
             out.print(indent);
             item.getType().accept(resolver);
             out.print(' ');
-            out.print(KEYWORD_INTERFACE);
-            out.print(' ');
-            out.print(item.getInterfaceName());
-
-            if (!item.getInstanceName().isEmpty()) {
-                out.print(' ');
-                out.print(KEYWORD_AS);
-                out.print(' ');
-                out.print(item.getInstanceName());
-            }
-
-            out.println(';');
+            finishUsesProvidesLine(out, item);
         }
+    }
+
+    /**
+     * Writes the uses/provides declaration to the given stream for given item.
+     * Part of the declaration from the 'interface' keyword till the end is
+     * written. A new line character is also written.
+     */
+    private void finishUsesProvidesLine(PrintStream out, UsesProvides item) {
+        out.print(KEYWORD_INTERFACE);
+        out.print(' ');
+        out.print(item.getInterfaceName());
+
+        if (!item.getInstanceName().isEmpty()) {
+            out.print(' ');
+            out.print(KEYWORD_AS);
+            out.print(' ');
+            out.print(item.getInstanceName());
+        }
+
+        out.println(';');
     }
 
     /**
