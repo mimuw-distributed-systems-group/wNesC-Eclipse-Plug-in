@@ -29,12 +29,27 @@ public class ProjectAdditionalPathSettingsComposite extends Composite {
 
 	private static final int COLUMN_WIDTH = 400;
 	private static final String TOSDIR_VARIABLE = "Use ${TOSDIR} variable to refer to TinyOS directory.";//$NON-NLS-1$
+
 	private static final String INCLUDE_PATHS_FIELD = "Include paths";//$NON-NLS-1$
-	private static final String INLUDE_PATHS_TIP = "Directory to be searched for source and header files.";//$NON-NLS-1$
+	private static final String INCLUDE_PATHS_TIP = "Directory to be searched for source and header files.";//$NON-NLS-1$
+	private static final String ADD_INCLUDE_PATH_TITLE = "New include path";//$NON-NLS-1$
+	private static final String ADD_INCLUDE_PATH_MESSAGE = "Enter a path of directory to be searched for source and header files.";//$NON-NLS-1$
+	private static final String EDIT_INCLUDE_PATH_TITLE = "Edit include path";//$NON-NLS-1$
+	private static final String EDIT_INCLUDE_PATH_MESSAGE = "Edit the path of directory to be searched for source and header files.";//$NON-NLS-1$
+
 	private static final String DEFAULT_INCLUDES_FIELD = "Default includes";//$NON-NLS-1$
-	private static final String DEFAULT_INCLUDES_TIP = "File to be included into each source and header file.";//$NON-NLS-1$
+	private static final String DEFAULT_INCLUDES_TIP = "File that should be included to each source and header file.";//$NON-NLS-1$
+	private static final String ADD_DEFAULT_INCLUDE_TITLE = "New file included by default";//$NON-NLS-1$
+	private static final String ADD_DEFAULT_INCLUDE_MESSAGE = "Enter a path of file that should be included to each source and header file.";//$NON-NLS-1$
+	private static final String EDIT_DEFAULT_INCLUDE_TITLE = "Edit path of file included by default";//$NON-NLS-1$
+	private static final String EDIT_DEFAULT_INCLUDE_MESSAGE = "Edit the path of file that should be included to each source and header file.";//$NON-NLS-1$
+
 	private static final String PREDEFINED_MACROS_FIELD = "Predefined macros";//$NON-NLS-1$
 	private static final String PREDEFINED_MACROS_TIP = "Predefined preprocessor macro (optionally with specified value).";//$NON-NLS-1$
+	private static final String ADD_PREDEFINED_MACRO_TITLE = "New predefined macro";//$NON-NLS-1$
+	private static final String ADD_PREDEFINED_MACRO_MESSAGE = "Enter a preprocessor macro (optionally with specified value).";//$NON-NLS-1$
+	private static final String EDIT_PREDEFINED_MACRO_TITLE = "Edit predefined macro";//$NON-NLS-1$
+	private static final String EDIT_PREDEFINED_MACRO_MESSAGE = "Edit the preprocessor macro (optionally with specified value).";//$NON-NLS-1$
 
 	private final PageCompositeListener pageCompositeListener;
 
@@ -60,12 +75,36 @@ public class ProjectAdditionalPathSettingsComposite extends Composite {
 		tosdirInfo.setText(TOSDIR_VARIABLE);
 
 		final GridData centerLayoutData = new GridData(FILL, FILL, true, true);
-		includePaths = new SingleStringField(container, getShell(), "", centerLayoutData, INCLUDE_PATHS_FIELD,
-				COLUMN_WIDTH, INLUDE_PATHS_TIP);
-		defaultIncludes = new SingleStringField(container, getShell(), "", centerLayoutData, DEFAULT_INCLUDES_FIELD,
-				COLUMN_WIDTH, DEFAULT_INCLUDES_TIP);
-		predefinedMacros = new SingleStringField(container, getShell(), "", centerLayoutData, PREDEFINED_MACROS_FIELD,
-				COLUMN_WIDTH, PREDEFINED_MACROS_TIP);
+
+		includePaths = SingleStringField.builder()
+				.parent(container, centerLayoutData, getShell())
+				.fieldName("")
+				.label(INCLUDE_PATHS_FIELD)
+				.tip(INCLUDE_PATHS_TIP)
+				.width(COLUMN_WIDTH)
+				.addValueStrings(ADD_INCLUDE_PATH_TITLE, ADD_INCLUDE_PATH_MESSAGE)
+				.editValueStrings(EDIT_INCLUDE_PATH_TITLE, EDIT_INCLUDE_PATH_MESSAGE)
+				.build();
+
+		defaultIncludes = SingleStringField.builder()
+				.parent(container, centerLayoutData, getShell())
+				.fieldName("")
+				.label(DEFAULT_INCLUDES_FIELD)
+				.tip(DEFAULT_INCLUDES_TIP)
+				.width(COLUMN_WIDTH)
+				.addValueStrings(ADD_DEFAULT_INCLUDE_TITLE, ADD_DEFAULT_INCLUDE_MESSAGE)
+				.editValueStrings(EDIT_DEFAULT_INCLUDE_TITLE, EDIT_DEFAULT_INCLUDE_MESSAGE)
+				.build();
+
+		predefinedMacros = SingleStringField.builder()
+				.parent(container, centerLayoutData, getShell())
+				.fieldName("")
+				.label(PREDEFINED_MACROS_FIELD)
+				.tip(PREDEFINED_MACROS_TIP)
+				.width(COLUMN_WIDTH)
+				.addValueStrings(ADD_PREDEFINED_MACRO_TITLE, ADD_PREDEFINED_MACRO_MESSAGE)
+				.editValueStrings(EDIT_PREDEFINED_MACRO_TITLE, EDIT_PREDEFINED_MACRO_MESSAGE)
+				.build();
 
 		includePaths.align(new AbstractField[] { defaultIncludes, predefinedMacros });
 		pageCompositeListener.setPageComplete(validatePage());

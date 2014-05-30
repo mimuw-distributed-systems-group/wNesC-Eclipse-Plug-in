@@ -1,10 +1,9 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
@@ -12,27 +11,40 @@ import org.eclipse.swt.widgets.TableItem;
 import pl.edu.mimuw.nesc.plugin.wizards.fields.SingleStringField.StringValue;
 
 /**
+ * A field that allows user to specify a list of string values, e.g. file paths.
  *
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  *
  */
 public class SingleStringField extends TableField<StringValue> {
 
-	/**
-	 * Shell that will be used as the parent for dialogs. Never null.
-	 */
-	private final Shell shell;
+	private static final String ERROR_MSG_EMPTY_VALUE = "Value cannot be empty."; //$NON-NLS-1$
 
-	public SingleStringField(Composite parent, Shell parentShell, String fieldName, Object layoutData,
-			String label, int width, String tip) {
-		super(parent, fieldName, layoutData, new ColumnSpecification[] { new ColumnSpecification(label, width, tip) });
-		checkArgument(parentShell != null, "Parent shell is null."); //$NON-NLS-1$
-		this.shell = parentShell;
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	private final Shell shell;
+	private final String addValueTitle;
+	private final String editValueTitle;
+	private final String addValueMessage;
+	private final String editValueMessage;
+
+	private SingleStringField(Builder builder) {
+		super(builder.parent, builder.fieldName, builder.layoutData,
+				new ColumnSpecification[] { new ColumnSpecification(builder.label, builder.width, builder.tip) });
+		this.shell = builder.shell;
+		this.addValueTitle = builder.addValueTitle;
+		this.addValueMessage = builder.addValueMessage;
+		this.editValueTitle = builder.editValueTitle;
+		this.editValueMessage = builder.editValueMessage;
 	}
 
 	/**
+	 * Initialize tablie with given items.
 	 *
 	 * @param items
+	 *            initial values
 	 */
 	public void setData(List<String> items) {
 		for (String item : items) {
@@ -50,11 +62,12 @@ public class SingleStringField extends TableField<StringValue> {
 
 	@Override
 	protected void addItemOperation() {
-		// FIXME title
-		final StringInputDialog dialog = new StringInputDialog(shell, "");
+		final InputDialog dialog = new InputDialog(shell, addValueTitle, addValueMessage, "", new StringValidator());
 
-		if (dialog.open() == Dialog.OK) {
-			final StringValue value = dialog.getData();
+		dialog.open();
+		final String str = dialog.getValue();
+		if (str != null && !dialog.getValue().isEmpty()) {
+			final StringValue value = new StringValue(str);
 			final TableItem newItem = newItem(value);
 			newItem.setText(value.getName());
 		}
@@ -62,16 +75,18 @@ public class SingleStringField extends TableField<StringValue> {
 
 	@Override
 	protected void editItemOperation(TableItem item, StringValue data) {
-		// FIXME title
-		final StringInputDialog dialog = new StringInputDialog(shell, "", data);
+		final InputDialog dialog = new InputDialog(shell, editValueTitle, editValueMessage, data.getName(),
+				new StringValidator());
+		dialog.open();
 
-		if (dialog.open() == Dialog.OK) {
-			dialog.insertData(data);
-			item.setText(data.getName());
+		final String str = dialog.getValue();
+		if (str != null && !dialog.getValue().isEmpty()) {
+			item.setText(str);
 		}
 	}
 
 	/**
+	 * Wrapper for string.
 	 *
 	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
 	 *
@@ -93,4 +108,94 @@ public class SingleStringField extends TableField<StringValue> {
 		}
 	}
 
+	/**
+	 * Class of objects that checks whether a string value is valid (non-null
+	 * and not empty).
+	 *
+	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
+	 *
+	 */
+	private class StringValidator implements IInputValidator {
+
+		@Override
+		public String isValid(String text) {
+			if (text == null || text.isEmpty()) {
+				return ERROR_MSG_EMPTY_VALUE;
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * String field builder.
+	 *
+	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
+	 *
+	 */
+	public static class Builder {
+
+		private Composite parent;
+		private Shell shell;
+		private String fieldName;
+		private Object layoutData;
+		private String label;
+		private int width;
+		private String tip;
+
+		private String addValueTitle;
+		private String editValueTitle;
+		private String addValueMessage;
+		private String editValueMessage;
+
+		public Builder() {
+		}
+
+		public Builder parent(Composite parent, Object layoutData, Shell parentShell) {
+			this.parent = parent;
+			this.layoutData = layoutData;
+			this.shell = parentShell;
+			return this;
+		}
+
+		public Builder width(int width) {
+			this.width = width;
+			return this;
+		}
+
+		public Builder fieldName(String fieldName) {
+			this.fieldName = fieldName;
+			return this;
+		}
+
+		public Builder label(String label) {
+			this.label = label;
+			return this;
+		}
+
+		public Builder tip(String tip) {
+			this.tip = tip;
+			return this;
+		}
+
+		public Builder addValueStrings(String dialogTitle, String dialogMessage) {
+			this.addValueTitle = dialogTitle;
+			this.addValueMessage = dialogMessage;
+			return this;
+		}
+
+		public Builder editValueStrings(String dialogTitle, String dialogMessage) {
+			this.editValueTitle = dialogTitle;
+			this.editValueMessage = dialogMessage;
+			return this;
+		}
+
+		public SingleStringField build() {
+			verify();
+			return new SingleStringField(this);
+		}
+
+		private void verify() {
+			// TODO Auto-generated method stub
+		}
+	}
 }

@@ -1,6 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.projects.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -97,6 +98,9 @@ public final class NescProjectPreferences {
 	}
 
 	private static List<String> stringToList(String str) {
+		if (str == null || str.isEmpty()) {
+			return Collections.emptyList();
+		}
 		final String[] parts = str.split(",");
 		final List<String> result = new ArrayList<>(parts.length);
 		for (String part : parts) {
