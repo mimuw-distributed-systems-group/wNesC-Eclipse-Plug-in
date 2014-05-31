@@ -59,6 +59,10 @@ public class NescWizardNewProjectGeneralSettingsPage extends WizardPage {
 		return generalSettingsComposite.getTinyOsPlatform();
 	}
 
+	public boolean isPlatformPredefined() {
+		return generalSettingsComposite.isPlatformPredefined();
+	}
+
 	public String getTinyOsPath() {
 		return generalSettingsComposite.getTinyOsPath();
 	}

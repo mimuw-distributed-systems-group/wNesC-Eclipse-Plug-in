@@ -7,7 +7,7 @@
             class="pl.edu.mimuw.nesc.plugin.editor.NescEditor"
             default="true"
             extensions="nc"
-            icon="icons/sample.gif"
+            icon="resources/icons/sample.gif"
             id="pl.edu.mimuw.nesc.NesCEditor"
             name="NesC Editor">
       </editor>

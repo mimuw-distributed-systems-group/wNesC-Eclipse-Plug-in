@@ -34,7 +34,7 @@ public class NescInterfaceWizardPage extends WizardPage {
      * Path to the icon resource that will be shown in the top right corner of
      * the page.
      */
-    private static final String ICON_PATH = "icons/interfaceWizardIcon.png";
+    private static final String ICON_PATH = "resources/icons/interfaceWizardIcon.png";
 
     /**
      * Texts shown in various places on this wizard page.

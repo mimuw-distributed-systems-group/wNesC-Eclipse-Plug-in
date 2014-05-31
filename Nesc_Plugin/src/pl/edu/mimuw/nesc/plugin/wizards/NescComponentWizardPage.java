@@ -33,7 +33,7 @@ public final class NescComponentWizardPage extends WizardPage {
     /**
      * Path to the plug-in resource with the icon for this wizard.
      */
-    private static final String ICON_PATH = "icons/componentWizardIcon.png";
+    private static final String ICON_PATH = "resources/icons/componentWizardIcon.png";
 
     /**
      * Keywords for component generation.

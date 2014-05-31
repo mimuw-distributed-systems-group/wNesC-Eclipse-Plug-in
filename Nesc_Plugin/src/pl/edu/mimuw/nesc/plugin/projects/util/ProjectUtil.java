@@ -4,9 +4,15 @@ import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDI
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_INCLUDE_PATHS;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_PREDEFINED_MACROS;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.MAIN_CONFIGURATION;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PATH;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PLATFORM;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PREDEFINED_PLATFORM;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValue;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValueB;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValueStringList;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +25,8 @@ import pl.edu.mimuw.nesc.ProjectData;
 import pl.edu.mimuw.nesc.exception.InvalidOptionsException;
 import pl.edu.mimuw.nesc.plugin.NescPlugin;
 import pl.edu.mimuw.nesc.plugin.projects.util.NescPlatformUtil.NescPlatform;
+
+import com.google.common.base.Optional;
 
 /**
  *
@@ -42,9 +50,18 @@ public class ProjectUtil {
 		return NescPlugin.getDefault().getProjectData(project.getName());
 	}
 
-	public static boolean ensureContext(IProject project) {
+
+	/**
+	 * Tries to create project context.
+	 *
+	 * @param project
+	 *            project
+	 * @return <code>Optional.absent()</code> if project context was created successfully,
+	 *         otherwise an error message will be returned.
+	 */
+	public static Optional<String> ensureContext(IProject project) {
 		if (project == null) {
-			return false;
+			return Optional.<String>absent();
 		}
 		if (getProjectContext(project) == null) {
 			try {
@@ -53,25 +70,25 @@ public class ProjectUtil {
 				NescPlugin.getDefault().setProjectContext(project.getName(), context);
 			} catch (InvalidOptionsException e) {
 				e.printStackTrace();
-				return false;
-			} catch (IllegalArgumentException e) {
-				/*
-				 * could not find main file FIXME: frontend should throw more
-				 * specific exception.
-				 */
+				return Optional.of(e.getMessage());
+			} catch (FileNotFoundException e) {
+				/* Could not find main file. */
 				e.printStackTrace();
 				/*
 				 * When a new project is created, the main configuration does
 				 * not exist yet.
 				 */
-				return true;
-			} catch (ConfigurationException e) {
-				// TODO
+				return Optional.<String>absent();
+			} catch (ConfigurationException | IOException e) {
 				e.printStackTrace();
-				return false;
+				return Optional.of(e.getMessage());
+			} catch (Exception e) {
+				/* Unexpected error. */
+				e.printStackTrace();
+				return Optional.of(e.getMessage());
 			}
 		}
-		return true;
+		return Optional.<String>absent();
 	}
 
 	public static ProjectData rebuildProjectContext(IProject project) {
@@ -79,19 +96,26 @@ public class ProjectUtil {
 		if (projectContext == null) {
 			return null;
 		}
+		try {
 		ProjectData data = NescPlugin.getDefault().getNescFrontend().rebuild(projectContext);
 		NescPlugin.getDefault().setProjectData(project.getName(), data);
 		return data;
+		} catch (FileNotFoundException e) {
+			/* Main file was not found. */
+			return null;
+		}
 	}
 
-	private static String[] getProjectArgs(IProject project) throws ConfigurationException {
+	private static String[] getProjectArgs(IProject project) throws ConfigurationException, IOException {
 		final IPath projectPath = project.getLocation();
 
 		final String mainConfiguration = getProjectPreferenceValue(project, MAIN_CONFIGURATION);
-		final String platformName = getProjectPreferenceValue(project, NescProjectPreferences.TINYOS_PLATFORM);
-		final String tinyOsPath = getProjectPreferenceValue(project, NescProjectPreferences.TINYOS_PATH);
+		final String platformName = getProjectPreferenceValue(project, TINYOS_PLATFORM);
+		final boolean isPlatformPredefined = getProjectPreferenceValueB(project, TINYOS_PREDEFINED_PLATFORM);
+		final String tinyOsPath = getProjectPreferenceValue(project, TINYOS_PATH);
 
-		final NescPlatform platform = NescPlatformUtil.loadPlatformProperties(platformName, tinyOsPath);
+		final NescPlatform platform = NescPlatformUtil.loadPlatformProperties(platformName, isPlatformPredefined,
+				tinyOsPath);
 		final List<String> additionalPaths = getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS);
 		final List<String> addtionalDefaultFiles = getProjectPreferenceValueStringList(project,
 				ADDITIONAL_DEFAULT_FILES);

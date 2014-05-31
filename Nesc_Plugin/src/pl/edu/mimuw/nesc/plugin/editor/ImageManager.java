@@ -35,10 +35,10 @@ public class ImageManager {
 	public static final Image COMPLETION_TEMPLATE;
 
 	static {
-		COMPLETION_LOCAL = getImage("icons/autocompletion/local.gif"); //$NON-NLS-1$
-		COMPLETION_COMPONENT = getImage("icons/autocompletion/component.png"); //$NON-NLS-1$
-		COMPLETION_GLOBAL = getImage("icons/autocompletion/global.gif"); //$NON-NLS-1$
-		COMPLETION_TEMPLATE = getImage("icons/autocompletion/template.gif"); //$NON-NLS-1$
+		COMPLETION_LOCAL = getImage("resources/icons/autocompletion/local.gif"); //$NON-NLS-1$
+		COMPLETION_COMPONENT = getImage("resources/icons/autocompletion/component.png"); //$NON-NLS-1$
+		COMPLETION_GLOBAL = getImage("resources/icons/autocompletion/global.gif"); //$NON-NLS-1$
+		COMPLETION_TEMPLATE = getImage("resources/icons/autocompletion/template.gif"); //$NON-NLS-1$
 	}
 
 	private static Image getImage(String path) {

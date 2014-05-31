@@ -32,7 +32,7 @@ public class NescHeaderFileWizardPage extends WizardPage {
     /**
      * Path to this plug-in resource with icon for this wizard.
      */
-    private static final String ICON_PATH = "icons/headerFileWizardIcon.png";
+    private static final String ICON_PATH = "resources/icons/headerFileWizardIcon.png";
 
     /**
      * Various texts that appear in the wizard interface.

@@ -1,13 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.projects;
 
 import static org.eclipse.swt.SWT.FILL;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.MAIN_CONFIGURATION;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PATH;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PLATFORM;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PROJECT;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValue;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValueB;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.setProjectPreferenceValue;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.*;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
@@ -60,6 +54,7 @@ public class NescProjectGeneralSettingsPage extends NescPropertyPage {
 		composite.setData(getProjectPreferenceValue(project, MAIN_CONFIGURATION),
 				getProjectPreferenceValueB(project, TINYOS_PROJECT),
 				getProjectPreferenceValue(project, TINYOS_PLATFORM),
+				getProjectPreferenceValueB(project, TINYOS_PREDEFINED_PLATFORM),
 				getProjectPreferenceValue(project, TINYOS_PATH));
 	}
 
@@ -78,6 +73,7 @@ public class NescProjectGeneralSettingsPage extends NescPropertyPage {
 			setProjectPreferenceValue(project, MAIN_CONFIGURATION, composite.getMainConfiguration());
 			setProjectPreferenceValue(project, TINYOS_PROJECT, composite.isTinyOsProject());
 			setProjectPreferenceValue(project, TINYOS_PLATFORM, composite.getTinyOsPlatform());
+			setProjectPreferenceValue(project, TINYOS_PREDEFINED_PLATFORM, composite.isPlatformPredefined());
 			setProjectPreferenceValue(project, TINYOS_PATH, composite.getTinyOsPath());
 			this.setErrorMessage(null);
 		} catch (BackingStoreException e) {

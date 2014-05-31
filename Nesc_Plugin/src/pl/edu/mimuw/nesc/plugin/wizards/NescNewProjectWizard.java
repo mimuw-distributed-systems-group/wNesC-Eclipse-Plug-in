@@ -6,12 +6,17 @@ import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDI
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.MAIN_CONFIGURATION;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PATH;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PLATFORM;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PREDEFINED_PLATFORM;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PROJECT;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.setProjectPreferenceValue;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -21,6 +26,8 @@ import org.osgi.service.prefs.BackingStoreException;
 
 import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
 import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
+
+import com.google.common.base.Optional;
 
 /**
  * @author Michał Szczepaniak <ms292534@students.mimuw.edu.pl>
@@ -37,6 +44,8 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 	private WizardNewProjectCreationPage _pageOne;
 	private NescWizardNewProjectGeneralSettingsPage _pageTwo;
 	private NescWizardNewProjectAdditionalPaths _pageThree;
+
+	private boolean validProject;
 
 	public NescNewProjectWizard() {
 		setWindowTitle(WIZARD_NAME);
@@ -87,25 +96,46 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 			setProjectPreferenceValue(project, MAIN_CONFIGURATION, _pageTwo.getMainConfiguration());
 			setProjectPreferenceValue(project, TINYOS_PROJECT, _pageTwo.getTinyOsProject());
 			setProjectPreferenceValue(project, TINYOS_PLATFORM, _pageTwo.getTinyOsPlatform());
+			setProjectPreferenceValue(project, TINYOS_PREDEFINED_PLATFORM, _pageTwo.isPlatformPredefined());
 			setProjectPreferenceValue(project, TINYOS_PATH, _pageTwo.getTinyOsPath());
 
 			setProjectPreferenceValue(project, ADDITIONAL_INCLUDE_PATHS, _pageThree.getAdditionalIncludePaths());
 			setProjectPreferenceValue(project, ADDITIONAL_DEFAULT_FILES, _pageThree.getDefaultIncludes());
 			setProjectPreferenceValue(project, ADDITIONAL_PREDEFINED_MACROS, _pageThree.getPredefinedMacros());
 
-			_pageOne.setErrorMessage(null);
-			_pageTwo.setErrorMessage(null);
-			_pageThree.setErrorMessage(null);
+			setErrorMessage(null);
 		} catch (BackingStoreException e) {
-			_pageOne.setErrorMessage("Failed to write project configuration on disk");
-			_pageTwo.setErrorMessage("Failed to write project configuration on disk");
-			_pageThree.setErrorMessage("Failed to write project configuration on disk");
+			setErrorMessage("Failed to write project configuration on disk");
 		}
 
 		/* Build context after saving project settings. */
-		ProjectUtil.ensureContext(project);
-
-		return true;
+		try {
+			final IRunnableWithProgress job = new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Building project...", IProgressMonitor.UNKNOWN);
+					final Optional<String> msg = ProjectUtil.ensureContext(project);
+					if (msg.isPresent()) {
+						setErrorMessage(msg.get());
+						validProject = false;
+					} else {
+						validProject = true;
+					}
+					monitor.done();
+				}
+			};
+			final ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+			dialog.run(true, true, job);
+		} catch (InvocationTargetException | InterruptedException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return validProject;
 	}
 
+	private void setErrorMessage(String message) {
+		_pageOne.setErrorMessage(message);
+		_pageTwo.setErrorMessage(message);
+		_pageThree.setErrorMessage(message);
+	}
 }

@@ -23,6 +23,7 @@ public final class NescProjectPreferences {
 	public static final String MAIN_CONFIGURATION = "main-configuration";
 	public static final String TINYOS_PROJECT = "is-TinyOS-project";
 	public static final String TINYOS_PLATFORM = "TinyOS-platform";
+	public static final String TINYOS_PREDEFINED_PLATFORM = "pl.edu.mimuw.nesc.plugin.predefined_platform";
 	public static final String TINYOS_PATH = "pl.edu.mimuw.nesc.plugin.TinyOS-path";
 	public static final String ADDITIONAL_INCLUDE_PATHS = "pl.edu.mimuw.nesc.plugin.additional_include_paths";
 	public static final String ADDITIONAL_DEFAULT_FILES = "pl.edu.mimuw.nesc.plugin.additional_default_files";
@@ -72,7 +73,7 @@ public final class NescProjectPreferences {
 		return preferences.getInt(key, -1);
 	}
 
-	public static Boolean getProjectPreferenceValueB(IProject project, String key) {
+	public static boolean getProjectPreferenceValueB(IProject project, String key) {
 		IEclipsePreferences preferences = getProjectPreferences(project);
 		return preferences.getBoolean(key, false);
 	}

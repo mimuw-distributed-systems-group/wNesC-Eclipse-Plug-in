@@ -1,5 +1,8 @@
 package pl.edu.mimuw.nesc.plugin.wizards.composite;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -14,6 +17,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import pl.edu.mimuw.nesc.plugin.projects.util.NescPlatformUtil;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * A composite for setting project general properties. It is a main part of both
@@ -37,6 +43,7 @@ public class ProjectGeneralSettingsComposite extends Composite {
 	private static final boolean TINYOS_PROJECT_SELECTION_DEFAULT = true;
 
 	private final PageCompositeListener pageCompositeListener;
+	private final List<PlatformItem> platforms;
 
 	private Composite container;
 	private Text mainConfiguration;
@@ -55,6 +62,7 @@ public class ProjectGeneralSettingsComposite extends Composite {
 	public ProjectGeneralSettingsComposite(Composite parent, PageCompositeListener pageCompositeListener) {
 		super(parent, SWT.NONE);
 		this.pageCompositeListener = pageCompositeListener;
+		this.platforms = getPlatforms();
 		createControl(parent);
 	}
 
@@ -105,7 +113,7 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		Label labelPlatform = new Label(container, SWT.NONE);
 		labelPlatform.setText(PLATFORM_LABEL);
 		tinyOsPlatform = new Combo(container, SWT.READ_ONLY);
-		tinyOsPlatform.setItems(getAvailablePlatforms());
+		tinyOsPlatform.setItems(getPlatformNames(platforms));
 		tinyOsPlatform.setEnabled(TINYOS_PROJECT_SELECTION_DEFAULT);
 		tinyOsPlatform.addListener(SWT.Modify, pageModifyListener);
 
@@ -138,7 +146,22 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		if (tinyOsPlatform == null) {
 			return EMTPY_STRING;
 		}
-		return emptyStringIfNull(tinyOsPlatform.getText());
+		final int index = tinyOsPlatform.getSelectionIndex();
+		if (index < 0) {
+			return EMTPY_STRING;
+		}
+		return platforms.get(index).getName();
+	}
+
+	public boolean isPlatformPredefined() {
+		if (tinyOsPlatform == null) {
+			return false;
+		}
+		final int index = tinyOsPlatform.getSelectionIndex();
+		if (index < 0) {
+			return false;
+		}
+		return platforms.get(index).isPredefined();
 	}
 
 	public String getTinyOsPath() {
@@ -148,7 +171,8 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		return emptyStringIfNull(tinyOsPathSelector.getSelectedPath());
 	}
 
-	public void setData(String mainConfiguration, boolean tinyOsProject, String platform, String platformPath) {
+	public void setData(String mainConfiguration, boolean tinyOsProject, String platform, boolean predefinedPlatform,
+			String platformPath) {
 		if (this.mainConfiguration != null) {
 			this.mainConfiguration.setText(mainConfiguration);
 		}
@@ -160,17 +184,17 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		}
 		if (this.tinyOsPlatform != null) {
 			boolean platformExists = false;
-			final String[] items = this.tinyOsPlatform.getItems();
-			for (int i = 0; i < items.length; ++i) {
-				final String item = items[i];
-				if (items != null && item.equals(platform)) {
+
+			for (int i = 0; i < platforms.size(); ++i) {
+				final PlatformItem item = platforms.get(i);
+				if (item.isPredefined() == predefinedPlatform && item.getName().equals(platform)) {
 					this.tinyOsPlatform.select(i);
 					platformExists = true;
 					break;
 				}
 			}
 			if (!platformExists) {
-				pageCompositeListener.setErrorMessage("Invalid platform '" + platform + "'");
+				pageCompositeListener.setErrorMessage("Unknown platform '" + platform + "'. Select a new one.");
 				pageCompositeListener.setPageComplete(false);
 			}
 		}
@@ -203,7 +227,51 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		return str == null ? EMTPY_STRING : str;
 	}
 
-	private String[] getAvailablePlatforms() {
-		return NescPlatformUtil.getAvailablePlatforms();
+	private List<PlatformItem> getPlatforms() {
+		final List<PlatformItem> result = new ArrayList<>();
+		for (String name : NescPlatformUtil.getPredefinedPlatforms()) {
+			result.add(new PlatformItem(name, true));
+		}
+		for (String name : NescPlatformUtil.getUserDefinedPlatforms()) {
+			result.add(new PlatformItem(name, false));
+		}
+		return result;
+	}
+
+	private String[] getPlatformNames(List<PlatformItem> platforms) {
+		return Lists.transform(platforms, new Function<PlatformItem, String>() {
+			@Override
+			public String apply(PlatformItem item) {
+				return item.getDisplayName();
+			}
+		}).toArray(new String[platforms.size()]);
+	}
+
+	/**
+	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
+	 */
+	private final class PlatformItem {
+
+		private final String name;
+		private final boolean predefined;
+		private final String displayName;
+
+		public PlatformItem(String name, boolean predefined) {
+			this.name = name;
+			this.predefined = predefined;
+			this.displayName = name + (predefined ? "(predefined)" : "");
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public boolean isPredefined() {
+			return predefined;
+		}
+
+		public String getDisplayName() {
+			return displayName;
+		}
 	}
 }
