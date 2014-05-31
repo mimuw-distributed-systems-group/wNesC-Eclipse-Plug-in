@@ -1,37 +1,37 @@
 package pl.edu.mimuw.nesc.plugin;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import pl.edu.mimuw.nesc.ContextRef;
 import pl.edu.mimuw.nesc.Frontend;
 import pl.edu.mimuw.nesc.NescFrontend;
-import pl.edu.mimuw.nesc.ProjectData;
 import pl.edu.mimuw.nesc.plugin.editor.util.AutosaveListener;
 import pl.edu.mimuw.nesc.plugin.editor.util.NescResourceChangeListener;
 
 /**
- * The activator class controls the plug-in life cycle
+ * The activator class controls the plug-in life cycle.
+ *
+ * @author Michał Szczepaniak <ms292534@students.mimuw.edu.pl>
+ * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  */
 public class NescPlugin extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "NesC_Plugin"; //$NON-NLS-1$
 
+	private static Frontend NESC_FRONTEND = NescFrontend.builder().build();
+
 	// The shared instance
 	private static NescPlugin plugin;
-
-	// Frontend data
-	private static ConcurrentMap<String, ContextRef> projectContext = new ConcurrentHashMap<String, ContextRef>();
-	private static ConcurrentMap<String, ProjectData> projectData = new ConcurrentHashMap<String, ProjectData>();
-
-	private static Frontend nescFrontend = NescFrontend.builder().build();
 
 	/**
 	 * The constructor
@@ -54,6 +54,7 @@ public class NescPlugin extends AbstractUIPlugin {
 		plugin = this;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(NescResourceChangeListener.getInstance(),
 				NescResourceChangeListener.getHandledEvents());
+		buildWorkspace();
 	}
 
 	@Override
@@ -73,29 +74,29 @@ public class NescPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
-	public ContextRef getProjectContext(String projectName) {
-		return projectContext.get(projectName);
-	}
-
-	public void setProjectContext(String projectName, ContextRef projectContextRef) {
-		projectContext.put(projectName, projectContextRef);
-	}
-
-	public ProjectData getProjectData(String projectName) {
-		return projectData.get(projectName);
-	}
-
-	public void setProjectData(String projectName, ProjectData newProjectData) {
-		projectData.put(projectName, newProjectData);
-	}
-
-	public void deleteProject(String projectName) {
-		projectData.remove(projectName);
-		projectContext.remove(projectName);
-	}
-
+	/**
+	 * Gets NesC frontend instance.
+	 *
+	 * @return NesC frontend
+	 */
 	public Frontend getNescFrontend() {
-		return nescFrontend;
+		return NESC_FRONTEND;
 	}
 
+	private void buildWorkspace() {
+		final Job job = new Job("Building workspace...") { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+				} catch (CoreException e) {
+					e.printStackTrace();
+					return Status.OK_STATUS;
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setPriority(Job.BUILD);
+		job.schedule();
+	}
 }

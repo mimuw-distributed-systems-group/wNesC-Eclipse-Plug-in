@@ -149,13 +149,13 @@ public class NescReconciler extends MonoReconciler {
 	private volatile boolean fIsEditorActive= true;
 	/** Tells whether a reconcile is in progress. */
 	private volatile boolean fIsReconciling= false;
-	
+
 	private boolean fInitialProcessDone= false;
 	private Job fTriggerReconcilerJob;
 
 	/**
 	 * Create a reconciler for the given editor and strategy.
-	 * 
+	 *
 	 * @param editor the text editor
 	 * @param strategy  the Nesc reconciling strategy
 	 */
@@ -167,7 +167,7 @@ public class NescReconciler extends MonoReconciler {
 	@Override
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
-		
+
 		fPartListener= new PartListener();
 		IWorkbenchPartSite site= fTextEditor.getSite();
 		IWorkbenchWindow window= site.getWorkbenchWindow();
@@ -176,7 +176,7 @@ public class NescReconciler extends MonoReconciler {
 		fActivationListener= new ActivationListener(textViewer.getTextWidget());
 		Shell shell= window.getShell();
 		shell.addShellListener(fActivationListener);
-		
+
 		fTriggerReconcilerJob= new SingletonJob("Trigger Reconciler", new Runnable() { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -187,7 +187,7 @@ public class NescReconciler extends MonoReconciler {
 	@Override
 	public void uninstall() {
 		fTriggerReconcilerJob.cancel();
-		
+
 		IWorkbenchPartSite site= fTextEditor.getSite();
 		IWorkbenchWindow window= site.getWorkbenchWindow();
 		window.getPartService().removePartListener(fPartListener);
@@ -220,9 +220,14 @@ public class NescReconciler extends MonoReconciler {
 	protected void aboutToBeReconciled() {
 		// If we ever want anything to happen just before reconciling
 		// something more than a comment must be written here.
-		
+
 		// Without the check this does not work. It should be checked if saving is allowed in such situations
 		if (fTextEditor.isDirty()) {
+			/*
+			 * FIXME: Probably file does not need to be saved every time. But
+			 * then we need to pass unsaved file to NesC frontend somehow. Which
+			 * is better (easier :))?
+			 */
 			fTextEditor.doSave(null);
 		}
 	}
@@ -233,7 +238,7 @@ public class NescReconciler extends MonoReconciler {
 		fInitialProcessDone= true;
 		if (!fIsReconciling && isEditorActive() && hasCModelChanged()) {
 			NescReconciler.this.scheduleReconciling();
-		} 
+		}
 	}
 
 	@Override
@@ -261,7 +266,7 @@ public class NescReconciler extends MonoReconciler {
 	private synchronized void setCModelChanged(boolean state) {
 		fHasCModelChanged= state;
 	}
-	
+
 	/**
 	 * Tells whether this reconciler's editor is active.
 	 *

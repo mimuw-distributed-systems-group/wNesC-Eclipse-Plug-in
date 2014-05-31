@@ -2,7 +2,6 @@ package pl.edu.mimuw.nesc.plugin.projects;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import pl.edu.mimuw.nesc.plugin.wizards.composite.PageCompositeListener;
@@ -13,9 +12,13 @@ import pl.edu.mimuw.nesc.plugin.wizards.composite.PageCompositeListener;
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  *
  */
-public abstract class NescPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
+public abstract class NescPropertyPage extends PropertyPage {
 
-	protected PageCompositeListener listener = new PageCompositeListener() {
+	/**
+	 * The underlying composite does the majority of logic on behalf of the
+	 * property page. The page needs to be notified about the state's changes.
+	 */
+	protected PageCompositeListener compositeListener = new PageCompositeListener() {
 		@Override
 		public void setPageComplete(boolean isComplete) {
 			NescPropertyPage.this.isComplete = isComplete;
@@ -26,8 +29,13 @@ public abstract class NescPropertyPage extends PropertyPage implements IWorkbenc
 			NescPropertyPage.this.setErrorMessage(message);
 		}
 	};
-
+	/**
+	 * Indicates whether current page is complete.
+	 */
 	protected boolean isComplete = true;
+
+	protected NescPropertyPage() {
+	}
 
 	@Override
 	public void performDefaults() {
@@ -78,5 +86,4 @@ public abstract class NescPropertyPage extends PropertyPage implements IWorkbenc
 	 * property store.
 	 */
 	protected abstract void storeValues();
-
 }

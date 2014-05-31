@@ -16,7 +16,7 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	private IProgressMonitor fProgressMonitor;
 	// used by tests
 	protected boolean fInitialProcessDone;
-	
+
 	public NescReconcilingStrategy(ITextEditor editor) {
 		fEditor = editor;
 		fInitialProcessDone = false;
@@ -105,13 +105,6 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 			// A good place to make sure that all the neccessary structures are in place
 		}
 		if (fEditor instanceof NescEditor) {
-			try {
-				NescEditor editor = (NescEditor)fEditor;
-				editor.updateFileData();
-			} catch (Exception e) {
-				// For now we catch all exceptions so that the reconciling does not explode
-				e.printStackTrace();
-			}
 		}
 		System.err.println("postReconcile");
  	}

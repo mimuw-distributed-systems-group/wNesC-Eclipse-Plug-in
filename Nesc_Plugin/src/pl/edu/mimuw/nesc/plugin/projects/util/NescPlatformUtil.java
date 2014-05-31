@@ -128,6 +128,7 @@ public class NescPlatformUtil {
 	}
 
 	private static void resolveVariables(String[] values, String tinyOsPath) {
+		// FIXME: http://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2FresAdv_builders.htm
 		for (int i = 0; i < values.length; ++i) {
 			values[i] = values[i].replaceAll(TOSDIR, tinyOsPath);
 		}

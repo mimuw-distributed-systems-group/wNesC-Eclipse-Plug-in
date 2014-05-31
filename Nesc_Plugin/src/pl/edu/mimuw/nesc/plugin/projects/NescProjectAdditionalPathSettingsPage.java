@@ -1,11 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.projects;
 
 import static org.eclipse.swt.SWT.FILL;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_DEFAULT_FILES;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_INCLUDE_PATHS;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_PREDEFINED_MACROS;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValueStringList;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.setProjectPreferenceValue;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.*;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
@@ -26,17 +22,18 @@ public class NescProjectAdditionalPathSettingsPage extends NescPropertyPage {
 
 	@Override
 	protected Control createContents(Composite parent) {
-		IProject project = getProject();
+		final IProject project = getProject();
 		if (project == null) {
 			return parent;
 		}
+
 		final Composite container = new Composite(parent, SWT.NONE);
 		final GridLayout layout = new GridLayout();
 		GridData parentData = new GridData(FILL, FILL, true, true);
 		container.setLayout(layout);
 		container.setLayoutData(parentData);
 
-		composite = new ProjectAdditionalPathSettingsComposite(container, listener);
+		composite = new ProjectAdditionalPathSettingsComposite(container, compositeListener);
 		initializeValues();
 		return new Composite(parent, SWT.NULL);
 	}
@@ -61,10 +58,6 @@ public class NescProjectAdditionalPathSettingsPage extends NescPropertyPage {
 
 	@Override
 	protected void storeValues() {
-		/*
-		 * TODO: Recreate context when settings are changed. (use
-		 * IEclipsePreferences.(Node|Preference)ChangeEvent?)
-		 */
 		final IProject project = getProject();
 		if (project == null) {
 			System.err.println("No project found!");
@@ -79,5 +72,4 @@ public class NescProjectAdditionalPathSettingsPage extends NescPropertyPage {
 			this.setErrorMessage("Failed to save changes to project properties");
 		}
 	}
-
 }

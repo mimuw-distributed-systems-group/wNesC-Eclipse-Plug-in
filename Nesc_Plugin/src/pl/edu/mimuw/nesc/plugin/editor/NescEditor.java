@@ -2,6 +2,10 @@ package pl.edu.mimuw.nesc.plugin.editor;
 
 import java.util.Stack;
 
+import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -18,10 +22,10 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
-import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -31,25 +35,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.filesystem.URIUtil;
 
-import pl.edu.mimuw.nesc.ContextRef;
-import pl.edu.mimuw.nesc.FileData;
-import pl.edu.mimuw.nesc.plugin.NescPlugin;
 import pl.edu.mimuw.nesc.plugin.partitioning.FastNescPartitioner;
 import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
-import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
 
 public class NescEditor extends TextEditor {
 
 	public static final String EDITOR_ID = "pl.edu.mimuw.nesc.NesCEditor";
-	
+
 	private NescSourceViewerConfiguration sourceViewerConfiguration = null;
-	private FileData fileData = null;
-	
+
 	private class ExitPolicy implements IExitPolicy {
 		final char fExitCharacter;
 		final char fEscapeCharacter;
@@ -63,9 +58,6 @@ public class NescEditor extends TextEditor {
 			fSize = fStack.size();
 		}
 
-		/*
-		 * @see org.eclipse.jface.text.link.LinkedModeUI$IExitPolicy#doExit(org.eclipse.jface.text.link.LinkedModeModel, org.eclipse.swt.events.VerifyEvent, int, int)
-		 */
 		@Override
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 			if (fSize == fStack.size() && !isMasked(offset)) {
@@ -100,13 +92,13 @@ public class NescEditor extends TextEditor {
 			return false;
 		}
 	}
-	
+
 	private static class BracketLevel {
 		LinkedModeUI fUI;
 		Position fFirstPosition;
 		Position fSecondPosition;
 	}
-	
+
 	private static class ExclusivePositionUpdater implements IPositionUpdater {
 
 		/** The position category. */
@@ -121,9 +113,6 @@ public class NescEditor extends TextEditor {
 			fCategory = category;
 		}
 
-		/*
-		 * @see org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.text.DocumentEvent)
-		 */
 		@Override
 		public void update(DocumentEvent event) {
 			int eventOffset = event.getOffset();
@@ -177,16 +166,13 @@ public class NescEditor extends TextEditor {
 		}
 
 	}
-	
+
 	private class BracketInserter implements VerifyKeyListener, ILinkedModeListener {
 
 		private final String CATEGORY = toString();
 		private IPositionUpdater fUpdater = new ExclusivePositionUpdater(CATEGORY);
 		private Stack<BracketLevel> fBracketLevelStack = new Stack<BracketLevel>();
 
-		/*
-		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
-		 */
 		@Override
 		public void verifyKey(VerifyEvent event) {
 			// early pruning to slow down normal typing as little as possible
@@ -272,9 +258,6 @@ public class NescEditor extends TextEditor {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
-		 */
 		@Override
 		public void left(LinkedModeModel environment, int flags) {
 
@@ -317,16 +300,10 @@ public class NescEditor extends TextEditor {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jface.text.link.ILinkedModeListener#suspend(org.eclipse.jface.text.link.LinkedModeModel)
-		 */
 		@Override
 		public void suspend(LinkedModeModel environment) {
 		}
 
-		/*
-		 * @see org.eclipse.jface.text.link.ILinkedModeListener#resume(org.eclipse.jface.text.link.LinkedModeModel, int)
-		 */
 		@Override
 		public void resume(LinkedModeModel environment, int flags) {
 		}
@@ -345,7 +322,7 @@ public class NescEditor extends TextEditor {
 		IDocumentPartitioner partitioner = new FastNescPartitioner();
 		partitioner.connect(this.getDocument());
 		this.getDocument().setDocumentPartitioner(partitioner);
-		
+
 		this.configureInsertMode(SMART_INSERT, true);
 		this.setInsertMode(SMART_INSERT);
 
@@ -380,7 +357,7 @@ public class NescEditor extends TextEditor {
 		}
 		return null;
 	}
-	
+
 	public IProject getOpenFileProject() {
 		IResource resource = (IResource) this.getEditorInput().getAdapter(IResource.class);
 		if (resource != null) {
@@ -389,28 +366,6 @@ public class NescEditor extends TextEditor {
 		return null;
 	}
 
-	public ContextRef getNescContext() {
-		ProjectUtil.ensureContext(getOpenFileProject());
-		return ProjectUtil.getProjectContext(getOpenFileProject());
-	}
-	
-	public void updateFileData() {
-		ContextRef context = getNescContext();
-		if (context == null) {
-			return;
-		}
-		fileData = NescPlugin.getDefault().getNescFrontend().update(context, getFileLocation());
-	}
-	
-	public FileData getFileData() {
-		if (fileData == null) {
-			if (getOpenFileProject() != null) {
-				updateFileData();
-			}
-		}
-		return fileData;
-	}
-	
 	private static char getPeerCharacter(char character) {
 		switch (character) {
 			case '(':
@@ -441,7 +396,7 @@ public class NescEditor extends TextEditor {
 				throw new IllegalArgumentException();
 		}
 	}
-	
+
 	private static char getEscapeCharacter(char character) {
 		switch (character) {
 			case '"':

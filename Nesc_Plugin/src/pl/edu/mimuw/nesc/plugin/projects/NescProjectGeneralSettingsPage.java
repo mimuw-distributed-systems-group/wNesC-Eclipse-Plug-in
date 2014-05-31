@@ -23,7 +23,7 @@ public class NescProjectGeneralSettingsPage extends NescPropertyPage {
 
 	@Override
 	protected Control createContents(Composite parent) {
-		IProject project = getProject();
+		final IProject project = getProject();
 		if (project == null) {
 			return parent;
 		}
@@ -33,7 +33,7 @@ public class NescProjectGeneralSettingsPage extends NescPropertyPage {
 		container.setLayout(layout);
 		container.setLayoutData(parentData);
 
-		composite = new ProjectGeneralSettingsComposite(container, listener);
+		composite = new ProjectGeneralSettingsComposite(container, compositeListener);
 		initializeValues();
 		return new Composite(parent, SWT.NULL);
 	}
@@ -60,10 +60,6 @@ public class NescProjectGeneralSettingsPage extends NescPropertyPage {
 
 	@Override
 	protected void storeValues() {
-		/*
-		 * TODO: Recreate context when settings are changed. (use
-		 * IEclipsePreferences.(Node|Preference)ChangeEvent?)
-		 */
 		final IProject project = getProject();
 		if (project == null) {
 			System.err.println("No project found!");

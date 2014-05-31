@@ -5,7 +5,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 
-import pl.edu.mimuw.nesc.plugin.NescPlugin;
+import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
 
 /**
  * Change listener for NesC projects.
@@ -48,7 +48,7 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 				// FIXME: use logger
 				System.out.println("Removing project " + resource.getName());
 				final String projectName = resource.getName();
-				NescPlugin.getDefault().deleteProject(projectName);
+				ProjectManager.deleteProject(projectName);
 			}
 		}
 	}

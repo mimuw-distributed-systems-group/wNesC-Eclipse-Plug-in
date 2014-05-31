@@ -25,7 +25,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.osgi.service.prefs.BackingStoreException;
 
 import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
-import pl.edu.mimuw.nesc.plugin.projects.util.ProjectUtil;
+import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
 
 import com.google.common.base.Optional;
 
@@ -90,6 +90,7 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 			location = _pageOne.getLocationURI();
 		} // else location == null
 
+		/* Nature is set in createProject. */
 		final IProject project = NescProjectSupport.createProject(name, location);
 
 		try {
@@ -113,15 +114,18 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 			final IRunnableWithProgress job = new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Building project...", IProgressMonitor.UNKNOWN);
-					final Optional<String> msg = ProjectUtil.ensureContext(project);
+					monitor.beginTask("Creating project context...", IProgressMonitor.UNKNOWN);
+					final Optional<String> msg = ProjectManager.ensureContext(project);
+					monitor.done();
+
+					// Rebuild is done automatically by builder.
+
 					if (msg.isPresent()) {
 						setErrorMessage(msg.get());
 						validProject = false;
 					} else {
 						validProject = true;
 					}
-					monitor.done();
 				}
 			};
 			final ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());

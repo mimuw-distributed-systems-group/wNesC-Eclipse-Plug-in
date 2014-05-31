@@ -48,7 +48,7 @@
       </wizard>
    </extension>
    <extension
-         id="pl.edu.mimuw.nesc.projectNature"
+         id="pl.edu.mimuw.nesc.plugin.natures.NescProjectNature"
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
@@ -68,6 +68,17 @@
             id="pl.edu.mimuw.nesc.category.wizards.import"
             name="NesC">
       </category>
+   </extension>
+   <!-- Project builders. -->
+   <extension
+   		 point="org.eclipse.core.resources.builders"
+   		 id="pl.edu.mimuw.nesc.plugin.builder.NescProjectBuilder"
+   		 name="NesC Project Builder">
+   		 <builder>
+   		 	<run class="pl.edu.mimuw.nesc.plugin.builder.NescProjectBuilder">
+   		 		<parameter name="optimize" value="true" />
+   		 	</run>
+   		 </builder>
    </extension>
    <!-- Plugin preference pages. -->
    <extension
@@ -97,7 +108,7 @@
             name="NesC Project">
             <enabledWhen>
             	<adapt type="org.eclipse.core.resources.IProject">
-                   <test property="org.eclipse.core.resources.projectNature" value="pl.edu.mimuw.nesc.projectNature"/>
+                   <test property="org.eclipse.core.resources.projectNature" value="pl.edu.mimuw.nesc.plugin.natures.NescProjectNature"/>
             	</adapt>
             </enabledWhen>
       </page>
@@ -108,7 +119,7 @@
             category="pl.edu.mimuw.nesc.projects.NescProjectPage">
             <enabledWhen>
             	<adapt type="org.eclipse.core.resources.IProject">
-                   <test property="org.eclipse.core.resources.projectNature" value="pl.edu.mimuw.nesc.projectNature"/>
+                   <test property="org.eclipse.core.resources.projectNature" value="pl.edu.mimuw.nesc.plugin.natures.NescProjectNature"/>
             	</adapt>
             </enabledWhen>
       </page>
