@@ -3,6 +3,7 @@ package pl.edu.mimuw.nesc.plugin;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -13,6 +14,7 @@ import pl.edu.mimuw.nesc.Frontend;
 import pl.edu.mimuw.nesc.NescFrontend;
 import pl.edu.mimuw.nesc.ProjectData;
 import pl.edu.mimuw.nesc.plugin.editor.util.AutosaveListener;
+import pl.edu.mimuw.nesc.plugin.editor.util.NescResourceChangeListener;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -24,11 +26,11 @@ public class NescPlugin extends AbstractUIPlugin {
 
 	// The shared instance
 	private static NescPlugin plugin;
-	
+
 	// Frontend data
 	private static ConcurrentMap<String, ContextRef> projectContext = new ConcurrentHashMap<String, ContextRef>();
 	private static ConcurrentMap<String, ProjectData> projectData = new ConcurrentHashMap<String, ProjectData>();
-	
+
 	private static Frontend nescFrontend = NescFrontend.builder().build();
 
 	/**
@@ -38,10 +40,7 @@ public class NescPlugin extends AbstractUIPlugin {
 		plugin = this;
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		// Adds document auto-save on active document change
@@ -53,44 +52,48 @@ public class NescPlugin extends AbstractUIPlugin {
 			}
 		}
 		plugin = this;
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(NescResourceChangeListener.getInstance(),
+				NescResourceChangeListener.getHandledEvents());
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
-	 * )
-	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		this.getWorkbench().removeWindowListener(AutosaveListener.getInstance());
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(NescResourceChangeListener.getInstance());
 		super.stop(context);
 	}
 
 	/**
 	 * Returns the shared instance
-	 * 
+	 *
 	 * @return the shared instance
 	 */
 	public static NescPlugin getDefault() {
 		return plugin;
 	}
-	
+
 	public ContextRef getProjectContext(String projectName) {
 		return projectContext.get(projectName);
 	}
-	
+
 	public void setProjectContext(String projectName, ContextRef projectContextRef) {
 		projectContext.put(projectName, projectContextRef);
 	}
-	
+
 	public ProjectData getProjectData(String projectName) {
 		return projectData.get(projectName);
 	}
-	
+
 	public void setProjectData(String projectName, ProjectData newProjectData) {
 		projectData.put(projectName, newProjectData);
 	}
-	
+
+	public void deleteProject(String projectName) {
+		projectData.remove(projectName);
+		projectContext.remove(projectName);
+	}
+
 	public Frontend getNescFrontend() {
 		return nescFrontend;
 	}
