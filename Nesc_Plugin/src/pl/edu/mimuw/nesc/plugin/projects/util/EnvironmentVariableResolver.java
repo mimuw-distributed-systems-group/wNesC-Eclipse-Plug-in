@@ -31,7 +31,6 @@ public final class EnvironmentVariableResolver {
 	public static String[] resolveTosDirVariable(String[] paths, String tinyOsPath) {
 		final String[] result = new String[paths.length];
 		for (int i = 0; i < paths.length; ++i) {
-			System.out.println("RESOLVING: " + paths[i] + " -> " + paths[i].replaceAll(TOSDIR, tinyOsPath));
 			result[i] = paths[i].replaceAll(TOSDIR, tinyOsPath);
 		}
 		return result;
@@ -50,7 +49,6 @@ public final class EnvironmentVariableResolver {
 	public static List<String> resolveTosDirVariable(List<String> paths, String tinyOsPath) {
 		final List<String> result = new ArrayList<>(paths.size());
 		for (String path : paths) {
-			System.out.println("RESOLVING: " + path + " -> " + path.replaceAll(TOSDIR, tinyOsPath));
 			result.add(path.replaceAll(TOSDIR, tinyOsPath));
 		}
 		return result;

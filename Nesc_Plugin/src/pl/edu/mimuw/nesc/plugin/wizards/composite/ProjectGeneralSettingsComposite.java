@@ -250,7 +250,7 @@ public class ProjectGeneralSettingsComposite extends Composite {
 	/**
 	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
 	 */
-	private final class PlatformItem {
+	private static final class PlatformItem {
 
 		private final String name;
 		private final boolean predefined;
@@ -259,7 +259,7 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		public PlatformItem(String name, boolean predefined) {
 			this.name = name;
 			this.predefined = predefined;
-			this.displayName = name + (predefined ? "(predefined)" : "");
+			this.displayName = name + (predefined ? " (predefined)" : "");
 		}
 
 		public String getName() {

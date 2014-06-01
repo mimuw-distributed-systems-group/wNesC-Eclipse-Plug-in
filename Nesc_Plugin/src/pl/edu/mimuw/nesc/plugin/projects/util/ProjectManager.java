@@ -160,8 +160,9 @@ public final class ProjectManager {
 	 *            project
 	 * @param filePath
 	 *            file path
+	 * @return file data
 	 */
-	public static void updateFile(IProject project, String filePath) {
+	public static FileData updateFile(IProject project, String filePath) {
 		ensureContextWithRebuild(project);
 		final List<FileData> datas = NescPlugin.getDefault()
 				.getNescFrontend()
@@ -171,6 +172,7 @@ public final class ProjectManager {
 			.getFilesMap()
 			.put(data.getFilePath(), data);
 		}
+		return datas.get(0);
 	}
 
 	/**

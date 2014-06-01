@@ -13,6 +13,7 @@ import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -220,16 +221,6 @@ public class NescReconciler extends MonoReconciler {
 	protected void aboutToBeReconciled() {
 		// If we ever want anything to happen just before reconciling
 		// something more than a comment must be written here.
-
-		// Without the check this does not work. It should be checked if saving is allowed in such situations
-		if (fTextEditor.isDirty()) {
-			/*
-			 * FIXME: Probably file does not need to be saved every time. But
-			 * then we need to pass unsaved file to NesC frontend somehow. Which
-			 * is better (easier :))?
-			 */
-			fTextEditor.doSave(null);
-		}
 	}
 
 	@Override
@@ -244,6 +235,17 @@ public class NescReconciler extends MonoReconciler {
 	@Override
 	protected void process(DirtyRegion dirtyRegion) {
 		fIsReconciling= true;
+
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				// Without the check this does not work. It should be checked if saving is allowed in such situations
+				if (fTextEditor.isDirty()) {
+					fTextEditor.doSave(null);
+				}
+			}
+		});
+
 		setCModelChanged(false);
 		super.process(dirtyRegion);
 		fIsReconciling= false;

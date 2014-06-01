@@ -10,6 +10,7 @@ import org.eclipse.swt.graphics.Image;
 
 import pl.edu.mimuw.nesc.ast.gen.DataDecl;
 import pl.edu.mimuw.nesc.ast.gen.Declaration;
+import pl.edu.mimuw.nesc.ast.gen.ErrorDecl;
 import pl.edu.mimuw.nesc.ast.gen.ExceptionVisitor;
 import pl.edu.mimuw.nesc.ast.gen.VariableDecl;
 import pl.edu.mimuw.nesc.declaration.nesc.ConfigurationDeclaration;
@@ -107,6 +108,12 @@ class ObjectProposalBuilder extends ProposalBuilder {
 		}
 
 		@Override
+		public Void visitErrorDecl(ErrorDecl decl, Void arg) {
+			appendDefaultParameter();
+			return null;
+		}
+
+		@Override
 		public Void visitVariableDecl(VariableDecl variableDecl, Void arg) {
 			if (variableDecl.getDeclaration() == null) {
 				// FIXME: declaration should not be null, but frontend
@@ -133,6 +140,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 			this.patternBuilder.append("${" + paramName + "}");
 			this.paramCount++;
 		}
+
 	}
 
 	/**

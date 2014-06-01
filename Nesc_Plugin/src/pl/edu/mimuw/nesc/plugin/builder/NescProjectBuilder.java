@@ -2,6 +2,7 @@ package pl.edu.mimuw.nesc.plugin.builder;
 
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -14,6 +15,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import pl.edu.mimuw.nesc.FileData;
+import pl.edu.mimuw.nesc.plugin.marker.MarkerHelper;
 import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
 
 /**
@@ -30,6 +33,12 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 	 */
 
 	public static final String BUILDER_ID = "pl.edu.mimuw.nesc.plugin.builder.NescProjectBuilder";
+
+	private final MarkerHelper markerHelper;
+
+	public NescProjectBuilder() {
+		this.markerHelper = new MarkerHelper();
+	}
 
 	@Override
 	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
@@ -65,6 +74,11 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 			protected IStatus run(IProgressMonitor monitor) {
 				// TODO: handle errors
 				ProjectManager.recreateProjectContext(project);
+				try {
+					markerHelper.updateMarkers(project);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -108,8 +122,11 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 					final Job job = new Job("Parsing and analysing file...") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							// TODO: handle errors
-							ProjectManager.updateFile(project, path.toOSString());
+							try {
+								updateFile(project, path, (IFile) resource);
+							} catch (CoreException e) {
+								e.printStackTrace();
+							}
 							return Status.OK_STATUS;
 						}
 					};
@@ -121,9 +138,13 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 				/* FILE - no children. */
 				return false;
 			}
-			/* DIRECTORY OR ROOT - visit childen. */
+			/* DIRECTORY OR ROOT - visit children. */
 			return true;
 		}
-	}
 
+		private void updateFile(IProject project, IPath path, IFile file) throws CoreException {
+			final FileData data = ProjectManager.updateFile(project, path.toOSString());
+			markerHelper.updateMarkers(project, file, data);
+		}
+	}
 }

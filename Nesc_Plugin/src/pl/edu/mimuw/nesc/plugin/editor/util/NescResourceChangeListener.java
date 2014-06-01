@@ -52,5 +52,4 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 			}
 		}
 	}
-
 }

@@ -4,14 +4,18 @@ import java.util.Arrays;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
+import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
+import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
@@ -26,6 +30,8 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -38,9 +44,14 @@ import pl.edu.mimuw.nesc.plugin.editor.util.NescAutoIndentStrategy;
 import pl.edu.mimuw.nesc.plugin.editor.util.NumberRule;
 import pl.edu.mimuw.nesc.plugin.editor.util.OperatorRule;
 import pl.edu.mimuw.nesc.plugin.editor.util.WhitespaceRule;
+import pl.edu.mimuw.nesc.plugin.marker.NescQuickAssistProcessor;
 import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
 import pl.edu.mimuw.nesc.plugin.scanners.NescWordDetector;
 
+/**
+ * @author Michał Szczepaniak <ms292534@students.mimuw.edu.pl>
+ * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
+ */
 public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration {
 
 	private static final int AUTO_ACTIVATION_DELAY = 400;
@@ -390,6 +401,29 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		contentAssistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		return contentAssistant;
+	}
+
+	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+		return new DefaultTextHover(sourceViewer);
+	}
+
+	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		return new DefaultTextHover(sourceViewer);
+	}
+
+	@Override
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+	    return new DefaultAnnotationHover();
+	}
+
+	@Override
+	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+		QuickAssistAssistant assistant = new QuickAssistAssistant();
+		assistant.setQuickAssistProcessor(new NescQuickAssistProcessor());
+		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+		return assistant;
 	}
 
 	@Override
