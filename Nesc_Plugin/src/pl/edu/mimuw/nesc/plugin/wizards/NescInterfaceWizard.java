@@ -15,6 +15,11 @@ import org.eclipse.ui.IWorkbench;
  */
 
 public class NescInterfaceWizard extends Wizard implements INewWizard {
+    /**
+     * Identifier of the wizard from 'plugin.xml' file.
+     */
+    public static final String WIZARD_ID = "pl.edu.mimuw.nesc.wizards.new.NescInterfaceWizard";
+
     private static final String WIZARD_TITLE = "NesC Interface Wizard";
     private final NescInterfaceWizardPage page = new NescInterfaceWizardPage();
 

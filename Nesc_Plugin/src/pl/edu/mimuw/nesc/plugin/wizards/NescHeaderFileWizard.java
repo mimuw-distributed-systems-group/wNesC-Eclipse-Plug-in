@@ -14,6 +14,11 @@ import org.eclipse.ui.IWorkbench;
  * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
  */
 public class NescHeaderFileWizard extends Wizard implements INewWizard {
+    /**
+     * Identifier of the wizard from 'plugin.xml' file.
+     */
+    public static final String WIZARD_ID = "pl.edu.mimuw.nesc.wizards.new.NescHeaderFileWizard";
+
     private static final String WIZARD_TITLE = "NesC Header File Wizard";
     private final NescHeaderFileWizardPage page = new NescHeaderFileWizardPage();
 

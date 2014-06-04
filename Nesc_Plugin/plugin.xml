@@ -124,5 +124,13 @@
             </enabledWhen>
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="pl.edu.mimuw.nesc.plugin.perspectives.NescPerspective"
+            id="pl.edu.mimuw.nesc.plugin.perspectives.NescPerspective"
+            name="NesC">
+      </perspective>
+   </extension>
 
 </plugin>

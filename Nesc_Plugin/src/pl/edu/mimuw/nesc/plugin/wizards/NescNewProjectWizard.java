@@ -38,6 +38,10 @@ import com.google.common.base.Optional;
  *
  */
 public class NescNewProjectWizard extends Wizard implements INewWizard {
+	/**
+	 * Identifier of the wizard from 'plugin.xml' file.
+	 */
+	public static final String WIZARD_ID = "pl.edu.mimuw.nesc.wizards.new.NescProjectWizard";
 
 	private static String PAGE_NAME = "New NesC Project";
 	private static String WIZARD_NAME = "NesC Project Wizard";

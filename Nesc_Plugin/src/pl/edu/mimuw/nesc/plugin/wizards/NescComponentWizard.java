@@ -15,6 +15,11 @@ import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
  */
 
 public class NescComponentWizard extends Wizard implements INewWizard {
+    /**
+     * Identifier of the wizard from 'plugin.xml' file.
+     */
+    public static final String WIZARD_ID = "pl.edu.mimuw.nesc.wizards.new.NescComponentWizard";
+
     private static final String WIZARD_TITLE = "NesC Component Wizard";
     private final NescComponentWizardPage page = new NescComponentWizardPage();
 
