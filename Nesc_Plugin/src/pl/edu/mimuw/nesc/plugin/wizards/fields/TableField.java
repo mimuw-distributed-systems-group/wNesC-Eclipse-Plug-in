@@ -66,7 +66,7 @@ public abstract class TableField<T> extends AbstractField {
      * @param fieldName Name of the field.
      * @param layoutData Object that affects layout of the composite created for
      *                   this field.
-     * @param columns Array with specifications for all columns that will be
+     * @param columnsSpec Array with specifications for all columns that will be
      *                created.
      * @throws NullPointerException One of the arguments (except
      *                              <code>layoutData</code>) is null.
@@ -116,7 +116,7 @@ public abstract class TableField<T> extends AbstractField {
     /**
      * Adds new item to the table.
      *
-     * @param data Data object associated with the new item in the table.
+     * @param itemData Data object associated with the new item in the table.
      *             Must not be null.
      * @return Newly created table item object for the added data.
      * @throws NullPointerException The argument is null.
@@ -149,8 +149,8 @@ public abstract class TableField<T> extends AbstractField {
      * to <code>parent</code> argument.
      *
      * @param parent Parent of the newly created object.
-     * @param columnsLabels Array that specifies the number of columns in the
-     *                      created table and their labels.
+     * @param columnsSpec Array that contains specification for each column in
+     *                    the created table.
      * @return Newly created table object.
      */
     private static Table createTable(Composite parent, ColumnSpecification[] columnsSpec) {
@@ -242,9 +242,7 @@ public abstract class TableField<T> extends AbstractField {
     }
 
     /**
-     * Creates a listener of the table to properly enable buttons from the pack.
-     *
-     * @param pack Pack with buttons for the field.
+     * Creates a listener of the table to properly enable buttons.
      */
     private void createEnableListener() {
         table.addSelectionListener(new SelectionListener() {

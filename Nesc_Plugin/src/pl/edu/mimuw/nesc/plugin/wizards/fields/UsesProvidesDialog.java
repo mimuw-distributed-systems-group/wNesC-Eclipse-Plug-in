@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -35,10 +34,9 @@ final class UsesProvidesDialog extends Dialog {
             + ")*[>])?$";
 
     /**
-     * Constants with minimum size of the dialog.
+     * Constants related to size of the dialog.
      */
-    private static final int MINIMUM_WIDTH = 300;
-    private static final int MINIMUM_HEIGHT = 300;
+    private static final int MAXIMUM_LABEL_WIDTH = 260;
 
     /**
      * Constants with indices for arrays.
@@ -51,8 +49,10 @@ final class UsesProvidesDialog extends Dialog {
      */
     private static final String LABEL_GROUP_TYPE = "Type";
     private static final String LABEL_GROUP_INTERFACE_NAME = "Name of the interface";
-    private static final String LABEL_GROUP_INSTANCE_NAME = "Name of the instance (empty if default)";
+    private static final String LABEL_GROUP_INSTANCE_SPEC = "Specification of the instance";
     private static final String LABEL_GROUP_VALIDATION = "Correctness information";
+    private static final String LABEL_INFO_INSTANCE_SPEC = "You can specify the instance name "
+            + "and/or parameters, e.g. \"Iface\", \"Many[uint8_t id]\" or \"[uint8_t id]\".";
     private static final String LABEL_RADIO_USES = "uses";
     private static final String LABEL_RADIO_PROVIDES = "provides";
     private static final String LABEL_STATUS_OK = "OK";
@@ -61,12 +61,9 @@ final class UsesProvidesDialog extends Dialog {
     private static final String ERR_MSG_INTERFACE_NAME_FIRST_CHAR_DIGIT = "Interface name cannot "
             + "start with a digit.";
     private static final String ERR_MSG_INTERFACE_NAME_OTHER = "Interface name is invalid.";
-    private static final String ERR_MSG_INSTANCE_NAME_FIRST_CHAR_DIGIT = "Instance name cannot start "
-            + "with a digit.";
-    private static final String ERR_MSG_INSTANCE_NAME_FORBIDDEN_CHAR = "Only letters, digits and "
-            + "underscores are allowed in the instance name.";
     private static final String ERR_MSG_INSTANCE_NAME_DUPLICATE = "An interface with given name "
             + "already exists.";
+    private static final String ERR_MSG_INSTANCE_SPEC_INVALID = "Instance specification is invalid.";
 
     /**
      * Controls of the dialog.
@@ -75,8 +72,8 @@ final class UsesProvidesDialog extends Dialog {
     private final Button typeRadios[] = new Button[2];
     private Group interfaceNameGroup;
     private Text interfaceNameText;
-    private Group instanceNameGroup;
-    private Text instanceNameText;
+    private Group instanceSpecGroup;
+    private Text instanceSpecText;
     private Group validationInfoGroup;
     private Label validationInfoLabel;
 
@@ -150,56 +147,79 @@ final class UsesProvidesDialog extends Dialog {
     protected Composite createDialogArea(Composite parent) {
         // Prepare the dialog area
         final Composite dialogArea = (Composite) super.createDialogArea(parent);
-        final GridData dialogAreaLayoutObj = new GridData(FILL, FILL, true, true);
-        dialogAreaLayoutObj.minimumHeight = MINIMUM_HEIGHT;
-        dialogAreaLayoutObj.minimumWidth = MINIMUM_WIDTH;
-        dialogArea.setLayoutData(dialogAreaLayoutObj);
+        dialogArea.setLayoutData(new GridData(FILL, FILL, true, true));
 
-        // Prepare layout data
-        final GridData groupLayoutObj = new GridData(FILL, CENTER, true, true);
-        final Layout groupLayout = new GridLayout();
-        final GridData layoutData = new GridData(FILL, CENTER, true, true);
-
-        // Create controls for type
-        typeGroup = new Group(dialogArea, NONE);
-        typeGroup.setLayoutData(groupLayoutObj);
-        typeGroup.setLayout(groupLayout);
-        typeGroup.setText(LABEL_GROUP_TYPE);
-        typeRadios[RADIO_INDEX_USES] = new Button(typeGroup, RADIO);
-        typeRadios[RADIO_INDEX_USES].setText(LABEL_RADIO_USES);
-        typeRadios[RADIO_INDEX_USES].setLayoutData(layoutData);
-        typeRadios[RADIO_INDEX_PROVIDES] = new Button(typeGroup, RADIO);
-        typeRadios[RADIO_INDEX_PROVIDES].setText(LABEL_RADIO_PROVIDES);
-        typeRadios[RADIO_INDEX_PROVIDES].setLayoutData(layoutData);
-
-        // Create controls for interface name
-        interfaceNameGroup = new Group(dialogArea, NONE);
-        interfaceNameGroup.setLayoutData(groupLayoutObj);
-        interfaceNameGroup.setLayout(groupLayout);
-        interfaceNameGroup.setText(LABEL_GROUP_INTERFACE_NAME);
-        interfaceNameText = new Text(interfaceNameGroup, SINGLE | BORDER);
-        interfaceNameText.setLayoutData(layoutData);
-
-        // Create controls for interface instance
-        instanceNameGroup = new Group(dialogArea, NONE);
-        instanceNameGroup.setLayoutData(groupLayoutObj);
-        instanceNameGroup.setLayout(groupLayout);
-        instanceNameGroup.setText(LABEL_GROUP_INSTANCE_NAME);
-        instanceNameText = new Text(instanceNameGroup, SINGLE | BORDER);
-        instanceNameText.setLayoutData(layoutData);
-
-        // Create controls for validation info
-        validationInfoGroup = new Group(dialogArea, NONE);
-        validationInfoGroup.setLayoutData(groupLayoutObj);
-        validationInfoGroup.setLayout(groupLayout);
-        validationInfoGroup.setText(LABEL_GROUP_VALIDATION);
-        validationInfoLabel = new Label(validationInfoGroup, WRAP);
-        validationInfoLabel.setLayoutData(new GridData(FILL, FILL, true, true));
+        // Create all groups and their controls
+        createGroupType(dialogArea);
+        createGroupInterfaceName(dialogArea);
+        createGroupInstanceSpec(dialogArea);
+        createGroupValidationInfo(dialogArea);
 
         // Create listeners for data changing
         createErrorStatusListeners();
 
         return dialogArea;
+    }
+
+    private void createGroupType(Composite dialogArea) {
+        typeGroup = new Group(dialogArea, NONE);
+        typeGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        typeGroup.setLayout(new GridLayout());
+        typeGroup.setText(LABEL_GROUP_TYPE);
+
+        typeRadios[RADIO_INDEX_USES] = new Button(typeGroup, RADIO);
+        typeRadios[RADIO_INDEX_USES].setText(LABEL_RADIO_USES);
+        typeRadios[RADIO_INDEX_USES].setLayoutData(new GridData(FILL, CENTER, true, true));
+
+        typeRadios[RADIO_INDEX_PROVIDES] = new Button(typeGroup, RADIO);
+        typeRadios[RADIO_INDEX_PROVIDES].setText(LABEL_RADIO_PROVIDES);
+        typeRadios[RADIO_INDEX_PROVIDES].setLayoutData(new GridData(FILL, CENTER, true, true));
+    }
+
+    private void createGroupInterfaceName(Composite dialogArea) {
+        interfaceNameGroup = new Group(dialogArea, NONE);
+        interfaceNameGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        interfaceNameGroup.setLayout(new GridLayout());
+        interfaceNameGroup.setText(LABEL_GROUP_INTERFACE_NAME);
+
+        interfaceNameText = new Text(interfaceNameGroup, SINGLE | BORDER);
+        interfaceNameText.setLayoutData(new GridData(FILL, CENTER, true, true));
+    }
+
+    private void createGroupInstanceSpec(Composite dialogArea) {
+        // Prepare the layout for the group
+        final GridLayout groupLayout = new GridLayout();
+        groupLayout.verticalSpacing = 15;
+        groupLayout.marginBottom = groupLayout.marginTop = 5;
+
+        // Prepare the layout object for the label
+        final GridData labelLayoutData = new GridData(CENTER, TOP, true, true);
+        labelLayoutData.widthHint = MAXIMUM_LABEL_WIDTH;
+
+        instanceSpecGroup = new Group(dialogArea, NONE);
+        instanceSpecGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        instanceSpecGroup.setLayout(groupLayout);
+        instanceSpecGroup.setText(LABEL_GROUP_INSTANCE_SPEC);
+
+        final Label instanceSpecInfoLabel = new Label(instanceSpecGroup, WRAP);
+        instanceSpecInfoLabel.setText(LABEL_INFO_INSTANCE_SPEC);
+        instanceSpecInfoLabel.setLayoutData(labelLayoutData);
+
+        instanceSpecText = new Text(instanceSpecGroup, SINGLE | BORDER);
+        instanceSpecText.setLayoutData(new GridData(FILL, FILL, true, true));
+    }
+
+    private void createGroupValidationInfo(Composite dialogArea) {
+        final GridData labelLayoutData = new GridData(FILL, FILL, true, true);
+        labelLayoutData.widthHint = MAXIMUM_LABEL_WIDTH;
+
+        validationInfoGroup = new Group(dialogArea, NONE);
+        validationInfoGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        validationInfoGroup.setLayout(new GridLayout());
+        validationInfoGroup.setText(LABEL_GROUP_VALIDATION);
+
+        validationInfoLabel = new Label(validationInfoGroup, WRAP);
+        validationInfoLabel.setLayoutData(labelLayoutData);
     }
 
     /**
@@ -230,7 +250,7 @@ final class UsesProvidesDialog extends Dialog {
             typeRadio.addSelectionListener(selectionListener);
         }
         interfaceNameText.addModifyListener(modifyListener);
-        instanceNameText.addModifyListener(modifyListener);
+        instanceSpecText.addModifyListener(modifyListener);
     }
 
     @Override
@@ -298,7 +318,7 @@ final class UsesProvidesDialog extends Dialog {
         }
 
         // Check the instance name
-        if ((errMsg = validateInstanceName()) != null) {
+        if ((errMsg = validateInstanceSpec()) != null) {
             setErrorStatus(errMsg);
             return;
         }
@@ -327,28 +347,28 @@ final class UsesProvidesDialog extends Dialog {
     }
 
     /**
-     * @return Error message depicting the error in the instance name or
-     *         null if there is no error.
+     * @return Error message depicting the error in the instance specification
+     *         or null if there is no error.
      */
-    private String validateInstanceName() {
-        final String instanceName = getInstanceName();
+    private String validateInstanceSpec() {
+        final UsesProvidesField.UsesProvides.InstanceSpecificationParser parser =
+                new UsesProvidesField.UsesProvides.InstanceSpecificationParser(getInstanceSpec());
+        if (!parser.correct()) {
+            return ERR_MSG_INSTANCE_SPEC_INVALID;
+        }
+
+        final String instanceName = parser.getInstanceName();
         if (instanceName.isEmpty()) {
             return null;
         }
 
-        final IdentifierValidator validator = new IdentifierValidator(forbiddenInstanceNames);
-        switch (validator.validate(instanceName)) {
-        case SUCCESS:
-            return null;
-        case FIRST_CHAR_DIGIT:
-            return ERR_MSG_INSTANCE_NAME_FIRST_CHAR_DIGIT;
-        case FORBIDDEN_CHAR:
-            return ERR_MSG_INSTANCE_NAME_FORBIDDEN_CHAR;
-        case DUPLICATE:
-            return ERR_MSG_INSTANCE_NAME_DUPLICATE;
-        default:
-            throw new RuntimeException("Unexpected instance name validation result.");
+        for (String deniedInstanceName : forbiddenInstanceNames) {
+            if (deniedInstanceName.equals(instanceName)) {
+                return ERR_MSG_INSTANCE_NAME_DUPLICATE;
+            }
         }
+
+        return null;
     }
 
     /**
@@ -359,10 +379,10 @@ final class UsesProvidesDialog extends Dialog {
     }
 
     /**
-     * @return Instance name entered by the user.
+     * @return Instance specification entered by the user.
      */
-    private String getInstanceName() {
-        return instanceNameText.getText();
+    private String getInstanceSpec() {
+        return instanceSpecText.getText();
     }
 
     /**
@@ -384,7 +404,7 @@ final class UsesProvidesDialog extends Dialog {
         typeRadios[RADIO_INDEX_USES].setSelection(true);
         typeRadios[RADIO_INDEX_PROVIDES].setSelection(false);
         interfaceNameText.setText("");
-        instanceNameText.setText("");
+        instanceSpecText.setText("");
     }
 
     /**
@@ -409,7 +429,7 @@ final class UsesProvidesDialog extends Dialog {
 
         // Other values
         interfaceNameText.setText(values.getInterfaceName());
-        instanceNameText.setText(values.getInstanceName());
+        instanceSpecText.setText(values.getInstanceSpec());
     }
 
     /**
@@ -430,7 +450,7 @@ final class UsesProvidesDialog extends Dialog {
             type = new UsesProvides.Provides();
         }
 
-        return new UsesProvides(type, getInterfaceName(), getInstanceName());
+        return new UsesProvides(type, getInterfaceName(), getInstanceSpec());
     }
 
     /**
@@ -459,6 +479,6 @@ final class UsesProvidesDialog extends Dialog {
 
         usesProvides.setType(finalValues.getType());
         usesProvides.setInterfaceName(finalValues.getInterfaceName());
-        usesProvides.setInstanceName(finalValues.getInstanceName());
+        usesProvides.setInstanceSpec(finalValues.getInstanceSpec());
     }
 }

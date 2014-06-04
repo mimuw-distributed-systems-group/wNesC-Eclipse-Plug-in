@@ -4,6 +4,8 @@ import pl.edu.mimuw.nesc.plugin.wizards.fields.UsesProvidesField.UsesProvides;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Composite;
@@ -29,7 +31,7 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
     private static final String TITLE_EDIT = "Edit uses/provides item";
     private static final String CELL_PROVIDES = "provides";
     private static final String CELL_USES = "uses";
-    private static final String CELL_NO_INSTANCE_NAME = "<default>";
+    private static final String CELL_NO_INSTANCE_SPEC = "<default>";
 
 
     /**
@@ -38,8 +40,8 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
     private static final ColumnSpecification[] FIELD_COLUMN_SPEC = {
         new ColumnSpecification("Type", 60, "Type of the element"),
         new ColumnSpecification("Interface", 120, "Interface that is provided or used"),
-        new ColumnSpecification("Name", 100, "Name that will be used to refer to "
-                + "this instance of the interface")
+        new ColumnSpecification("Instance", 100, "Specification of the interface instance. "
+                + "It defines the instance name and parameters.")
     };
 
     /**
@@ -139,9 +141,9 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
 
         // Other values
         result[1] = usesProvides.getInterfaceName();
-        result[2] =    !usesProvides.getInstanceName().isEmpty()
-                    ?  usesProvides.getInstanceName()
-                    :  CELL_NO_INSTANCE_NAME;
+        result[2] =    !usesProvides.getInstanceSpec().isEmpty()
+                    ?  usesProvides.getInstanceSpec()
+                    :  CELL_NO_INSTANCE_SPEC;
 
         return result;
     }
@@ -165,11 +167,23 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
         private String interfaceName;
 
         /**
-         * A name that allows referring to the instance of an interface instead
-         * of the name of the interface itself. Never null. Empty value means no
-         * instance name.
+         * Specification of the instance. If consists of the instance name
+         * and/or instance parameters. Never null. Empty value means no instance
+         * name and no instance parameters.
+         */
+        private String instanceSpec;
+
+        /**
+         * Name of the instance extracted from the instance specification.
+         * Never null. Empty values means no instance name.
          */
         private String instanceName;
+
+        /**
+         * Parameters of the instance extracted from the instance specification.
+         * Never null. Empty value means no instance parameters.
+         */
+        private String instanceParameters;
 
         /**
          * Initializes fields of the object.
@@ -177,10 +191,10 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
          * @throws NullPointerException One of the arguments is null.
          * @throws IllegalArgumentException Interface name is empty.
          */
-        UsesProvides(Type type, String interfaceName, String instanceName) {
+        UsesProvides(Type type, String interfaceName, String instanceSpec) {
             setType(type);
             setInterfaceName(interfaceName);
-            setInstanceName(instanceName);
+            setInstanceSpec(instanceSpec);
         }
 
         /**
@@ -200,16 +214,22 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
         }
 
         /**
-         * Sets the instance name to the given value.
+         * Sets the instance specification to the given value.
          *
          * @throws NullPointerException The argument is null.
+         * @throws IllegalArgumentException The argument is invalid.
          */
-        void setInstanceName(String instanceName) {
-            if (instanceName == null) {
-                throw new NullPointerException("Instance name cannot be null.");
+        void setInstanceSpec(String instanceSpec) {
+            // Parse the specification
+            final InstanceSpecificationParser parser = new InstanceSpecificationParser(instanceSpec);
+            if (!parser.correct()) {
+                throw new IllegalArgumentException("Instance specification is invalid.");
             }
 
-            this.instanceName = instanceName;
+            // The specification is correct so set it
+            this.instanceSpec = parser.getInstanceSpec();
+            this.instanceName = parser.getInstanceName();
+            this.instanceParameters = parser.getInstanceParams();
         }
 
         /**
@@ -241,10 +261,24 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
         }
 
         /**
+         * @return Instance specification that this object carries. Never null.
+         */
+        public String getInstanceSpec() {
+            return instanceSpec;
+        }
+
+        /**
          * @return Instance name that this object carries. Never null.
          */
         public String getInstanceName() {
             return instanceName;
+        }
+
+        /**
+         * @return Instance parameters that this object carries. Never null.
+         */
+        public String getInstanceParameters() {
+            return instanceParameters;
         }
 
         /**
@@ -295,6 +329,105 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
             @Override
             public void accept(Visitor visitor) {
                 visitor.visit(this);
+            }
+        }
+
+        /**
+         * Class that parses the instance specification text. It extracts the
+         * instance name and instance parameters from it.
+         *
+         * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
+         */
+        final static class InstanceSpecificationParser {
+            /**
+             * Names of the groups used in regular expressions.
+             */
+            private static final String REGEXP_GROUP_NAME = "name";
+            private static final String REGEXP_GROUP_PARAMS = "params";
+
+            /**
+             * Auxiliary regular expressions.
+             */
+            private static final String REGEXP_IDENTIFIER = "[a-zA-Z_]\\w*";
+            private static final String REGEXP_PARAMETER = REGEXP_IDENTIFIER + "\\s+"
+                    + REGEXP_IDENTIFIER;
+
+            /**
+             * Regular expression that defines the language of valid instance
+             * specifications.
+             */
+            private static final String REGEXP_INSTANCE_SPEC = "^(?<" + REGEXP_GROUP_NAME + ">"
+                    + REGEXP_IDENTIFIER + ")?(\\s*(?<" + REGEXP_GROUP_PARAMS + ">\\["
+                    + REGEXP_PARAMETER + "([,]\\s*" + REGEXP_PARAMETER + ")*\\]))?$";
+
+            /**
+             * Instance specification that has been parsed and the instance
+             * name and instance parameters from it. The name and parameters are
+             * null if and only if the specification is invalid.
+             */
+            private final String instanceSpec;
+            private final String instanceName;
+            private final String instanceParams;
+
+            /**
+             * Parses the given instance specification and initializes the
+             * object.
+             *
+             * @param instanceSpec Instance specification to parse.
+             * @throws NullPointerException The given argument is null.
+             */
+            InstanceSpecificationParser(String instanceSpec) {
+                if (instanceSpec == null) {
+                    throw new NullPointerException("Instance specification cannot be null.");
+                }
+
+                this.instanceSpec = instanceSpec;
+
+                // Parse the instance specification
+                final Pattern pattern = Pattern.compile(REGEXP_INSTANCE_SPEC);
+                final Matcher matcher = pattern.matcher(instanceSpec);
+                if (!matcher.matches()) {
+                    this.instanceName = null;
+                    this.instanceParams = null;
+                    return;
+                }
+
+                final String matchedName = matcher.group(REGEXP_GROUP_NAME),
+                             matchedParams = matcher.group(REGEXP_GROUP_PARAMS);
+                this.instanceName = matchedName != null ? matchedName : "";
+                this.instanceParams = matchedParams != null ? matchedParams : "";
+            }
+
+            /**
+             * @return True if and only if the instance specification has been
+             *         correct.
+             */
+            boolean correct() {
+                return instanceName != null && instanceParams != null;
+            }
+
+            /**
+             * @return Instance specification that has been validated.
+             *         Never null.
+             */
+            String getInstanceSpec() {
+                return instanceSpec;
+            }
+
+            /**
+             * @return Extracted instance name. Null if and only if the instance
+             *         specification has been invalid.
+             */
+            String getInstanceName() {
+                return instanceName;
+            }
+
+            /**
+             * @return Extracted instance parameters. Null if and only if the
+             *         specification has been invalid.
+             */
+            String getInstanceParams() {
+                return instanceParams;
             }
         }
     }

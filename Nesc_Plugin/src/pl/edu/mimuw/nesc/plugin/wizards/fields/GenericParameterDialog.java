@@ -27,10 +27,10 @@ import static org.eclipse.swt.SWT.*;
  */
 final class GenericParameterDialog extends Dialog {
     /**
-     * Minimum size of the dialog.
+     * Some sizes for the dialog.
      */
-    private static final int MINIMUM_WIDTH = 300;
-    private static final int MINIMUM_HEIGHT = 400;
+    private static final int MAXIMUM_WIDTH_LABEL = 260;
+    private static final int MINIMUM_HEIGHT_VALIDATION_LABEL = 34;
 
     /**
      * Indent that will be used for the attribute radios.
@@ -187,85 +187,104 @@ final class GenericParameterDialog extends Dialog {
     @Override
     protected Composite createDialogArea(Composite parent) {
         final Composite dialogArea = (Composite) super.createDialogArea(parent);
-        final GridData dialogAreaLayoutData = new GridData(FILL, FILL, true, true);
-        dialogAreaLayoutData.minimumHeight = MINIMUM_HEIGHT;
-        dialogAreaLayoutData.minimumWidth = MINIMUM_WIDTH;
-        dialogArea.setLayoutData(dialogAreaLayoutData);
+        dialogArea.setLayoutData(new GridData(FILL, FILL, true, true));
         dialogArea.setLayout(new GridLayout());
 
-        // Prepare layout objects
-        final GridData groupLayoutData = new GridData(FILL, CENTER, true, true);
-        final GridLayout groupLayout = new GridLayout();
-        final GridData layoutData = new GridData(FILL, CENTER, true, true);
-
-        // Create type group
-        typeGroup = new Group(dialogArea, NONE);
-        typeGroup.setLayoutData(groupLayoutData);
-        typeGroup.setLayout(groupLayout);
-        typeGroup.setText(LABEL_GROUP_PARAM_TYPE);
-        typeRadios[RADIO_INDEX_TYPE] = new Button(typeGroup, RADIO);
-        typeRadios[RADIO_INDEX_TYPE].setText(LABEL_PARAM_TYPE_TYPE);
-        typeRadios[RADIO_INDEX_TYPE].setSelection(true);
-        typeRadios[RADIO_INDEX_TYPE].setLayoutData(layoutData);
-        typeRadios[RADIO_INDEX_CONSTANT] = new Button(typeGroup, RADIO);
-        typeRadios[RADIO_INDEX_CONSTANT].setText(LABEL_PARAM_TYPE_CONSTANT);
-        typeRadios[RADIO_INDEX_CONSTANT].setSelection(false);
-        typeRadios[RADIO_INDEX_CONSTANT].setLayoutData(layoutData);
-
-        // Create controls for typing the constant type
-        constantTypeGroup = new Group(dialogArea, NONE);
-        constantTypeGroup.setLayoutData(groupLayoutData);
-        constantTypeGroup.setLayout(groupLayout);
-        constantTypeGroup.setText(LABEL_GROUP_CONSTANT_TYPE);
-        constantTypeText = new Text(constantTypeGroup, SINGLE | BORDER);
-        constantTypeText.setSize(1000, constantTypeText.getSize().y);
-        constantTypeText.setLayoutData(layoutData);
-
-        // Create controls for typing the name
-        nameGroup = new Group(dialogArea, NONE);
-        nameGroup.setLayoutData(groupLayoutData);
-        nameGroup.setLayout(groupLayout);
-        nameGroup.setText(LABEL_GROUP_NAME);
-        nameText = new Text(nameGroup, SINGLE | BORDER);
-        nameText.setLayoutData(layoutData);
-
-        // Create controls for attributes
-        final GridData attributeGroupLayoutData = new GridData(FILL, CENTER, true, true);
-        attributeGroupLayoutData.minimumHeight = 100;
-        attributeGroup = new Group(dialogArea, NONE);
-        attributeGroup.setLayoutData(attributeGroupLayoutData);
-        attributeGroup.setLayout(groupLayout);
-        attributeGroup.setText(LABEL_GROUP_ATTRIBUTES);
-        attributeCheckbox = new Button(attributeGroup, CHECK | WRAP);
-        attributeCheckbox.setSelection(false);
-        attributeCheckbox.setText(LABEL_ATTRIBUTE_CHECKBOX);
-        attributeCheckbox.setLayoutData(layoutData);
-        final Composite attributeRadiosComposite = new Composite(attributeGroup, NONE);
-        final GridData attributeRadiosLayoutObject = new GridData(FILL, CENTER, true, true);
-        attributeRadiosLayoutObject.horizontalIndent = INDENT_ATTRIBUTE_RADIOS;
-        attributeRadiosComposite.setLayoutData(attributeRadiosLayoutObject);
-        attributeRadiosComposite.setLayout(new GridLayout(2, true));
-        attributeRadios[RADIO_INDEX_NUMBER] = new Button(attributeRadiosComposite, RADIO);
-        attributeRadios[RADIO_INDEX_NUMBER].setText(LABEL_NUMBER_ATTRIBUTE);
-        attributeRadios[RADIO_INDEX_NUMBER].setSelection(true);
-        attributeRadios[RADIO_INDEX_NUMBER].setLayoutData(layoutData);
-        attributeRadios[RADIO_INDEX_INTEGER] = new Button(attributeRadiosComposite, RADIO);
-        attributeRadios[RADIO_INDEX_INTEGER].setText(LABEL_INTEGER_ATTRIBUTE);
-        attributeRadios[RADIO_INDEX_INTEGER].setSelection(false);
-        attributeRadios[RADIO_INDEX_INTEGER].setLayoutData(layoutData);
-
-        // Create controls for showing the validation info
-        final Group validationInfoGroup = new Group(dialogArea, NONE);
-        validationInfoGroup.setLayout(groupLayout);
-        validationInfoGroup.setLayoutData(groupLayoutData);
-        validationInfoGroup.setText(LABEL_GROUP_VALIDATION);
-        validationInfoLabel = new Label(validationInfoGroup, WRAP);
-        validationInfoLabel.setLayoutData(new GridData(FILL, FILL, true, true));
+        // Create all groups and their controls
+        createGroupType(dialogArea);
+        createGroupConstantType(dialogArea);
+        createGroupName(dialogArea);
+        createGroupAttribute(dialogArea);
+        createGroupValidationInfo(dialogArea);
 
         // Create listeners to update error status
         createErrorStatusListeners();
 
         return dialogArea;
+    }
+
+    private void createGroupType(Composite dialogArea) {
+        typeGroup = new Group(dialogArea, NONE);
+        typeGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        typeGroup.setLayout(new GridLayout());
+        typeGroup.setText(LABEL_GROUP_PARAM_TYPE);
+
+        typeRadios[RADIO_INDEX_TYPE] = new Button(typeGroup, RADIO);
+        typeRadios[RADIO_INDEX_TYPE].setText(LABEL_PARAM_TYPE_TYPE);
+        typeRadios[RADIO_INDEX_TYPE].setSelection(true);
+        typeRadios[RADIO_INDEX_TYPE].setLayoutData(new GridData(FILL, CENTER, true, true));
+
+        typeRadios[RADIO_INDEX_CONSTANT] = new Button(typeGroup, RADIO);
+        typeRadios[RADIO_INDEX_CONSTANT].setText(LABEL_PARAM_TYPE_CONSTANT);
+        typeRadios[RADIO_INDEX_CONSTANT].setSelection(false);
+        typeRadios[RADIO_INDEX_CONSTANT].setLayoutData(new GridData(FILL, CENTER, true, true));
+    }
+
+    private void createGroupConstantType(Composite dialogArea) {
+        constantTypeGroup = new Group(dialogArea, NONE);
+        constantTypeGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        constantTypeGroup.setLayout(new GridLayout());
+        constantTypeGroup.setText(LABEL_GROUP_CONSTANT_TYPE);
+
+        constantTypeText = new Text(constantTypeGroup, SINGLE | BORDER);
+        constantTypeText.setSize(1000, constantTypeText.getSize().y);
+        constantTypeText.setLayoutData(new GridData(FILL, CENTER, true, true));
+    }
+
+    private void createGroupName(Composite dialogArea) {
+        nameGroup = new Group(dialogArea, NONE);
+        nameGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        nameGroup.setLayout(new GridLayout());
+        nameGroup.setText(LABEL_GROUP_NAME);
+
+        nameText = new Text(nameGroup, SINGLE | BORDER);
+        nameText.setLayoutData(new GridData(FILL, CENTER, true, true));
+    }
+
+    private void createGroupAttribute(Composite dialogArea) {
+        final GridData checkboxLayoutData = new GridData(FILL, CENTER, true, true);
+        checkboxLayoutData.widthHint = MAXIMUM_WIDTH_LABEL;
+        final GridData attributeGroupLayoutData = new GridData(FILL, CENTER, true, true);
+        attributeGroupLayoutData.minimumHeight = 100;
+
+        attributeGroup = new Group(dialogArea, NONE);
+        attributeGroup.setLayoutData(attributeGroupLayoutData);
+        attributeGroup.setLayout(new GridLayout());
+        attributeGroup.setText(LABEL_GROUP_ATTRIBUTES);
+
+        attributeCheckbox = new Button(attributeGroup, CHECK | WRAP);
+        attributeCheckbox.setSelection(false);
+        attributeCheckbox.setText(LABEL_ATTRIBUTE_CHECKBOX);
+        attributeCheckbox.setLayoutData(checkboxLayoutData);
+
+        final Composite attributeRadiosComposite = new Composite(attributeGroup, NONE);
+        final GridData attributeRadiosLayoutObject = new GridData(FILL, CENTER, true, true);
+        attributeRadiosLayoutObject.horizontalIndent = INDENT_ATTRIBUTE_RADIOS;
+        attributeRadiosComposite.setLayoutData(attributeRadiosLayoutObject);
+        attributeRadiosComposite.setLayout(new GridLayout(2, true));
+
+        attributeRadios[RADIO_INDEX_NUMBER] = new Button(attributeRadiosComposite, RADIO);
+        attributeRadios[RADIO_INDEX_NUMBER].setText(LABEL_NUMBER_ATTRIBUTE);
+        attributeRadios[RADIO_INDEX_NUMBER].setSelection(true);
+        attributeRadios[RADIO_INDEX_NUMBER].setLayoutData(new GridData(FILL, CENTER, true, true));
+
+        attributeRadios[RADIO_INDEX_INTEGER] = new Button(attributeRadiosComposite, RADIO);
+        attributeRadios[RADIO_INDEX_INTEGER].setText(LABEL_INTEGER_ATTRIBUTE);
+        attributeRadios[RADIO_INDEX_INTEGER].setSelection(false);
+        attributeRadios[RADIO_INDEX_INTEGER].setLayoutData(new GridData(FILL, CENTER, true, true));
+    }
+
+    private void createGroupValidationInfo(Composite dialogArea) {
+        final GridData labelLayoutData = new GridData(FILL, FILL, true, true);
+        labelLayoutData.minimumHeight = MINIMUM_HEIGHT_VALIDATION_LABEL;
+
+        final Group validationInfoGroup = new Group(dialogArea, NONE);
+        validationInfoGroup.setLayout(new GridLayout());
+        validationInfoGroup.setLayoutData(new GridData(FILL, CENTER, true, true));
+        validationInfoGroup.setText(LABEL_GROUP_VALIDATION);
+
+        validationInfoLabel = new Label(validationInfoGroup, WRAP);
+        validationInfoLabel.setLayoutData(labelLayoutData);
     }
 
     @Override

@@ -385,6 +385,10 @@ public final class NescComponentWizardPage extends WizardPage {
             out.print(item.getInstanceName());
         }
 
+        if (!item.getInstanceParameters().isEmpty()) {
+            out.print(item.getInstanceParameters());
+        }
+
         out.println(';');
     }
 
