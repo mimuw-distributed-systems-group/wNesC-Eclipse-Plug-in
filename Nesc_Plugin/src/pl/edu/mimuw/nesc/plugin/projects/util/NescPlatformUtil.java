@@ -1,5 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.projects.util;
 
+import static pl.edu.mimuw.nesc.plugin.projects.util.EnvironmentVariableResolver.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -23,9 +25,7 @@ import pl.edu.mimuw.nesc.plugin.preferences.NescPluginPreferences;
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  *
  */
-public class NescPlatformUtil {
-
-	private static final String TOSDIR = "\\$\\{TOSDIR\\}";//$NON-NLS-1$
+public final class NescPlatformUtil {
 
 	private static final String INCLUDES = "includes";//$NON-NLS-1$
 	private static final String MACROS = "macros";//$NON-NLS-1$
@@ -102,11 +102,9 @@ public class NescPlatformUtil {
 			throws ConfigurationException, IOException {
 		final File file = new File(getPlatformsDir(predefinedPlatform) + File.separator + platformName + ".properties");
 		final Configuration config = new PropertiesConfiguration(file);
-		final String[] includes = config.getStringArray(INCLUDES);
+		final String[] includes = resolveTosDirVariable(config.getStringArray(INCLUDES), tinyOsPath);
 		final String[] macros = config.getStringArray(MACROS);
-		final String[] paths = config.getStringArray(PATHS);
-		resolveVariables(includes, tinyOsPath);
-		resolveVariables(paths, tinyOsPath);
+		final String[] paths = resolveTosDirVariable(config.getStringArray(PATHS), tinyOsPath);
 		return new NescPlatform(paths, includes, macros);
 	}
 
@@ -125,13 +123,6 @@ public class NescPlatformUtil {
 	private static String getUserDefinedPlatformsDir() {
 		final IPreferenceStore store = NescPlugin.getDefault().getPreferenceStore();
 		return store.getString(NescPluginPreferences.PLATFORMS_DIR);
-	}
-
-	private static void resolveVariables(String[] values, String tinyOsPath) {
-		// FIXME: http://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2FresAdv_builders.htm
-		for (int i = 0; i < values.length; ++i) {
-			values[i] = values[i].replaceAll(TOSDIR, tinyOsPath);
-		}
 	}
 
 	/**

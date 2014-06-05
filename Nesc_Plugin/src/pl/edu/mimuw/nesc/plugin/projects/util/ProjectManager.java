@@ -1,15 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.projects.util;
 
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_DEFAULT_FILES;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_INCLUDE_PATHS;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_PREDEFINED_MACROS;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.MAIN_CONFIGURATION;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PATH;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PLATFORM;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PREDEFINED_PLATFORM;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValue;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValueB;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.getProjectPreferenceValueStringList;
+import static pl.edu.mimuw.nesc.plugin.projects.util.EnvironmentVariableResolver.*;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -64,7 +56,7 @@ public final class ProjectManager {
 	 * Gets project's NesC frontend context
 	 *
 	 * @param project
-	 *            procect
+	 *            project
 	 * @return NesC frontendContext
 	 */
 	public static ContextRef getProjectContext(IProject project) {
@@ -261,9 +253,10 @@ public final class ProjectManager {
 
 		final NescPlatform platform = NescPlatformUtil.loadPlatformProperties(platformName, isPlatformPredefined,
 				tinyOsPath);
-		final List<String> additionalPaths = getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS);
-		final List<String> addtionalDefaultFiles = getProjectPreferenceValueStringList(project,
-				ADDITIONAL_DEFAULT_FILES);
+		final List<String> additionalPaths = resolveTosDirVariable(
+				getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS), tinyOsPath);
+		final List<String> addtionalDefaultFiles = resolveTosDirVariable(
+				getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES), tinyOsPath);
 		final List<String> additionalMacros = getProjectPreferenceValueStringList(project, ADDITIONAL_PREDEFINED_MACROS);
 
 		List<String> args = new ArrayList<>();
