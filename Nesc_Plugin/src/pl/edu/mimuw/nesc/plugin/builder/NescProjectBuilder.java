@@ -64,8 +64,7 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// TODO: handle errors
-				ProjectManager.ensureContext(project);
-				ProjectManager.rebuildProjectContext(project);
+				ProjectManager.recreateProjectContext(project);
 				return Status.OK_STATUS;
 			}
 		};

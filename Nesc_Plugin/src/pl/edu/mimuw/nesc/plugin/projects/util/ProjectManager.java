@@ -121,6 +121,20 @@ public final class ProjectManager {
 	}
 
 	/**
+	 * Recreates project context with (possibly) updated settings loaded from
+	 * store.
+	 *
+	 * @param project
+	 *            project
+	 * @return project data (from NesC frontend)
+	 */
+	public static ProjectData recreateProjectContext(IProject project) {
+		deleteProject(project.getName());
+		ensureContext(project, true);
+		return PROJECT_DATA_MAP.get(project.getName()).getProjectData();
+	}
+
+	/**
 	 * Rebuild given project.
 	 *
 	 * @param project
