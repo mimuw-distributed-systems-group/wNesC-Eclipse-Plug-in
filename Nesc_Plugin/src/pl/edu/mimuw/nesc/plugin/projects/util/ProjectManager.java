@@ -183,7 +183,14 @@ public final class ProjectManager {
 	 *            project's name
 	 */
 	public static void deleteProject(String name) {
-		PROJECT_DATA_MAP.remove(name);
+		final ProjectCache projectCache = PROJECT_DATA_MAP.remove(name);
+		if (projectCache == null) {
+			System.err.println("Project '" + name + "' does not exist.");
+			return;
+		}
+		NescPlugin.getDefault()
+				.getNescFrontend()
+				.deleteContext(projectCache.getContextRef());
 	}
 
 	private static void createProjectCache(IProject project, ContextRef contextRef) {
