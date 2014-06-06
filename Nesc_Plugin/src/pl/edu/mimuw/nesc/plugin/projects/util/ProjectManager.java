@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -127,18 +128,15 @@ public final class ProjectManager {
 	 * @return project data (from NesC frontend)
 	 */
 	public static ProjectData rebuildProjectContext(IProject project) {
-		ContextRef projectContext = getProjectContext(project);
+		final ContextRef projectContext = getProjectContext(project);
 		if (projectContext == null) {
 			return null;
 		}
-		try {
-			ProjectData data = NescPlugin.getDefault().getNescFrontend().rebuild(projectContext);
-			setProjectData(project, data);
-			return data;
-		} catch (FileNotFoundException e) {
-			/* Main file was not found. */
-			return null;
-		}
+		final ProjectData data = NescPlugin.getDefault()
+				.getNescFrontend()
+				.rebuild(projectContext);
+		setProjectData(project, data);
+		return data;
 	}
 
 	/**
@@ -151,8 +149,14 @@ public final class ProjectManager {
 	 */
 	public static void updateFile(IProject project, String filePath) {
 		ensureContextWithRebuild(project);
-		final FileData data = NescPlugin.getDefault().getNescFrontend().update(getProjectContext(project), filePath);
-		PROJECT_DATA_MAP.get(project.getName()).getFilesMap().put(filePath, data);
+		final List<FileData> datas = NescPlugin.getDefault()
+				.getNescFrontend()
+				.update(getProjectContext(project), filePath);
+		for (FileData data : datas) {
+			PROJECT_DATA_MAP.get(project.getName())
+			.getFilesMap()
+			.put(data.getFilePath(), data);
+		}
 	}
 
 	/**
@@ -194,6 +198,11 @@ public final class ProjectManager {
 			return;
 		}
 		cache.setProjectData(projectData);
+		for (Map.Entry<String, FileData> entry : projectData.getFileDatas().entrySet()) {
+			PROJECT_DATA_MAP.get(project.getName())
+					.getFilesMap()
+					.put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	/**
