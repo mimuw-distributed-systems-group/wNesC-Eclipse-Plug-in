@@ -27,6 +27,12 @@ import pl.edu.mimuw.nesc.plugin.preferences.NescPluginPreferences;
  */
 public final class NescPlatformUtil {
 
+	private static final NescPlatform DUMMY_PLATFORM = new NescPlatform(new String[0], new String[0], new String[0]);
+
+	public static NescPlatform getDummyPlatform() {
+		return DUMMY_PLATFORM;
+	}
+
 	private static final String INCLUDES = "includes";//$NON-NLS-1$
 	private static final String MACROS = "macros";//$NON-NLS-1$
 	private static final String PATHS = "paths";//$NON-NLS-1$

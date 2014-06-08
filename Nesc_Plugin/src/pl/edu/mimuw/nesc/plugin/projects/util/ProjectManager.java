@@ -169,8 +169,8 @@ public final class ProjectManager {
 				.update(getProjectContext(project), filePath);
 		for (FileData data : datas) {
 			PROJECT_DATA_MAP.get(project.getName())
-			.getFilesMap()
-			.put(data.getFilePath(), data);
+					.getFilesMap()
+					.put(data.getFilePath(), data);
 		}
 		return datas.get(0);
 	}
@@ -247,7 +247,9 @@ public final class ProjectManager {
 		if (getProjectCache(project) == null) {
 			try {
 				final String options[] = getProjectArgs(project);
-				final ContextRef context = NescPlugin.getDefault().getNescFrontend().createContext(options);
+				final ContextRef context = NescPlugin.getDefault()
+						.getNescFrontend()
+						.createContext(options);
 				createProjectCache(project, context);
 				if (doRebuild) {
 					rebuildProjectContext(project);
@@ -278,20 +280,32 @@ public final class ProjectManager {
 	private static String[] getProjectArgs(IProject project) throws ConfigurationException, IOException {
 		final IPath projectPath = project.getLocation();
 
+		final List<String> args = new ArrayList<>();
+
 		final String mainConfiguration = getProjectPreferenceValue(project, MAIN_CONFIGURATION);
-		final String platformName = getProjectPreferenceValue(project, TINYOS_PLATFORM);
-		final boolean isPlatformPredefined = getProjectPreferenceValueB(project, TINYOS_PREDEFINED_PLATFORM);
-		final String tinyOsPath = getProjectPreferenceValue(project, TINYOS_PATH);
+		final boolean isTinyOsProject = getProjectPreferenceValueB(project, TINYOS_PROJECT);
 
-		final NescPlatform platform = NescPlatformUtil.loadPlatformProperties(platformName, isPlatformPredefined,
-				tinyOsPath);
-		final List<String> additionalPaths = resolveTosDirVariable(
-				getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS), tinyOsPath);
-		final List<String> addtionalDefaultFiles = resolveTosDirVariable(
-				getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES), tinyOsPath);
+		final List<String> additionalPaths;
+		final List<String> addtionalDefaultFiles;
 		final List<String> additionalMacros = getProjectPreferenceValueStringList(project, ADDITIONAL_PREDEFINED_MACROS);
+		final NescPlatform platform;
 
-		List<String> args = new ArrayList<>();
+		if (isTinyOsProject) {
+			final String platformName = getProjectPreferenceValue(project, TINYOS_PLATFORM);
+			final boolean isPlatformPredefined = getProjectPreferenceValueB(project, TINYOS_PREDEFINED_PLATFORM);
+			final String tinyOsPath = getProjectPreferenceValue(project, TINYOS_PATH);
+			platform = NescPlatformUtil.loadPlatformProperties(platformName, isPlatformPredefined,
+					tinyOsPath);
+
+			additionalPaths = resolveTosDirVariable(
+					getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS), tinyOsPath);
+			addtionalDefaultFiles = resolveTosDirVariable(getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES), tinyOsPath);
+		} else {
+			additionalPaths =
+					getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS);
+			addtionalDefaultFiles = getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES);
+			platform = NescPlatformUtil.getDummyPlatform();
+		}
 
 		addOption(args, "-include", platform.getFiles(), addtionalDefaultFiles);
 		addOption(args, "-I", platform.getPaths(), additionalPaths);
@@ -303,6 +317,10 @@ public final class ProjectManager {
 	}
 
 	private static void addOption(List<String> options, String key, String[] platformValues, List<String> userValues) {
+		if (platformValues.length == 0 && userValues.isEmpty()) {
+			return;
+		}
+
 		options.add(key);
 		for (String value : platformValues) {
 			// FIXME: empty strings in additional*
