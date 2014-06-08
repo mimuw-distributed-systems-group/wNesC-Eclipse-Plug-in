@@ -112,7 +112,6 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
-		System.err.println("getting reconciler");
 		if (textEditor != null) {
 			//Delay changed and non-incremental reconciler used due to
 			//PR 130089
@@ -304,6 +303,8 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		words.addWord("__volatile", keywordToken);
 		words.addWord("__volatile__", keywordToken);
 
+		words.addWord("bool", keywordToken);
+
 		// Additional words. should be deleted when semantic highlighting is available
 		IToken preprocessorToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xE1, 0x9D, 0x1E)));
 		words.addWord("TRUE", preprocessorToken);
@@ -325,6 +326,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		words.addWord("nx_uint16_t", typedefToken);
 		words.addWord("nx_uint32_t", typedefToken);
 		words.addWord("nx_uint64_t", typedefToken);
+		words.addWord("error_t", typedefToken);
 		// end of additional words
 
 		IToken numberToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x30, 0x30, 0xD0)));
@@ -430,7 +432,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
 		IAutoEditStrategy strategy = null;
 		if (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType)) {
-			strategy = new NescAutoIndentStrategy();
+			strategy = new NescAutoIndentStrategy(getConfiguredDocumentPartitioning(sourceViewer));
 		} else {
 			strategy = new DefaultIndentLineAutoEditStrategy();
 		}

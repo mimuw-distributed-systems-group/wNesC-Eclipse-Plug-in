@@ -54,8 +54,7 @@ public class ProjectGeneralSettingsComposite extends Composite {
 	private Listener pageModifyListener = new Listener() {
 		@Override
 		public void handleEvent(Event e) {
-			boolean valid = validatePage();
-			pageCompositeListener.setPageComplete(valid);
+			pageCompositeListener.setPageComplete(validatePage());
 		}
 	};
 

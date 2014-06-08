@@ -6,7 +6,7 @@
       <editor
             class="pl.edu.mimuw.nesc.plugin.editor.NescEditor"
             default="true"
-            extensions="nc"
+            extensions="nc, h"
             icon="resources/icons/sample.gif"
             id="pl.edu.mimuw.nesc.NesCEditor"
             name="NesC Editor">
@@ -60,8 +60,8 @@
          point="org.eclipse.ui.importWizards">
       <wizard
             category="pl.edu.mimuw.nesc.category.wizards.import"
-            class="pl.edu.mimuw.nesc.plugin.wizards.NescImportWizard"
-            id="pl.edu.mimuw.nesc.wizards.new.NescImportWizard"
+            class="pl.edu.mimuw.nesc.plugin.wizards.NescImportProjectWizard"
+            id="pl.edu.mimuw.nesc.wizards.import.NescImportWizard"
             name="NesC Project">
       </wizard>
       <category

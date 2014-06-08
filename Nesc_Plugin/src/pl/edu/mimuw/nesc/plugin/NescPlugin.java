@@ -33,9 +33,6 @@ public class NescPlugin extends AbstractUIPlugin {
 	// The shared instance
 	private static NescPlugin plugin;
 
-	/**
-	 * The constructor
-	 */
 	public NescPlugin() {
 		plugin = this;
 	}

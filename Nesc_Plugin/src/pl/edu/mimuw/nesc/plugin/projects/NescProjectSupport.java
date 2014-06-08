@@ -1,17 +1,21 @@
 package pl.edu.mimuw.nesc.plugin.projects;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Stack;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
@@ -114,6 +118,34 @@ public class NescProjectSupport {
 
 			IProgressMonitor monitor = null;
 			project.setDescription(description, monitor);
+		}
+	}
+	
+	public static void importAllFilesInProjectFolder(IProject project) throws CoreException {
+		IPath projectDirectory = project.getLocation();
+		if (projectDirectory != null) {
+			Stack<File> subdirs = new Stack<>();
+			for (File f: projectDirectory.toFile().listFiles()) {
+				if (!f.getName().equals(".project") && !f.getName().equals(".settings"))
+				subdirs.push(f);
+			}
+			while (!subdirs.isEmpty()) {
+				File current = subdirs.pop();
+				if (current.isDirectory()) {
+					for (File f : current.listFiles()) {
+						subdirs.push(f);
+					}
+					IFolder folder = project.getFolder(current.getAbsolutePath());
+					if (!folder.exists()) {
+						folder.createLink(new Path(current.getAbsolutePath()), IResource.NONE, null);
+					}
+				} else {
+					IFile file = project.getFile(current.getAbsolutePath());
+					if (!file.exists()) {
+						file.createLink(new Path(current.getAbsolutePath()), IResource.NONE, null);
+					}
+				}
+			}
 		}
 	}
 
