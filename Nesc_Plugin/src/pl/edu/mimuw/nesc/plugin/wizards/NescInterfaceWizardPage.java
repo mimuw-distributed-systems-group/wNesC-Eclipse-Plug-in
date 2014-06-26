@@ -177,6 +177,8 @@ public class NescInterfaceWizardPage extends WizardPage {
         if (getCommentsFlag()) {
             output.println(NescWizardSupport.generateHeadComment());
             output.println();
+            output.println();
+            output.println(NescWizardSupport.generateEntityComment());
         }
 
         // Write the initial contents of the interface file

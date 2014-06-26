@@ -13,5 +13,7 @@ public final class NescPluginPreferences {
 	 */
 
 	public static final String PLATFORMS_DIR = "pl.edu.mimuw.nesc.plugin.platforms_dir"; //$NON-NLS-1$
+	public static final String HEAD_COMMENT = "pl.edu.mimuw.nesc.plugin.head_comment";
+	public static final String ENTITY_COMMENT = "pl.edu.mimuw.nesc.plugin.entity_comment";
 
 }

@@ -1,16 +1,19 @@
 package pl.edu.mimuw.nesc.plugin.wizards;
 
+import pl.edu.mimuw.nesc.plugin.NescPlugin;
 import pl.edu.mimuw.nesc.plugin.editor.NescEditor;
+import pl.edu.mimuw.nesc.plugin.preferences.NescPluginPreferences;
+import pl.edu.mimuw.nesc.plugin.preferences.NescPreferencesInitializer;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -221,18 +224,33 @@ class NescWizardSupport {
      *         the comment text.
      */
     static String generateHeadComment() {
-        final StringBuilder builder = new StringBuilder();
+        return getPreferenceValue(NescPluginPreferences.HEAD_COMMENT,
+                NescPreferencesInitializer.getDefaultHeadComment());
+    }
 
-        // Create the comment
-        builder.append("/**\n");
-        builder.append(" * Copyright (C) ");
-        builder.append(Calendar.getInstance().get(Calendar.YEAR));
-        builder.append("\n");
-        builder.append(" *\n");
-        builder.append(" * @author\n");
-        builder.append(" */");
+    /**
+     * @return String with comment that is to be placed exactly before an
+     *         interface or component definition. It does not contain any
+     *         newline character before or after the comment text.
+     */
+    static String generateEntityComment() {
+        return getPreferenceValue(NescPluginPreferences.ENTITY_COMMENT,
+                NescPreferencesInitializer.getDefaultEntityComment());
+    }
 
+    /**
+     * @param preferenceName Name of the preference to retrieve.
+     * @param valueIfEmpty Value that will be returned if the value of the
+     *                     preference with given name is empty.
+     * @return Value of the preference with given name or
+     *         <code>valueIfEmpty</code> if it is empty.
+     */
+    private static String getPreferenceValue(String preferenceName, String valueIfEmpty) {
+        final IPreferenceStore store = NescPlugin.getDefault().getPreferenceStore();
+        final String preferredValue = store.getString(preferenceName).trim();
 
-        return builder.toString();
+        return   !preferredValue.isEmpty()
+               ? preferredValue
+               : valueIfEmpty.trim();
     }
 }

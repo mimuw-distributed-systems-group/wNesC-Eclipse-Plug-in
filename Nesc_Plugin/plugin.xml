@@ -98,6 +98,12 @@
    		 	name="Empty child page"
    		 	category="pl.edu.mimuw.nesc.plugin.preferences.MainPage">
    		 </page>
+      <page
+            category="pl.edu.mimuw.nesc.plugin.preferences.MainPage"
+            class="pl.edu.mimuw.nesc.plugin.preferences.NescPluginCommentsTemplatesPreferencePage"
+            id="pl.edu.mimuw.nesc.plugin.preferences.CommentsTemplates"
+            name="Comments Templates">
+      </page>
    </extension>
    <!-- Project property pages. -->
    <extension

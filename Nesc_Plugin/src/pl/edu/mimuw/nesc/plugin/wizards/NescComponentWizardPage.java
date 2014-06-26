@@ -188,6 +188,8 @@ public final class NescComponentWizardPage extends WizardPage {
         if (getCommentsFlag()) {
             out.println(NescWizardSupport.generateHeadComment());
             out.println();
+            out.println();
+            out.println(NescWizardSupport.generateEntityComment());
         }
 
         // Write the keyword a name of the component

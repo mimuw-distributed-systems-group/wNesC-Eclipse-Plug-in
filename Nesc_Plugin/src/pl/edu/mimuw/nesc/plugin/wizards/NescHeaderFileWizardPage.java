@@ -160,7 +160,6 @@ public class NescHeaderFileWizardPage extends WizardPage {
         // Add the comments if the user has chosen to do so
         if (getCommentsFlag()) {
             out.println(NescWizardSupport.generateHeadComment());
-            out.println();
         }
 
         // Create initial contents
@@ -170,9 +169,9 @@ public class NescHeaderFileWizardPage extends WizardPage {
             out.println(headerGuardDefine);
             out.print("#define ");
             out.println(headerGuardDefine);
-            out.println();
         }
 
+        out.println();
         final int cursorOffset = byteOut.size();
 
         if (getHeaderGuardFlag()) {
