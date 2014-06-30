@@ -1193,6 +1193,20 @@ public class NescHeuristicScanner implements Symbols {
 		}
 		return false;
 	}
+	
+	public boolean looksLikeInterface(int start, int bound) {
+		int token = previousToken(start - 1, bound);
+		if (token != Symbols.TokenIDENT) {
+			return false;
+		}
+		
+		token = previousToken(getPosition(), bound);
+		if (token == Symbols.TokenINTERFACE) {
+			return true;
+		}
+
+		return false;
+	}
 
 	/**
 	 * Returns <code>true</code> if the document, when scanned backwards from

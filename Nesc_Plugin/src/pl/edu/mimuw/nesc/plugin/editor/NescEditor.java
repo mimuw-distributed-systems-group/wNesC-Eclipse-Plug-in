@@ -36,6 +36,8 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import pl.edu.mimuw.nesc.plugin.editor.util.NescHeuristicScanner;
+import pl.edu.mimuw.nesc.plugin.editor.util.Symbols;
 import pl.edu.mimuw.nesc.plugin.partitioning.FastNescPartitioner;
 import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
 
@@ -207,6 +209,47 @@ public class NescEditor extends TextEditor {
 				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
 						&& !INCPartitions.NC_PREPROCESSOR.equals(partition.getType())) {
 					return;
+				}
+				
+				NescHeuristicScanner scanner = new NescHeuristicScanner(document, INCPartitions.NC_PARTITIONING, partition.getType());
+				int nextToken = scanner.nextToken(offset + length, endLine.getOffset() + endLine.getLength());
+				String next = nextToken == Symbols.TokenEOF ? null : document.get(offset, scanner.getPosition() - offset).trim();
+				int prevToken = scanner.previousToken(offset - 1, startLine.getOffset());
+				int prevTokenOffset = scanner.getPosition() + 1;
+				String previous = prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
+
+				switch (event.character) {
+					case '(':
+						if (nextToken == Symbols.TokenLPAREN
+								|| nextToken == Symbols.TokenIDENT
+								|| next != null && next.length() > 1)
+							return;
+						break;
+
+					case '<':
+						if (nextToken == Symbols.TokenLESSTHAN
+								|| nextToken == Symbols.TokenGREATERTHAN
+								|| prevToken != Symbols.TokenIDENT
+								|| !scanner.looksLikeInterface(offset, startLine.getOffset() -1)) {
+							return;
+						}
+						break;
+
+					case '[':
+						if (nextToken == Symbols.TokenIDENT
+								|| next != null && next.length() > 1)
+							return;
+						break;
+
+					case '\'':
+					case '"':
+						if (nextToken == Symbols.TokenIDENT
+								|| next != null && (next.length() > 1 || next.charAt(0) == event.character))
+							return;
+						break;
+
+					default:
+						return;
 				}
 
 				if (!validateEditorInputState()) {
