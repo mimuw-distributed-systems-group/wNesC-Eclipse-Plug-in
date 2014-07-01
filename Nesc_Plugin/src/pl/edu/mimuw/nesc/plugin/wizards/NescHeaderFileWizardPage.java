@@ -3,8 +3,8 @@ package pl.edu.mimuw.nesc.plugin.wizards;
 import pl.edu.mimuw.nesc.plugin.wizards.fields.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.events.ModifyEvent;
@@ -153,13 +153,18 @@ public class NescHeaderFileWizardPage extends WizardPage {
      * @return Initial contents of the new header file to be created.
      */
     public NewFileContents getNewHeaderFileContents() {
-        // Create all needed output streams
-        final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        final PrintStream out = new PrintStream(byteOut);
+        // Create all needed writers
+        final StringWriter strWriter = new StringWriter();
+        final PrintWriter out = new PrintWriter(strWriter);
 
         // Add the comments if the user has chosen to do so
         if (getCommentsFlag()) {
-            out.println(NescWizardSupport.generateHeadComment());
+            final String headComment = NescWizardSupport.generateHeadComment(
+                        NescWizardSupport.getProjectFromFullPath(getNewHeaderFileFullPath())
+                    );
+            if (!headComment.isEmpty()) {
+                out.println(headComment);
+            }
         }
 
         // Create initial contents
@@ -172,7 +177,7 @@ public class NescHeaderFileWizardPage extends WizardPage {
         }
 
         out.println();
-        final int cursorOffset = byteOut.size();
+        final int cursorOffset = strWriter.getBuffer().length();
 
         if (getHeaderGuardFlag()) {
             out.println();
@@ -182,7 +187,7 @@ public class NescHeaderFileWizardPage extends WizardPage {
             out.println(" */");
         }
 
-        return new NewFileContents(new ByteArrayInputStream(byteOut.toByteArray()), cursorOffset);
+        return new NewFileContents(new ByteArrayInputStream(strWriter.toString().getBytes()), cursorOffset);
     }
 
     /**

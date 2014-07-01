@@ -3,8 +3,8 @@ package pl.edu.mimuw.nesc.plugin.wizards;
 import pl.edu.mimuw.nesc.plugin.wizards.fields.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -169,16 +169,13 @@ public class NescInterfaceWizardPage extends WizardPage {
      *         file.
      */
     public NewFileContents getNewInterfaceContents() {
-        // Prepare output streams
-        final ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
-        final PrintStream output = new PrintStream(byteOutput);
+        // Prepare writers
+        final StringWriter strWriter = new StringWriter();
+        final PrintWriter output = new PrintWriter(strWriter);
 
         // Add the comments if the user has chosen to do it
         if (getCommentsFlag()) {
-            output.println(NescWizardSupport.generateHeadComment());
-            output.println();
-            output.println();
-            output.println(NescWizardSupport.generateEntityComment());
+            NescWizardSupport.writeComments(getNewInterfaceFullPath(), output);
         }
 
         // Write the initial contents of the interface file
@@ -203,11 +200,11 @@ public class NescInterfaceWizardPage extends WizardPage {
         output.println();
         output.println('{');
         output.print(NescWizardSupport.getIndentationStep());
-        final int cursorOffset = byteOutput.size();
+        final int cursorOffset = strWriter.getBuffer().length();
         output.println();
         output.println('}');
 
-        return new NewFileContents(new ByteArrayInputStream(byteOutput.toByteArray()), cursorOffset);
+        return new NewFileContents(new ByteArrayInputStream(strWriter.toString().getBytes()), cursorOffset);
     }
 
     private void updateErrorStatus() {

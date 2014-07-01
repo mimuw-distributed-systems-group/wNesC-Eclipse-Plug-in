@@ -1,5 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.preferences;
 
+import pl.edu.mimuw.nesc.plugin.preferences.util.CommentTextWrapper;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

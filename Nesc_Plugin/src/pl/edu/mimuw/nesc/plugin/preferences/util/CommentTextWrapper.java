@@ -1,9 +1,6 @@
-package pl.edu.mimuw.nesc.plugin.preferences;
+package pl.edu.mimuw.nesc.plugin.preferences.util;
 
 import com.google.common.base.Preconditions;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Font;
@@ -20,21 +17,6 @@ import static org.eclipse.swt.SWT.*;
  * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
  */
 public final class CommentTextWrapper {
-    /**
-     * Regular expressions related to line terminators.
-     */
-    private static final String REGEXP_LINE_TERMINATOR = "((\\n)|(\\r\\n)|(\\r)|(\\u0085)|(\\u2028)|(\\u2029))";
-    private static final String REGEXP_NOT_LINE_TERMINATOR = "[^\\n\\r\\u0085\\u2028\\u2029]";
-
-    /**
-     * Regular expressions whose languages are those of valid nesC comments.
-     */
-    private static final String REGEXP_NESC_MULTILINE_COMMENT = "(/\\*.*\\*/)";
-    private static final String REGEXP_NESC_SINGLELINE_COMMENT = "(//" + REGEXP_NOT_LINE_TERMINATOR + "*"
-            + REGEXP_LINE_TERMINATOR + "?)+";
-    private static final String REGEXP_NESC_COMMENT = "\\A(" + REGEXP_NESC_SINGLELINE_COMMENT + "|"
-            + REGEXP_NESC_MULTILINE_COMMENT + ")?\\z";
-
     /**
      * Name of the font that will be used in the Text control.
      */
@@ -95,12 +77,18 @@ public final class CommentTextWrapper {
     }
 
     /**
+     * Enables the controls in this wrapper if the given argument is true.
+     * Otherwise, disables the controls.
+     */
+    public void setEnabled(boolean enabled) {
+        text.setEnabled(enabled);
+    }
+
+    /**
      * @return True if and only if the comment entered by the user is valid.
      */
     public boolean validate() {
-        final Pattern pattern = Pattern.compile(REGEXP_NESC_COMMENT, Pattern.DOTALL);
-        final Matcher matcher = pattern.matcher(getContents());
-        return matcher.matches();
+        return NescCommentValidator.getInstance().validate(getContents());
     }
 
     /**

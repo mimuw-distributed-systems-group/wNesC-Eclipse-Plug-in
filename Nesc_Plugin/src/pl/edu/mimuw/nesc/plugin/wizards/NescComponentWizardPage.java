@@ -8,8 +8,8 @@ import pl.edu.mimuw.nesc.plugin.wizards.fields.UsesProvidesField.UsesProvides.Pr
 import pl.edu.mimuw.nesc.plugin.wizards.fields.UsesProvidesField.UsesProvides.Uses;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -181,15 +181,12 @@ public final class NescComponentWizardPage extends WizardPage {
      * @return Initial contents of the new component to be created.
      */
     public NewFileContents getNewComponentContents() {
-        final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        final PrintStream out = new PrintStream(byteOut);
+        final StringWriter strWriter = new StringWriter();
+        final PrintWriter out = new PrintWriter(strWriter);
 
-        // Add comments if the user has chosen to
+        // Add comments if the user has chosen to do it
         if (getCommentsFlag()) {
-            out.println(NescWizardSupport.generateHeadComment());
-            out.println();
-            out.println();
-            out.println(NescWizardSupport.generateEntityComment());
+            NescWizardSupport.writeComments(getNewComponentFullPath(), out);
         }
 
         // Write the keyword a name of the component
@@ -211,17 +208,17 @@ public final class NescComponentWizardPage extends WizardPage {
         out.println('}');
 
         // Write the implementation section
-        int cursorOffset = byteOut.size();
+        int cursorOffset = strWriter.getBuffer().length();
         if (componentInfo.containsImplementation) {
             out.println(KEYWORD_IMPLEMENTATION);
             out.println('{');
             out.print(NescWizardSupport.getIndentationStep());
-            cursorOffset = byteOut.size();
+            cursorOffset = strWriter.getBuffer().length();
             out.println();
             out.println('}');
         }
 
-        return new NewFileContents(new ByteArrayInputStream(byteOut.toByteArray()),
+        return new NewFileContents(new ByteArrayInputStream(strWriter.toString().getBytes()),
                 cursorOffset);
     }
 
@@ -230,7 +227,7 @@ public final class NescComponentWizardPage extends WizardPage {
      * chosen by the user to the given stream. Before or after the parentheses
      * there is no whitespace.
      */
-    private void writeGenericParameters(PrintStream out) {
+    private void writeGenericParameters(PrintWriter out) {
         final String indent = NescWizardSupport.getIndentationStep();
         boolean first = true;
 
@@ -279,7 +276,7 @@ public final class NescComponentWizardPage extends WizardPage {
      * user has chosen such option. Starting and ending braces are not written.
      * Each entry is followed by a newline character.
      */
-    private void writeUsesProvides(PrintStream out) {
+    private void writeUsesProvides(PrintWriter out) {
         if (getGroupFlag()) {
             writeUsesProvidesGrouped(out);
         } else {
@@ -291,7 +288,7 @@ public final class NescComponentWizardPage extends WizardPage {
      * Writes uses/provides entries to the given stream. All 'provides' entries
      * and 'uses' entries are grouped and written together.
      */
-    private void writeUsesProvidesGrouped(PrintStream out) {
+    private void writeUsesProvidesGrouped(PrintWriter out) {
         /* Local class that is used to group uses/provides entries. */
         class UsesProvidesResolver implements UsesProvides.Type.Visitor {
             private final List<UsesProvides> uses = new ArrayList<>();
@@ -325,7 +322,7 @@ public final class NescComponentWizardPage extends WizardPage {
      * Writes the given uses/provides group to the given stream. Something is
      * written if and only if the given group is not empty.
      */
-    private void writeUsesProvidesGroup(PrintStream out, String keyword, List<UsesProvides> group) {
+    private void writeUsesProvidesGroup(PrintWriter out, String keyword, List<UsesProvides> group) {
         if (!group.isEmpty()) {
             final String indent = NescWizardSupport.getIndentationStep();
             final String squareIndent = indent + indent;
@@ -346,7 +343,7 @@ public final class NescComponentWizardPage extends WizardPage {
     /**
      * Writes uses/provides entries to the given stream without grouping them.
      */
-    private void writeUsesProvidesSimple(final PrintStream out) {
+    private void writeUsesProvidesSimple(final PrintWriter out) {
         /* Local class that writes the type of the uses/provides entry to
            the stream. */
         class UsesProvidesResolver implements UsesProvides.Type.Visitor {
@@ -375,7 +372,7 @@ public final class NescComponentWizardPage extends WizardPage {
      * Part of the declaration from the 'interface' keyword till the end is
      * written. A new line character is also written.
      */
-    private void finishUsesProvidesLine(PrintStream out, UsesProvides item) {
+    private void finishUsesProvidesLine(PrintWriter out, UsesProvides item) {
         out.print(KEYWORD_INTERFACE);
         out.print(' ');
         out.print(item.getInterfaceName());

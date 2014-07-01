@@ -4,13 +4,22 @@ import pl.edu.mimuw.nesc.plugin.NescPlugin;
 import pl.edu.mimuw.nesc.plugin.editor.NescEditor;
 import pl.edu.mimuw.nesc.plugin.preferences.NescPluginPreferences;
 import pl.edu.mimuw.nesc.plugin.preferences.NescPreferencesInitializer;
+import pl.edu.mimuw.nesc.plugin.projects.util.CommentGroupWrapper;
+import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
 
+import com.google.common.base.Optional;
+
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -218,37 +227,164 @@ class NescWizardSupport {
     }
 
     /**
+     * Tries to find the project that is indicated by the given path.
+     *
+     * @param fullPath A string with an absolute path to an Eclipse resource.
+     * @return IProject object that is indicated by the given path or null if
+     *         such project cannot be found (wrapped by Optional).
+     * @throws NullPointerException Given argument is null.
+     * @throws IllegalArgumentException Given path is empty.
+     */
+    static Optional<IProject> getProjectFromFullPath(String fullPath) {
+        // Check argument
+        if (fullPath == null) {
+            throw new NullPointerException("full path cannot be null");
+        } else if (fullPath.isEmpty()) {
+            throw new IllegalArgumentException("full path cannot be empty");
+        }
+
+        // Extract the project name from the path
+        final String withoutSlash =   fullPath.startsWith("/")
+                                    ? fullPath.substring(1)
+                                    : fullPath;
+        final int slashPosition = withoutSlash.indexOf('/');
+        final String projectName =   slashPosition != -1
+                                   ? withoutSlash.substring(0, slashPosition)
+                                   : withoutSlash;
+
+        // Try to get the project
+        final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        final IResource resource = root.findMember(projectName, false);
+
+        return   resource instanceof IProject
+               ? Optional.of((IProject) resource)
+               : Optional.<IProject>absent();
+    }
+
+    /**
+     * Generates and unconditionally writes the head and entity comments to
+     * given stream. The project settings that affect the comments generation
+     * are taken from the preferences of the project that is on the given path.
+     */
+    static void writeComments(String newFileFullPath, PrintWriter out) {
+        final Optional<IProject> maybeProject = getProjectFromFullPath(newFileFullPath);
+
+        // Head comment
+        final String headComment = generateHeadComment(maybeProject);
+        if (!headComment.isEmpty()) {
+            out.println(headComment);
+            out.println();
+            out.println();
+        }
+
+        // Entity comment
+        final String entityComment = generateEntityComment(maybeProject);
+        if (!entityComment.isEmpty()) {
+            out.println(entityComment);
+        }
+    }
+
+    /**
      * @return String with comment that is to be placed in the top part of
      *         a file that is created by a wizard if the user chooses such
      *         option. It does not contain any newline character after or before
-     *         the comment text.
+     *         the comment text. If the comment should not be placed, the empty
+     *         string is returned.
      */
-    static String generateHeadComment() {
-        return getPreferenceValue(NescPluginPreferences.HEAD_COMMENT,
-                NescPreferencesInitializer.getDefaultHeadComment());
+    static String generateHeadComment(Optional<IProject> maybeProject) {
+        return generateCommentGeneric(maybeProject, NescProjectPreferences.COMMENT_HEAD,
+                    NescPluginPreferences.HEAD_COMMENT,
+                    NescPreferencesInitializer.getDefaultHeadComment());
     }
 
     /**
      * @return String with comment that is to be placed exactly before an
      *         interface or component definition. It does not contain any
-     *         newline character before or after the comment text.
+     *         newline character before or after the comment text. If the
+     *         comment should not be placed, the empty string is returned.
      */
-    static String generateEntityComment() {
-        return getPreferenceValue(NescPluginPreferences.ENTITY_COMMENT,
-                NescPreferencesInitializer.getDefaultEntityComment());
+    static String generateEntityComment(Optional<IProject> maybeProject) {
+        return generateCommentGeneric(maybeProject, NescProjectPreferences.COMMENT_ENTITY,
+                    NescPluginPreferences.ENTITY_COMMENT,
+                    NescPreferencesInitializer.getDefaultEntityComment());
     }
 
     /**
-     * @param preferenceName Name of the preference to retrieve.
-     * @param valueIfEmpty Value that will be returned if the value of the
-     *                     preference with given name is empty.
-     * @return Value of the preference with given name or
-     *         <code>valueIfEmpty</code> if it is empty.
+     * @return The comment that is set in the preferences of the given project.
+     *         The value is absent if and only if the project is absent or the
+     *         comment is to be inherited from global preferences.
      */
-    private static String getPreferenceValue(String preferenceName, String valueIfEmpty) {
+    private static Optional<String> getCommentFromProjectPreferences(Optional<IProject> maybeProject,
+            String projectPreferenceName) {
+        if (maybeProject.isPresent()) {
+            final CommentGroupWrapper.Setting commentSetting =
+                    CommentGroupWrapper.Setting.loadFromProjectPreferences(
+                            maybeProject.get(),
+                            projectPreferenceName
+                    );
+
+            class ReadVisitor implements CommentGroupWrapper.Setting.Visitor {
+                private boolean inherit;
+                private String result;
+
+                @Override
+                public void visit(CommentGroupWrapper.Inherit marker) {
+                    inherit = true;
+                }
+
+                @Override
+                public void visit(CommentGroupWrapper.DontGenerate marker) {
+                    inherit = false;
+                    result = "";
+                }
+
+                @Override
+                public void visit(CommentGroupWrapper.ProjectSpecific marker) {
+                    result = marker.getComment().trim();
+                    inherit = result.isEmpty();
+                }
+            }
+
+            final ReadVisitor visitor = new ReadVisitor();
+            commentSetting.accept(visitor);
+            if (!visitor.inherit) {
+                return Optional.of(visitor.result);
+            }
+        }
+
+        return Optional.absent();
+    }
+
+    /**
+     * Retrieve the comment to use when creating new files.
+     *
+     * @param maybeProject Project whose preferences contain the setting for
+     *                     comment that will be used.
+     * @param projectPreferenceName Name of the preference of the given project
+     *                              to read the comment setting from.
+     * @param preferenceName Name of the global preference to read the comment
+     *                       if the project preferences say to inherit the
+     *                       comment.
+     * @param valueIfEmpty Value that will be returned if the found comment is
+     *                     empty (if it is set not to be generated, the empty
+     *                     string is returned).
+     * @return String with comment to be used. It depends on the project and
+     *         global preferences. If no comment is to be used, the empty string
+     *         is returned. If the determined comment is empty, then
+     *         <code>valueIfEmpty</code> is returned.
+     */
+    private static String generateCommentGeneric(Optional<IProject> maybeProject,
+            String projectPreferenceName, String preferenceName, String valueIfEmpty) {
+        // Try to get the setting from the project preferences
+        final Optional<String> maybeComment = getCommentFromProjectPreferences(maybeProject,
+                projectPreferenceName);
+        if (maybeComment.isPresent()) {
+            return maybeComment.get();
+        }
+
+        // The comment must be inherited from global preferences so do it
         final IPreferenceStore store = NescPlugin.getDefault().getPreferenceStore();
         final String preferredValue = store.getString(preferenceName).trim();
-
         return   !preferredValue.isEmpty()
                ? preferredValue
                : valueIfEmpty.trim();

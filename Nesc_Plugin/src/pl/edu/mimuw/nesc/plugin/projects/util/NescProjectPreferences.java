@@ -28,6 +28,8 @@ public final class NescProjectPreferences {
 	public static final String ADDITIONAL_INCLUDE_PATHS = "pl.edu.mimuw.nesc.plugin.additional_include_paths";
 	public static final String ADDITIONAL_DEFAULT_FILES = "pl.edu.mimuw.nesc.plugin.additional_default_files";
 	public static final String ADDITIONAL_PREDEFINED_MACROS = "pl.edu.mimuw.nesc.plugin.additional_predefined_macros";
+	public static final String COMMENT_HEAD = "pl.edu.mimuw.nesc.plugin.head_comment";
+	public static final String COMMENT_ENTITY = "pl.edu.mimuw.nesc.plugin.entity_comment";
 
 	public static void setProjectPreferenceValue(IProject project, String key, List<String> value)
 			throws BackingStoreException {
