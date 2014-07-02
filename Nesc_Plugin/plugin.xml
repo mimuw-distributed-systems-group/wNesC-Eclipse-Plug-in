@@ -21,6 +21,7 @@
       <wizard
             category="pl.edu.mimuw.nesc.category.wizards.new"
             class="pl.edu.mimuw.nesc.plugin.wizards.NescNewProjectWizard"
+            icon="resources/icons/newProjectWizardIconSmall.png"
             id="pl.edu.mimuw.nesc.wizards.new.NescProjectWizard"
             name="NesC Project"
             project="true">
@@ -28,6 +29,7 @@
       <wizard
          category="pl.edu.mimuw.nesc.category.wizards.new"
          class="pl.edu.mimuw.nesc.plugin.wizards.NescInterfaceWizard"
+         icon="resources/icons/interfaceWizardIconSmall.png"
          id="pl.edu.mimuw.nesc.wizards.new.NescInterfaceWizard"
          name="NesC Interface"
          project="false">
@@ -35,6 +37,7 @@
       <wizard
          category="pl.edu.mimuw.nesc.category.wizards.new"
          class="pl.edu.mimuw.nesc.plugin.wizards.NescHeaderFileWizard"
+         icon="resources/icons/headerFileWizardIconSmall.png"
          id="pl.edu.mimuw.nesc.wizards.new.NescHeaderFileWizard"
          name="Header File"
          project="false">
@@ -42,6 +45,7 @@
       <wizard
          category="pl.edu.mimuw.nesc.category.wizards.new"
          class="pl.edu.mimuw.nesc.plugin.wizards.NescComponentWizard"
+         icon="resources/icons/componentWizardIconSmall.png"
          id="pl.edu.mimuw.nesc.wizards.new.NescComponentWizard"
          name="NesC Component"
          project="false">
