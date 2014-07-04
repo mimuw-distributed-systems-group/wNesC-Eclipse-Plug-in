@@ -1,7 +1,6 @@
 package pl.edu.mimuw.nesc.plugin.wizards;
 
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_DEFAULT_FILES;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_INCLUDE_PATHS;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_PREDEFINED_MACROS;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.MAIN_CONFIGURATION;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PATH;
@@ -47,7 +46,7 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 	private static String WIZARD_NAME = "NesC Project Wizard";
 	private WizardNewProjectCreationPage _pageOne;
 	private NescWizardNewProjectGeneralSettingsPage _pageTwo;
-	private NescWizardNewProjectAdditionalPaths _pageThree;
+	private NescWizardNewProjectAdditionalMacrosPage _pageThree;
 
 	private boolean validProject;
 
@@ -74,7 +73,7 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 		_pageTwo.setDescription("Set the main configuration name and optionally choose the platform.");
 		addPage(_pageTwo);
 
-		_pageThree = new NescWizardNewProjectAdditionalPaths(PAGE_NAME);
+		_pageThree = new NescWizardNewProjectAdditionalMacrosPage(PAGE_NAME);
 		_pageThree.setTitle("Additional settings");
 		_pageThree.setDescription("Set additional source paths, files included by default or predefined macros.");
 		addPage(_pageThree);
@@ -104,7 +103,6 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 			setProjectPreferenceValue(project, TINYOS_PREDEFINED_PLATFORM, _pageTwo.isPlatformPredefined());
 			setProjectPreferenceValue(project, TINYOS_PATH, _pageTwo.getTinyOsPath());
 
-			setProjectPreferenceValue(project, ADDITIONAL_INCLUDE_PATHS, _pageThree.getAdditionalIncludePaths());
 			setProjectPreferenceValue(project, ADDITIONAL_DEFAULT_FILES, _pageThree.getDefaultIncludes());
 			setProjectPreferenceValue(project, ADDITIONAL_PREDEFINED_MACROS, _pageThree.getPredefinedMacros());
 

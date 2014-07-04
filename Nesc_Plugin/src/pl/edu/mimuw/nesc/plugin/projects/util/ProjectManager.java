@@ -296,15 +296,13 @@ public final class ProjectManager {
 			final String tinyOsPath = getProjectPreferenceValue(project, TINYOS_PATH);
 			platform = NescPlatformUtil.loadPlatformProperties(platformName, isPlatformPredefined,
 					tinyOsPath);
-
-			additionalPaths = resolveTosDirVariable(
-					getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS), tinyOsPath);
-			addtionalDefaultFiles = resolveTosDirVariable(getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES), tinyOsPath);
+			addtionalDefaultFiles = resolveTosDirVariable(
+					getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES), tinyOsPath);
+			additionalPaths = PathsUtil.getResolvedNonPlatformPaths(project, Optional.of(tinyOsPath));
 		} else {
-			additionalPaths =
-					getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS);
 			addtionalDefaultFiles = getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES);
 			platform = NescPlatformUtil.getDummyPlatform();
+			additionalPaths = PathsUtil.getResolvedNonPlatformPaths(project, Optional.<String>absent());
 		}
 
 		addOption(args, "-include", platform.getFiles(), addtionalDefaultFiles);

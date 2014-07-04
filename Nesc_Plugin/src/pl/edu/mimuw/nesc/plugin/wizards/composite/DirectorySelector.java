@@ -13,6 +13,8 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
+import com.google.common.base.Optional;
+
 /**
  * A composite which enables user to select any directory path from local file
  * system.
@@ -25,15 +27,28 @@ public class DirectorySelector extends Composite {
 	private static final String BROWSE = "Browse...";//$NON-NLS-1$
 	private static final String SELECT_DIRECTORY = "Select directory";//$NON-NLS-1$
 
+	private final Optional<String> additionalButtonLabel;
+
 	private Text pathText;
 	private Button browseButton;
+	private Button additionalButton;
 
 	private String path;
 
 	public DirectorySelector(Composite parent) {
+		this(parent, Optional.<String>absent());
+	}
+
+	public DirectorySelector(Composite parent, String additionalButtonLabel) {
+		this(parent, Optional.of(additionalButtonLabel));
+	}
+
+	private DirectorySelector(Composite parent, Optional<String> additionalButtonLabel) {
 		super(parent, SWT.NONE);
+		this.additionalButtonLabel = additionalButtonLabel;
+
 		GridData parentData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		GridLayout layout = new GridLayout(2, false);
+		GridLayout layout = new GridLayout(additionalButtonLabel.isPresent() ? 3 : 2, false);
 		layout.horizontalSpacing = 0;
 		this.setLayout(layout);
 		this.setLayoutData(parentData);
@@ -77,6 +92,15 @@ public class DirectorySelector extends Composite {
 				}
 			}
 		});
+
+		if (additionalButtonLabel.isPresent()) {
+			additionalButton = new Button(this, SWT.PUSH);
+			additionalButton.setText(additionalButtonLabel.get());
+		}
+	}
+
+	public Button getAdditionalButton() {
+		return additionalButton;
 	}
 
 	public String getSelectedPath() {

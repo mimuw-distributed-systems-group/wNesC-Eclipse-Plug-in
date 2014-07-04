@@ -11,14 +11,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.osgi.service.prefs.BackingStoreException;
 
-import pl.edu.mimuw.nesc.plugin.wizards.composite.ProjectAdditionalPathSettingsComposite;
+import pl.edu.mimuw.nesc.plugin.wizards.composite.ProjectAdditionalMacrosComposite;
 
 /**
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  */
-public class NescProjectAdditionalPathSettingsPage extends NescPropertyPage {
+public class NescProjectAdditionalMacrosPage extends NescPropertyPage {
 
-	private ProjectAdditionalPathSettingsComposite composite;
+	private ProjectAdditionalMacrosComposite composite;
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -33,7 +33,7 @@ public class NescProjectAdditionalPathSettingsPage extends NescPropertyPage {
 		container.setLayout(layout);
 		container.setLayoutData(parentData);
 
-		composite = new ProjectAdditionalPathSettingsComposite(container, compositeListener);
+		composite = new ProjectAdditionalMacrosComposite(container, compositeListener);
 		initializeValues();
 		return new Composite(parent, SWT.NULL);
 	}
@@ -51,8 +51,7 @@ public class NescProjectAdditionalPathSettingsPage extends NescPropertyPage {
 			System.err.println("No project found!");
 			return;
 		}
-		composite.setData(getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS),
-				getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES),
+		composite.setData(getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES),
 				getProjectPreferenceValueStringList(project, ADDITIONAL_PREDEFINED_MACROS));
 	}
 
@@ -65,7 +64,6 @@ public class NescProjectAdditionalPathSettingsPage extends NescPropertyPage {
 		}
 		try {
 			setProjectPreferenceValue(project, ADDITIONAL_DEFAULT_FILES, composite.getAdditionalDefaultIncludes());
-			setProjectPreferenceValue(project, ADDITIONAL_INCLUDE_PATHS, composite.getAdditionalIncludePaths());
 			setProjectPreferenceValue(project, ADDITIONAL_PREDEFINED_MACROS, composite.getAdditionalPredefinedMacros());
 			this.setErrorMessage(null);
 		} catch (BackingStoreException e) {

@@ -19,23 +19,16 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 /**
- * A composite for selecting additional paths, files or macros. It is a main
+ * A composite for selecting additional files or macros. It is a main
  * part of both a new project wizard page and project property page.
  *
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  *
  */
-public class ProjectAdditionalPathSettingsComposite extends Composite {
+public class ProjectAdditionalMacrosComposite extends Composite {
 
 	private static final int COLUMN_WIDTH = 400;
 	private static final String TOSDIR_VARIABLE = "Use ${TOSDIR} variable to refer to TinyOS directory.";//$NON-NLS-1$
-
-	private static final String INCLUDE_PATHS_FIELD = "Include paths";//$NON-NLS-1$
-	private static final String INCLUDE_PATHS_TIP = "Directory to be searched for source and header files.";//$NON-NLS-1$
-	private static final String ADD_INCLUDE_PATH_TITLE = "New include path";//$NON-NLS-1$
-	private static final String ADD_INCLUDE_PATH_MESSAGE = "Enter a path of directory to be searched for source and header files.";//$NON-NLS-1$
-	private static final String EDIT_INCLUDE_PATH_TITLE = "Edit include path";//$NON-NLS-1$
-	private static final String EDIT_INCLUDE_PATH_MESSAGE = "Edit the path of directory to be searched for source and header files.";//$NON-NLS-1$
 
 	private static final String DEFAULT_INCLUDES_FIELD = "Default includes";//$NON-NLS-1$
 	private static final String DEFAULT_INCLUDES_TIP = "File that should be included to each source and header file.";//$NON-NLS-1$
@@ -54,11 +47,10 @@ public class ProjectAdditionalPathSettingsComposite extends Composite {
 	private final PageCompositeListener pageCompositeListener;
 
 	private Composite container;
-	private SingleStringField includePaths;
 	private SingleStringField defaultIncludes;
 	private SingleStringField predefinedMacros;
 
-	public ProjectAdditionalPathSettingsComposite(Composite parent, PageCompositeListener pageCompositeListener) {
+	public ProjectAdditionalMacrosComposite(Composite parent, PageCompositeListener pageCompositeListener) {
 		super(parent, SWT.NONE);
 		this.pageCompositeListener = pageCompositeListener;
 		createControl(parent);
@@ -75,16 +67,6 @@ public class ProjectAdditionalPathSettingsComposite extends Composite {
 		tosdirInfo.setText(TOSDIR_VARIABLE);
 
 		final GridData centerLayoutData = new GridData(FILL, FILL, true, true);
-
-		includePaths = SingleStringField.builder()
-				.parent(container, centerLayoutData, getShell())
-				.fieldName("")
-				.label(INCLUDE_PATHS_FIELD)
-				.tip(INCLUDE_PATHS_TIP)
-				.width(COLUMN_WIDTH)
-				.addValueStrings(ADD_INCLUDE_PATH_TITLE, ADD_INCLUDE_PATH_MESSAGE)
-				.editValueStrings(EDIT_INCLUDE_PATH_TITLE, EDIT_INCLUDE_PATH_MESSAGE)
-				.build();
 
 		defaultIncludes = SingleStringField.builder()
 				.parent(container, centerLayoutData, getShell())
@@ -106,12 +88,8 @@ public class ProjectAdditionalPathSettingsComposite extends Composite {
 				.editValueStrings(EDIT_PREDEFINED_MACRO_TITLE, EDIT_PREDEFINED_MACRO_MESSAGE)
 				.build();
 
-		includePaths.align(new AbstractField[] { defaultIncludes, predefinedMacros });
+		defaultIncludes.align(new AbstractField[] { predefinedMacros });
 		pageCompositeListener.setPageComplete(validatePage());
-	}
-
-	public List<String> getAdditionalIncludePaths() {
-		return transform(includePaths.getValue());
 	}
 
 	public List<String> getAdditionalDefaultIncludes() {
@@ -125,15 +103,12 @@ public class ProjectAdditionalPathSettingsComposite extends Composite {
 	/**
 	 * Inserts given values into displayed tables.
 	 *
-	 * @param paths
-	 *            additional include paths
 	 * @param files
 	 *            additional default includes
 	 * @param macros
 	 *            additional predefined macros
 	 */
-	public void setData(List<String> paths, List<String> files, List<String> macros) {
-		includePaths.setData(paths);
+	public void setData(List<String> files, List<String> macros) {
 		defaultIncludes.setData(files);
 		predefinedMacros.setData(macros);
 	}

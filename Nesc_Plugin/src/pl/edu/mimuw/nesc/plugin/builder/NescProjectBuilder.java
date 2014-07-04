@@ -103,6 +103,15 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 
 		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
+			final int kind = delta.getKind();
+
+			/*
+			 * Do not rebuild when resource was moved or removed.
+			 */
+			if (kind == IResourceDelta.MOVED_FROM || kind == IResourceDelta.REMOVED) {
+				return true;
+			}
+
 			final IResource resource = delta.getResource();
 			final IPath path = resource.getRawLocation();
 

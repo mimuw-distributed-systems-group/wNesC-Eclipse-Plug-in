@@ -25,9 +25,15 @@ public final class NescProjectPreferences {
 	public static final String TINYOS_PLATFORM = "TinyOS-platform";
 	public static final String TINYOS_PREDEFINED_PLATFORM = "pl.edu.mimuw.nesc.plugin.predefined_platform";
 	public static final String TINYOS_PATH = "pl.edu.mimuw.nesc.plugin.TinyOS-path";
-	public static final String ADDITIONAL_INCLUDE_PATHS = "pl.edu.mimuw.nesc.plugin.additional_include_paths";
 	public static final String ADDITIONAL_DEFAULT_FILES = "pl.edu.mimuw.nesc.plugin.additional_default_files";
 	public static final String ADDITIONAL_PREDEFINED_MACROS = "pl.edu.mimuw.nesc.plugin.additional_predefined_macros";
+	public static final String ADDITIONAL_INCLUDE_PATHS = "pl.edu.mimuw.nesc.plugin.additional_include_paths";
+	/**
+	 * List of include paths which are either project subdirectories or
+	 * user-defined paths.
+	 */
+	public static final String NON_PLATFORM_INCLUDE_PATHS = "pl.edu.mimuw.nesc.plugin.non_platform_include_paths";
+	public static final String ACTIVE_INCLUDE_PATHS = "pl.edu.mimuw.nesc.plugin.active_include_paths";
 	public static final String COMMENT_HEAD = "pl.edu.mimuw.nesc.plugin.head_comment";
 	public static final String COMMENT_ENTITY = "pl.edu.mimuw.nesc.plugin.entity_comment";
 

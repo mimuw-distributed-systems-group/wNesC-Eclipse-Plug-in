@@ -123,9 +123,20 @@
             </enabledWhen>
       </page>
       <page
-            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectAdditionalPathSettingsPage"
+            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectAdditionalMacrosPage"
             id="pl.edu.mimuw.nesc.projects.NescProjectPage.AdditionalPaths"
-            name="Additional paths"
+            name="Additional includes and macros"
+            category="pl.edu.mimuw.nesc.projects.NescProjectPage">
+            <enabledWhen>
+            	<adapt type="org.eclipse.core.resources.IProject">
+                   <test property="org.eclipse.core.resources.projectNature" value="pl.edu.mimuw.nesc.plugin.natures.NescProjectNature"/>
+            	</adapt>
+            </enabledWhen>
+      </page>
+      <page
+            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectSourceFoldersPage"
+            id="pl.edu.mimuw.nesc.projects.NescProjectPage.ProjectSourceFolders"
+            name="Project source paths"
             category="pl.edu.mimuw.nesc.projects.NescProjectPage">
             <enabledWhen>
             	<adapt type="org.eclipse.core.resources.IProject">

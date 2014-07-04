@@ -12,10 +12,10 @@ import java.util.List;
  */
 public final class EnvironmentVariableResolver {
 
-	// FIXME:
-	// http://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2FresAdv_builders.htm
-
-	private static final String TOSDIR = "\\$\\{TOSDIR\\}";//$NON-NLS-1$
+	public static final String TOSDIR = "${TOSDIR}";//$NON-NLS-1$
+	public static final String PROJECT_DIR = "${PROJECT_DIR}";//$NON-NLS-1$
+	public static final String TOSDIR_REGEXP = "\\$\\{TOSDIR\\}";//$NON-NLS-1$
+	public static final String PROJECT_DIR_REGEXP = "\\$\\{PROJECT_DIR\\}";//$NON-NLS-1$
 
 	/**
 	 * Replaces all occurrences of <code>TOSDIR</code> variable in given paths
@@ -31,7 +31,7 @@ public final class EnvironmentVariableResolver {
 	public static String[] resolveTosDirVariable(String[] paths, String tinyOsPath) {
 		final String[] result = new String[paths.length];
 		for (int i = 0; i < paths.length; ++i) {
-			result[i] = paths[i].replaceAll(TOSDIR, tinyOsPath);
+			result[i] = paths[i].replaceAll(TOSDIR_REGEXP, tinyOsPath);
 		}
 		return result;
 	}
@@ -44,12 +44,32 @@ public final class EnvironmentVariableResolver {
 	 *            paths to resolve
 	 * @param tinyOsPath
 	 *            replacement string
-	 * @return list of paths with resolved <code>TOSDIR</code> variable reference
+	 * @return list of paths with resolved <code>TOSDIR</code> variable
+	 *         reference
 	 */
 	public static List<String> resolveTosDirVariable(List<String> paths, String tinyOsPath) {
 		final List<String> result = new ArrayList<>(paths.size());
 		for (String path : paths) {
-			result.add(path.replaceAll(TOSDIR, tinyOsPath));
+			result.add(path.replaceAll(TOSDIR_REGEXP, tinyOsPath));
+		}
+		return result;
+	}
+
+	/**
+	 * Replaces all occurrences of <code>PROJECT_DIR</code> variable in given
+	 * path lists.
+	 *
+	 * @param paths
+	 *            paths to resolve
+	 * @param projectPath
+	 *            replacement string
+	 * @return list of paths with resolved <code>PROJECT_DIR</code> variable
+	 *         reference
+	 */
+	public static List<String> resolveProjectDirVariable(List<String> paths, String projectPath) {
+		final List<String> result = new ArrayList<>(paths.size());
+		for (String path : paths) {
+			result.add(path.replaceAll(PROJECT_DIR_REGEXP, projectPath));
 		}
 		return result;
 	}
