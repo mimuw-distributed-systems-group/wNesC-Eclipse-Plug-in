@@ -35,7 +35,7 @@ public class NescProjectGeneralSettingsPage extends NescPropertyPage {
 
 		composite = new ProjectGeneralSettingsComposite(container, compositeListener);
 		initializeValues();
-		return new Composite(parent, SWT.NULL);
+		return container;
 	}
 
 	@Override

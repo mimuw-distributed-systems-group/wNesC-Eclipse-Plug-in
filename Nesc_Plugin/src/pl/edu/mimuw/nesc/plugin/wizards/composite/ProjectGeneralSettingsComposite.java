@@ -45,7 +45,6 @@ public class ProjectGeneralSettingsComposite extends Composite {
 	private final PageCompositeListener pageCompositeListener;
 	private final List<PlatformItem> platforms;
 
-	private Composite container;
 	private Text mainConfiguration;
 	private Button tinyOsProject;
 	private Combo tinyOsPlatform;
@@ -67,25 +66,24 @@ public class ProjectGeneralSettingsComposite extends Composite {
 
 	private void createControl(Composite parent) {
 		/* Prepare container. */
-		container = new Composite(parent, SWT.NONE);
 		GridData parentData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		GridLayout layout = new GridLayout(2, false);
-		container.setLayout(layout);
-		container.setLayoutData(parentData);
+		setLayout(layout);
+		setLayoutData(parentData);
 
 		/* Main configuration selector. */
-		Label configurationLabel = new Label(container, SWT.NONE);
+		Label configurationLabel = new Label(this, SWT.NONE);
 		configurationLabel.setText(MAIN_CONFIGURATION_LABEL);
-		mainConfiguration = new Text(container, SWT.BORDER | SWT.SINGLE);
+		mainConfiguration = new Text(this, SWT.BORDER | SWT.SINGLE);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		mainConfiguration.setLayoutData(data);
 		mainConfiguration.setText(EMTPY_STRING);
 		mainConfiguration.addListener(SWT.Modify, pageModifyListener);
 
 		/* TinyOS project checkbox. */
-		Label labelTinyOS = new Label(container, SWT.NONE);
+		Label labelTinyOS = new Label(this, SWT.NONE);
 		labelTinyOS.setText(TINYOS_PROJECT_LABEL);
-		tinyOsProject = new Button(container, SWT.CHECK);
+		tinyOsProject = new Button(this, SWT.CHECK);
 		tinyOsProject.setSelection(TINYOS_PROJECT_SELECTION_DEFAULT);
 		tinyOsProject.addSelectionListener(new SelectionListener() {
 			@Override
@@ -109,17 +107,17 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		// tinyOsProject.addListener(SWT.Modify, pageModifyListener);
 
 		/* Platform selector. */
-		Label labelPlatform = new Label(container, SWT.NONE);
+		Label labelPlatform = new Label(this, SWT.NONE);
 		labelPlatform.setText(PLATFORM_LABEL);
-		tinyOsPlatform = new Combo(container, SWT.READ_ONLY);
+		tinyOsPlatform = new Combo(this, SWT.READ_ONLY);
 		tinyOsPlatform.setItems(getPlatformNames(platforms));
 		tinyOsPlatform.setEnabled(TINYOS_PROJECT_SELECTION_DEFAULT);
 		tinyOsPlatform.addListener(SWT.Modify, pageModifyListener);
 
 		/* TinyOS directory selector. */
-		Label tinyOsPath = new Label(container, SWT.NONE);
+		Label tinyOsPath = new Label(this, SWT.NONE);
 		tinyOsPath.setText(TINYOS_PATH_LABEL);
-		tinyOsPathSelector = new DirectorySelector(container);
+		tinyOsPathSelector = new DirectorySelector(this);
 		tinyOsPathSelector.setEnabled(TINYOS_PROJECT_SELECTION_DEFAULT);
 		tinyOsPathSelector.addListener(SWT.Modify, pageModifyListener);
 

@@ -93,7 +93,7 @@ public class NescProjectSourceFoldersPage extends NescPropertyPage {
 		});
 
 		initializeValues();
-		return new Composite(parent, NULL);
+		return baseContainer;
 	}
 
 	private void initializeTables(Composite parent) {

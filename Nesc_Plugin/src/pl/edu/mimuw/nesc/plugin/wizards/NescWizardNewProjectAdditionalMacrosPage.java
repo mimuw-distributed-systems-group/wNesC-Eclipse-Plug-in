@@ -1,9 +1,12 @@
 package pl.edu.mimuw.nesc.plugin.wizards;
 
+import static org.eclipse.swt.SWT.FILL;
+
 import java.util.List;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
@@ -40,7 +43,9 @@ public class NescWizardNewProjectAdditionalMacrosPage extends WizardPage {
 	public void createControl(Composite parent) {
 		final Composite container = new Composite(parent, SWT.NONE);
 		final GridLayout layout = new GridLayout();
+		GridData layoutData = new GridData(FILL, FILL, true, true);
 		container.setLayout(layout);
+		container.setLayoutData(layoutData);
 		additionalPathsComposite = new ProjectAdditionalMacrosComposite(container, listener);
 		setControl(container);
 	}

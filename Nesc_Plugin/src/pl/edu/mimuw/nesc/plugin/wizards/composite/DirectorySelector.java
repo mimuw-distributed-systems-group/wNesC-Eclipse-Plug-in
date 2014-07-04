@@ -49,7 +49,7 @@ public class DirectorySelector extends Composite {
 
 		GridData parentData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		GridLayout layout = new GridLayout(additionalButtonLabel.isPresent() ? 3 : 2, false);
-		layout.horizontalSpacing = 0;
+		layout.marginHeight = layout.marginWidth = 0;
 		this.setLayout(layout);
 		this.setLayoutData(parentData);
 		createContent();

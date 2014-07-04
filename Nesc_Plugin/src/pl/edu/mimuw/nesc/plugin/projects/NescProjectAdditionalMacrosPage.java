@@ -29,13 +29,13 @@ public class NescProjectAdditionalMacrosPage extends NescPropertyPage {
 
 		final Composite container = new Composite(parent, SWT.NONE);
 		final GridLayout layout = new GridLayout();
-		GridData parentData = new GridData(FILL, FILL, true, true);
+		GridData layoutData = new GridData(FILL, FILL, true, true);
 		container.setLayout(layout);
-		container.setLayoutData(parentData);
+		container.setLayoutData(layoutData);
 
 		composite = new ProjectAdditionalMacrosComposite(container, compositeListener);
 		initializeValues();
-		return new Composite(parent, SWT.NULL);
+		return container;
 	}
 
 	@Override

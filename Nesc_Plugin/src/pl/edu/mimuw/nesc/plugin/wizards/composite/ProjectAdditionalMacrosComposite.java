@@ -46,7 +46,6 @@ public class ProjectAdditionalMacrosComposite extends Composite {
 
 	private final PageCompositeListener pageCompositeListener;
 
-	private Composite container;
 	private SingleStringField defaultIncludes;
 	private SingleStringField predefinedMacros;
 
@@ -57,19 +56,18 @@ public class ProjectAdditionalMacrosComposite extends Composite {
 	}
 
 	private void createControl(Composite parent) {
-		container = new Composite(parent, NONE);
-		GridData parentData = new GridData(FILL, FILL, true, true);
 		GridLayout layout = new GridLayout();
-		container.setLayout(layout);
-		container.setLayoutData(parentData);
+		GridData layoutData = new GridData(FILL, FILL, true, true);
+		setLayout(layout);
+		setLayoutData(layoutData);
 
-		final Label tosdirInfo = new Label(container, NONE);
+		final Label tosdirInfo = new Label(this, NONE);
 		tosdirInfo.setText(TOSDIR_VARIABLE);
 
 		final GridData centerLayoutData = new GridData(FILL, FILL, true, true);
 
 		defaultIncludes = SingleStringField.builder()
-				.parent(container, centerLayoutData, getShell())
+				.parent(this, centerLayoutData, getShell())
 				.fieldName("")
 				.label(DEFAULT_INCLUDES_FIELD)
 				.tip(DEFAULT_INCLUDES_TIP)
@@ -79,7 +77,7 @@ public class ProjectAdditionalMacrosComposite extends Composite {
 				.build();
 
 		predefinedMacros = SingleStringField.builder()
-				.parent(container, centerLayoutData, getShell())
+				.parent(this, centerLayoutData, getShell())
 				.fieldName("")
 				.label(PREDEFINED_MACROS_FIELD)
 				.tip(PREDEFINED_MACROS_TIP)
