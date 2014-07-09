@@ -27,14 +27,11 @@ public class NescPerspective implements IPerspectiveFactory {
         layout.addNewWizardShortcut(NescInterfaceWizard.WIZARD_ID);
         layout.addNewWizardShortcut(NescComponentWizard.WIZARD_ID);
 
-        /* FIXME
-         * Change the navigator to the package explorer and make the nesC
-         * wizards available from the context menu in it.
-         */
         // Add the views
-        layout.addView(IPageLayout.ID_RES_NAV, IPageLayout.LEFT, 0.2f, layout.getEditorArea());
+        layout.addView(IPageLayout.ID_PROJECT_EXPLORER, IPageLayout.LEFT, 0.2f, layout.getEditorArea());
         final IFolderLayout bottomFolder = layout.createFolder(FOLDER_ID_BOTTOM, IPageLayout.BOTTOM,
                 0.75f, layout.getEditorArea());
         bottomFolder.addView(IPageLayout.ID_PROBLEM_VIEW);
+        bottomFolder.addView(IPageLayout.ID_TASK_LIST);
     }
 }
