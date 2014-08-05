@@ -1,25 +1,43 @@
 package pl.edu.mimuw.nesc.plugin.editor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import pl.edu.mimuw.nesc.FileData;
+import pl.edu.mimuw.nesc.plugin.marker.MarkerHelper;
+import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
+
 /**
- * Adapted from CDT.
+ *
+ * @author Michał Szczepaniak <ms292534@students.mimuw.edu.pl>
+ * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
+ *
  */
 public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
-	private ITextEditor fEditor;
-	private IProgressMonitor fProgressMonitor;
-	// used by tests
-	protected boolean fInitialProcessDone;
+
+	private final ITextEditor editor;
+	private final MarkerHelper markerHelper;
+	private IProgressMonitor progressMonitor;
 
 	public NescReconcilingStrategy(ITextEditor editor) {
-		fEditor = editor;
-		fInitialProcessDone = false;
+		this.editor = editor;
+		this.markerHelper = new MarkerHelper();
+	}
+
+	@Override
+	public void setProgressMonitor(IProgressMonitor monitor) {
+		progressMonitor = monitor;
 	}
 
 	@Override
@@ -29,89 +47,53 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		// only called for incremental reconciler
-	}
-
-	@Override
-	public void setProgressMonitor(IProgressMonitor monitor) {
-		fProgressMonitor= monitor;
+		reconcile();
 	}
 
 	@Override
 	public void reconcile(IRegion region) {
-		reconcile(false);
+		reconcile();
 	}
-
-	private void reconcile(final boolean initialReconcile) {
-		/**
-		 * This code represents the way CDT handles reconciling.
-		 * It is left here as a reference for designing the Nesc way
-		 * of handling reconciling
-		 */
-		/*
-		boolean computeAST= fEditor instanceof ICReconcilingListener;
-		IASTTranslationUnit ast= null;
-		IWorkingCopy workingCopy= fManager.getWorkingCopy(fEditor.getEditorInput());
-		if (workingCopy == null) {
-			return;
-		}
-		boolean forced= false;
-		try {
-			// reconcile
-			synchronized (workingCopy) {
-				forced= workingCopy.isConsistent();
-				ast= workingCopy.reconcile(computeAST, true, fProgressMonitor);
-			}
-		} catch (OperationCanceledException e) {
-			// document was modified while parsing
-		} catch (CModelException e) {
-			IStatus status= new Status(IStatus.ERROR, CUIPlugin.PLUGIN_ID, IStatus.OK,
-					"Error in CDT UI during reconcile", e);  //$NON-NLS-1$
-			CUIPlugin.log(status);
-		} finally {
-			if (computeAST) {
-				IIndex index= null;
-				if (ast != null) {
-					index= ast.getIndex();
-				}
-				try {
-					final boolean canceled = fProgressMonitor.isCanceled();
-					if (ast == null || canceled) {
-						((ICReconcilingListener)fEditor).reconciled(null, forced, fProgressMonitor);
-					} else {
-						((ASTTranslationUnit) ast).beginExclusiveAccess();
-						try {
-							((ICReconcilingListener)fEditor).reconciled(ast, forced, fProgressMonitor);
-						} finally {
-							((ASTTranslationUnit) ast).endExclusiveAccess();
-						}
-					}
-					if (canceled) {
-						aboutToBeReconciled();
-					}
-				} catch (Exception e) {
-					IStatus status= new Status(IStatus.ERROR, CUIPlugin.PLUGIN_ID, IStatus.OK,
-							"Error in CDT UI during reconcile", e);  //$NON-NLS-1$
-					CUIPlugin.log(status);
-				} finally {
-					if (index != null) {
-						index.releaseReadLock();
-					}
-				}
-			}
-		}
-		*/
-		System.err.println("preReconcile");
-		if (!fInitialProcessDone) {
-			// A good place to make sure that all the neccessary structures are in place
-		}
-		if (fEditor instanceof NescEditor) {
-		}
-		System.err.println("postReconcile");
- 	}
 
 	@Override
 	public void initialReconcile() {
-		reconcile(true);
-		fInitialProcessDone= true;
+		reconcile();
+	}
+
+	private void reconcile() {
+		System.out.println("Start reconciling preparation...");
+		if (!(editor instanceof NescEditor)) {
+			return;
+		}
+		final NescEditor nescEditor = (NescEditor) editor;
+		final IProject project = nescEditor.getOpenFileProject();
+		if (project == null) {
+			return;
+		}
+		final IEditorInput input = nescEditor.getEditorInput();
+		if (input == null || !(input instanceof FileEditorInput)) {
+			return;
+		}
+		final IFile file = ((FileEditorInput) input).getFile();
+		final IPath path = file.getRawLocation();
+
+		/* All necessary data is obtained. */
+
+		progressMonitor.beginTask("Reconciling " + path.toOSString(), IProgressMonitor.UNKNOWN);
+
+		try {
+			reconcile(project, file, path);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Reconciling done.");
+		if (progressMonitor != null) {
+			progressMonitor.done();
+		}
+	}
+
+	private void reconcile(IProject project, IFile file, IPath path) throws CoreException {
+		final FileData data = ProjectManager.updateFile(project, path.toOSString());
+		markerHelper.updateMarkers(project, file, data);
 	}
 }

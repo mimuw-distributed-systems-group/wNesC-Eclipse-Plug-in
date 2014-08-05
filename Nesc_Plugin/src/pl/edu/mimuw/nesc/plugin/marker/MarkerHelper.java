@@ -42,7 +42,7 @@ public final class MarkerHelper {
 		project.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 		project.accept(new ProjectResourceVisitor(project));
 
-		/* Set project scope errors. */
+		/* Set errors for the project scope. */
 		final ProjectData data = ProjectManager.getProjectData(project);
 		if (data == null) {
 			return;
@@ -55,22 +55,22 @@ public final class MarkerHelper {
 	}
 
 	/**
-	 * Updates markers for given file in specified project's context.
+	 * Updates markers for a given file in a specified project's context.
 	 *
 	 * @param project
-	 *            current project
+	 *            a current project
 	 * @param file
-	 *            current file
+	 *            a current file
 	 * @param data
-	 *            file's data
+	 *            a file's data
 	 * @throws CoreException
 	 */
 	public void updateMarkers(IProject project, IFile file, FileData data) throws CoreException {
-		/* Delete existing markers in current file. */
+		/* Delete existing markers in the current file. */
 		file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 
 		/*
-		 * Get document associated with given file to be able to count offsets
+		 * Get the document associated with a given file to be able to count offsets
 		 * of marker's start and end locations.
 		 */
 		final IDocumentProvider provider = new TextFileDocumentProvider();
@@ -81,7 +81,7 @@ public final class MarkerHelper {
 			return;
 		}
 
-		/* Create marker for each issue. */
+		/* Create a new marker for each issue. */
 		for (NescIssue issue : data.getIssues().values()) {
 			IMarker marker = file.createMarker(ERROR_MARKER);
 			marker.setAttribute(IMarker.MESSAGE, issue.getMessage());
@@ -107,7 +107,7 @@ public final class MarkerHelper {
 		final Location startLocation = startLocationOptional.get();
 
 		/*
-		 * Some errors should point to the end of file (e.g.
+		 * Some errors should point to the end of the file (e.g.
 		 * "unexpected end of file") but line is set to -1 in such cases.
 		 */
 		if (startLocation.getLine() < 0) {
@@ -129,8 +129,8 @@ public final class MarkerHelper {
 				endOffset = startOffset + 1;
 			}
 			/*
-			 * Set exact position when it is sure that no location causes
-			 * exception.
+			 * Set the exact position when it is sure that no location causes
+			 * an exception.
 			 */
 			marker.setAttribute(IMarker.CHAR_START, startOffset);
 			marker.setAttribute(IMarker.CHAR_END, endOffset);
@@ -145,7 +145,7 @@ public final class MarkerHelper {
 	}
 
 	/**
-	 * Sets marker priority and severity according to given problem class.
+	 * Sets marker priority and severity according to the given problem class.
 	 *
 	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
 	 *

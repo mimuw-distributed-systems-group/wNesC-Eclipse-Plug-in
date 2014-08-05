@@ -40,45 +40,13 @@ public final class ProjectManager {
 	private static final ConcurrentMap<String, ProjectCache> PROJECT_DATA_MAP = new ConcurrentHashMap<String, ProjectCache>();
 
 	/**
-	 * Gets project cache (containing all data associated with project).
-	 *
-	 * @param project
-	 *            project
-	 * @return project data
-	 */
-	public static ProjectCache getProjectCache(IProject project) {
-		if (project == null) {
-			return null;
-		}
-		return PROJECT_DATA_MAP.get(project.getName());
-	}
-
-	/**
-	 * Gets project's NesC frontend context
-	 *
-	 * @param project
-	 *            project
-	 * @return NesC frontendContext
-	 */
-	public static ContextRef getProjectContext(IProject project) {
-		if (project == null) {
-			return null;
-		}
-		final ProjectCache cache = PROJECT_DATA_MAP.get(project.getName());
-		if (cache == null) {
-			return null;
-		}
-		return cache.getContextRef();
-	}
-
-	/**
 	 * Gets project's data returned by NesC frontend.
 	 *
 	 * @param project
 	 *            project
 	 * @return data returned by NesC frontend
 	 */
-	public static ProjectData getProjectData(IProject project) {
+	public static synchronized ProjectData getProjectData(IProject project) {
 		if (project == null) {
 			return null;
 		}
@@ -91,7 +59,7 @@ public final class ProjectManager {
 
 	/**
 	 * <p>
-	 * Ensures that a NesC frontend context exists. If not the context will be
+	 * Ensures that a NesC frontend context exists. If not, the context will be
 	 * created and the entire project will be build.
 	 * </p>
 	 *
@@ -109,11 +77,11 @@ public final class ProjectManager {
 	}
 
 	/**
-	 * Tries to create project context without building project.
+	 * Tries to create a project context without building the project.
 	 *
 	 * @param project
 	 *            project
-	 * @return <code>Optional.absent()</code> if project context was created
+	 * @return <code>Optional.absent()</code> if the project context was created
 	 *         successfully, otherwise an error message will be returned
 	 */
 	public static Optional<String> ensureContext(IProject project) {
@@ -121,34 +89,34 @@ public final class ProjectManager {
 	}
 
 	/**
-	 * Recreates project context with (possibly) updated settings loaded from
-	 * store.
+	 * Recreates the project context with (possibly) updated settings loaded from
+	 * the store.
 	 *
 	 * @param project
 	 *            project
-	 * @return project data (from NesC frontend)
+	 * @param rebuild
+	 *            indicates whether the context should be rebuild
+	 * @return project data (from the NesC frontend)
 	 */
-	public static ProjectData recreateProjectContext(IProject project) {
+	public static ProjectData recreateProjectContext(IProject project, boolean rebuild) {
 		deleteProject(project.getName());
-		ensureContext(project, true);
+		ensureContext(project, rebuild);
 		return PROJECT_DATA_MAP.get(project.getName()).getProjectData();
 	}
 
 	/**
-	 * Rebuild given project.
+	 * Rebuild the given project.
 	 *
 	 * @param project
 	 *            project
-	 * @return project data (from NesC frontend)
+	 * @return project data (from the NesC frontend)
 	 */
 	public static ProjectData rebuildProjectContext(IProject project) {
 		final ContextRef projectContext = getProjectContext(project);
 		if (projectContext == null) {
 			return null;
 		}
-		final ProjectData data = NescPlugin.getDefault()
-				.getNescFrontend()
-				.rebuild(projectContext);
+		final ProjectData data = NescPlugin.getDefault().getNescFrontend().rebuild(projectContext);
 		setProjectData(project, data);
 		return data;
 	}
@@ -164,13 +132,10 @@ public final class ProjectManager {
 	 */
 	public static FileData updateFile(IProject project, String filePath) {
 		ensureContextWithRebuild(project);
-		final List<FileData> datas = NescPlugin.getDefault()
-				.getNescFrontend()
+		final List<FileData> datas = NescPlugin.getDefault().getNescFrontend()
 				.update(getProjectContext(project), filePath);
 		for (FileData data : datas) {
-			PROJECT_DATA_MAP.get(project.getName())
-					.getFilesMap()
-					.put(data.getFilePath(), data);
+			PROJECT_DATA_MAP.get(project.getName()).getFilesMap().put(data.getFilePath(), data);
 		}
 		return datas.get(0);
 	}
@@ -184,7 +149,7 @@ public final class ProjectManager {
 	 *            file path
 	 * @return file's data
 	 */
-	public static FileData getFileData(IProject project, String filePath) {
+	public static synchronized FileData getFileData(IProject project, String filePath) {
 		final ProjectCache cache = getProjectCache(project);
 		if (cache == null) {
 			return null;
@@ -198,23 +163,53 @@ public final class ProjectManager {
 	 * @param name
 	 *            project's name
 	 */
-	public static void deleteProject(String name) {
+	public static synchronized void deleteProject(String name) {
 		final ProjectCache projectCache = PROJECT_DATA_MAP.remove(name);
 		if (projectCache == null) {
 			System.err.println("Project '" + name + "' does not exist.");
 			return;
 		}
-		NescPlugin.getDefault()
-				.getNescFrontend()
-				.deleteContext(projectCache.getContextRef());
+		NescPlugin.getDefault().getNescFrontend().deleteContext(projectCache.getContextRef());
 	}
 
-	private static void createProjectCache(IProject project, ContextRef contextRef) {
+	/**
+	 * Gets project cache (containing all data associated with project).
+	 *
+	 * @param project
+	 *            project
+	 * @return project data
+	 */
+	private static synchronized ProjectCache getProjectCache(IProject project) {
+		if (project == null) {
+			return null;
+		}
+		return PROJECT_DATA_MAP.get(project.getName());
+	}
+
+	/**
+	 * Gets project's NesC frontend context
+	 *
+	 * @param project
+	 *            project
+	 * @return NesC frontendContext
+	 */
+	private static synchronized ContextRef getProjectContext(IProject project) {
+		if (project == null) {
+			return null;
+		}
+		final ProjectCache cache = PROJECT_DATA_MAP.get(project.getName());
+		if (cache == null) {
+			return null;
+		}
+		return cache.getContextRef();
+	}
+
+	private static synchronized void createProjectCache(IProject project, ContextRef contextRef) {
 		final ProjectCache cache = new ProjectCache(contextRef);
 		PROJECT_DATA_MAP.put(project.getName(), cache);
 	}
 
-	private static void setProjectData(IProject project, ProjectData projectData) {
+	private static synchronized void setProjectData(IProject project, ProjectData projectData) {
 		final ProjectCache cache = PROJECT_DATA_MAP.get(project.getName());
 		if (cache == null) {
 			// TODO
@@ -222,21 +217,19 @@ public final class ProjectManager {
 		}
 		cache.setProjectData(projectData);
 		for (Map.Entry<String, FileData> entry : projectData.getFileDatas().entrySet()) {
-			PROJECT_DATA_MAP.get(project.getName())
-					.getFilesMap()
-					.put(entry.getKey(), entry.getValue());
+			PROJECT_DATA_MAP.get(project.getName()).getFilesMap().put(entry.getKey(), entry.getValue());
 		}
 	}
 
 	/**
-	 * Tries to create project context.
+	 * Tries to create a new project context.
 	 *
 	 * @param project
 	 *            project
 	 * @param doRebuild
-	 *            indicates if project should be rebuild after creating context
+	 *            indicates if the project should be rebuild after creating a context
 	 *            (if it had not existed before)
-	 * @return <code>Optional.absent()</code> if project context was created
+	 * @return <code>Optional.absent()</code> if the project context was created
 	 *         successfully, otherwise an error message will be returned.
 	 */
 	private static Optional<String> ensureContext(IProject project, boolean doRebuild) {
@@ -244,12 +237,11 @@ public final class ProjectManager {
 			return Optional.<String> absent();
 		}
 
+		/* Create new context only if it does not exist. */
 		if (getProjectCache(project) == null) {
 			try {
 				final String options[] = getProjectArgs(project);
-				final ContextRef context = NescPlugin.getDefault()
-						.getNescFrontend()
-						.createContext(options);
+				final ContextRef context = NescPlugin.getDefault().getNescFrontend().createContext(options);
 				createProjectCache(project, context);
 				if (doRebuild) {
 					rebuildProjectContext(project);
@@ -294,15 +286,14 @@ public final class ProjectManager {
 			final String platformName = getProjectPreferenceValue(project, TINYOS_PLATFORM);
 			final boolean isPlatformPredefined = getProjectPreferenceValueB(project, TINYOS_PREDEFINED_PLATFORM);
 			final String tinyOsPath = getProjectPreferenceValue(project, TINYOS_PATH);
-			platform = NescPlatformUtil.loadPlatformProperties(platformName, isPlatformPredefined,
-					tinyOsPath);
+			platform = NescPlatformUtil.loadPlatformProperties(platformName, isPlatformPredefined, tinyOsPath);
 			addtionalDefaultFiles = resolveTosDirVariable(
 					getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES), tinyOsPath);
 			additionalPaths = PathsUtil.getResolvedNonPlatformPaths(project, Optional.of(tinyOsPath));
 		} else {
 			addtionalDefaultFiles = getProjectPreferenceValueStringList(project, ADDITIONAL_DEFAULT_FILES);
 			platform = NescPlatformUtil.getDummyPlatform();
-			additionalPaths = PathsUtil.getResolvedNonPlatformPaths(project, Optional.<String>absent());
+			additionalPaths = PathsUtil.getResolvedNonPlatformPaths(project, Optional.<String> absent());
 		}
 
 		addOption(args, "-include", platform.getFiles(), addtionalDefaultFiles);

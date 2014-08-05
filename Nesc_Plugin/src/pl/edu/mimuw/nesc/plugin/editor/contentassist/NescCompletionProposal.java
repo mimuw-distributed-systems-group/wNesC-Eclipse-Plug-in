@@ -5,8 +5,8 @@ import org.eclipse.swt.graphics.Image;
 
 /**
  * <p>
- * Simple completion proposal. Object of this class contains only data to be
- * used to build final proposal, but it is not a proposal itself.
+ * A simple completion proposal. An object of this class contains only data to
+ * be used to build a final proposal, but it is not a proposal itself.
  * </p>
  * <p>
  * Note that this class does not implements {@link ICompletionProposal}.

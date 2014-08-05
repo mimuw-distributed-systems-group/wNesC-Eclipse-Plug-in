@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.osgi.service.prefs.BackingStoreException;
 
+import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
 import pl.edu.mimuw.nesc.plugin.wizards.composite.ProjectGeneralSettingsComposite;
 
 /**
@@ -66,11 +67,13 @@ public class NescProjectGeneralSettingsPage extends NescPropertyPage {
 			return;
 		}
 		try {
-			setProjectPreferenceValue(project, MAIN_CONFIGURATION, composite.getMainConfiguration());
-			setProjectPreferenceValue(project, TINYOS_PROJECT, composite.isTinyOsProject());
-			setProjectPreferenceValue(project, TINYOS_PLATFORM, composite.getTinyOsPlatform());
-			setProjectPreferenceValue(project, TINYOS_PREDEFINED_PLATFORM, composite.isPlatformPredefined());
-			setProjectPreferenceValue(project, TINYOS_PATH, composite.getTinyOsPath());
+			NescProjectPreferences.transaction(project)
+					.set(MAIN_CONFIGURATION, composite.getMainConfiguration())
+					.set(TINYOS_PROJECT, composite.isTinyOsProject())
+					.set(TINYOS_PLATFORM, composite.getTinyOsPlatform())
+					.set(TINYOS_PREDEFINED_PLATFORM, composite.isPlatformPredefined())
+					.set(TINYOS_PATH, composite.getTinyOsPath())
+					.commit();
 			this.setErrorMessage(null);
 		} catch (BackingStoreException e) {
 			this.setErrorMessage("Failed to save changes to project properties");

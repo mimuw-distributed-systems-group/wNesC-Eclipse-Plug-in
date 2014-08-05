@@ -7,7 +7,6 @@ import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINY
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PLATFORM;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PREDEFINED_PLATFORM;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PROJECT;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.setProjectPreferenceValue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -24,6 +23,7 @@ import org.eclipse.ui.IWorkbench;
 import org.osgi.service.prefs.BackingStoreException;
 
 import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
+import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
 import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
 
 import com.google.common.base.Optional;
@@ -86,14 +86,15 @@ public class NescImportProjectWizard extends Wizard implements IImportWizard {
 		final IProject project = NescProjectSupport.createProject(name, location);
 
 		try {
-			setProjectPreferenceValue(project, MAIN_CONFIGURATION, _pageTwo.getMainConfiguration());
-			setProjectPreferenceValue(project, TINYOS_PROJECT, _pageTwo.getTinyOsProject());
-			setProjectPreferenceValue(project, TINYOS_PLATFORM, _pageTwo.getTinyOsPlatform());
-			setProjectPreferenceValue(project, TINYOS_PREDEFINED_PLATFORM, _pageTwo.isPlatformPredefined());
-			setProjectPreferenceValue(project, TINYOS_PATH, _pageTwo.getTinyOsPath());
-
-			setProjectPreferenceValue(project, ADDITIONAL_DEFAULT_FILES, _pageThree.getDefaultIncludes());
-			setProjectPreferenceValue(project, ADDITIONAL_PREDEFINED_MACROS, _pageThree.getPredefinedMacros());
+			NescProjectPreferences.transaction(project)
+					.set(MAIN_CONFIGURATION, _pageTwo.getMainConfiguration())
+					.set(TINYOS_PROJECT, _pageTwo.getTinyOsProject())
+					.set(TINYOS_PLATFORM, _pageTwo.getTinyOsPlatform())
+					.set(TINYOS_PREDEFINED_PLATFORM, _pageTwo.isPlatformPredefined())
+					.set(TINYOS_PATH, _pageTwo.getTinyOsPath())
+					.set(ADDITIONAL_DEFAULT_FILES, _pageThree.getDefaultIncludes())
+					.set(ADDITIONAL_PREDEFINED_MACROS, _pageThree.getPredefinedMacros())
+					.commit();
 
 			setErrorMessage(null);
 		} catch (BackingStoreException e) {

@@ -54,7 +54,7 @@ public final class EnvironmentUtils {
 	}
 
 	/**
-	 * Returns the most nested environment in given location.
+	 * Returns the most nested environment in the given location.
 	 *
 	 * @param environment
 	 *            current environment
@@ -82,17 +82,18 @@ public final class EnvironmentUtils {
 				continue;
 			}
 			/*
-			 * Due to syntax error end location may not be set, so the "closest"
-			 * environment to the given location should be selected. We can
-			 * assume that the syntax error caused that current environment was
-			 * not properly "closed", so that we can deduce that given location
-			 * is in currently investigated scope or in some further environment
-			 * on the same level. Example:
+			 * Due to a syntax error end location may not be set, so the
+			 * "closest" environment to the given location should be selected.
+			 * We can assume that the syntax error has caused that the current
+			 * environment was not properly "closed", so that we can deduce that
+			 * given location is in a currently investigated scope or in some
+			 * further environment on the same level. Example:
 			 *
 			 * int foo() { int bar; someerroneousstring }
 			 *
-			 * The "someerroneousstring" causes syntax error, so that the
-			 * following '}' is eaten hence the function is not properly closed.
+			 * The "someerroneousstring" causes a syntax error, so that the
+			 * following '}' is eaten, hence the function is not properly
+			 * closed.
 			 */
 			else if (!nested.getEndLocation().isPresent()) {
 				closestEnv = nested;
@@ -114,7 +115,8 @@ public final class EnvironmentUtils {
 	}
 
 	/**
-	 * Checks if given line and column fit between given start and end location.
+	 * Checks if given the line and column fit between the given start and end
+	 * location.
 	 *
 	 * @param currentLocation
 	 *            current location
@@ -122,8 +124,8 @@ public final class EnvironmentUtils {
 	 *            start location
 	 * @param endLocation
 	 *            end location
-	 * @return <code>true</code> if given line and column fit between given
-	 *         start and end location
+	 * @return <code>true</code> if the given line and column fit between the
+	 *         given start and end location
 	 */
 	public static boolean isInRange(Location currentLocation, Location startLocation, Location endLocation) {
 		final int line = currentLocation.getLine();

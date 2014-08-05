@@ -365,7 +365,10 @@ public final class CommentGroupWrapper {
             // Perform the operation
             final SaveVisitor visitor = new SaveVisitor();
             toSave.accept(visitor);
-            setProjectPreferenceValue(project, key, visitor.prefix + toSave.text);
+
+            NescProjectPreferences.transaction(project)
+            		.set(key, visitor.prefix + toSave.text)
+            		.commit();
         }
 
         /**

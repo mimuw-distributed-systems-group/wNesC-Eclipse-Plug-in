@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.osgi.service.prefs.BackingStoreException;
 
+import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
 import pl.edu.mimuw.nesc.plugin.wizards.composite.ProjectAdditionalMacrosComposite;
 
 /**
@@ -63,8 +64,10 @@ public class NescProjectAdditionalMacrosPage extends NescPropertyPage {
 			return;
 		}
 		try {
-			setProjectPreferenceValue(project, ADDITIONAL_DEFAULT_FILES, composite.getAdditionalDefaultIncludes());
-			setProjectPreferenceValue(project, ADDITIONAL_PREDEFINED_MACROS, composite.getAdditionalPredefinedMacros());
+			NescProjectPreferences.transaction(project)
+					.set(ADDITIONAL_DEFAULT_FILES, composite.getAdditionalDefaultIncludes())
+					.set(ADDITIONAL_PREDEFINED_MACROS, composite.getAdditionalPredefinedMacros())
+					.commit();
 			this.setErrorMessage(null);
 		} catch (BackingStoreException e) {
 			this.setErrorMessage("Failed to save changes to project properties");

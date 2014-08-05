@@ -37,33 +37,49 @@ public final class NescProjectPreferences {
 	public static final String COMMENT_HEAD = "pl.edu.mimuw.nesc.plugin.head_comment";
 	public static final String COMMENT_ENTITY = "pl.edu.mimuw.nesc.plugin.entity_comment";
 
-	public static void setProjectPreferenceValue(IProject project, String key, List<String> value)
-			throws BackingStoreException {
-		final IEclipsePreferences preferences = getProjectPreferences(project);
-		final String commaSeparatedListString = listToString(value);
-		preferences.put(key, commaSeparatedListString);
-		preferences.flush();
+	public static TransactionBuilder transaction(IProject project) {
+		return new TransactionBuilder(project);
 	}
 
-	public static void setProjectPreferenceValue(IProject project, String key, String value)
-			throws BackingStoreException {
-		IEclipsePreferences preferences = getProjectPreferences(project);
-		preferences.put(key, value);
-		preferences.flush();
-	}
+	/**
+	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
+	 */
+	public static class TransactionBuilder {
 
-	public static void setProjectPreferenceValue(IProject project, String key, Integer value)
-			throws BackingStoreException {
-		IEclipsePreferences preferences = getProjectPreferences(project);
-		preferences.putInt(key, value);
-		preferences.flush();
-	}
+		private final IEclipsePreferences preferences;
 
-	public static void setProjectPreferenceValue(IProject project, String key, Boolean value)
-			throws BackingStoreException {
-		IEclipsePreferences preferences = getProjectPreferences(project);
-		preferences.putBoolean(key, value);
-		preferences.flush();
+		public TransactionBuilder(IProject project) {
+			this.preferences = getProjectPreferences(project);
+		}
+
+		public TransactionBuilder set(String key, List<String> value) throws BackingStoreException {
+			final String commaSeparatedListString = listToString(value);
+			preferences.put(key, commaSeparatedListString);
+			return this;
+		}
+
+		public TransactionBuilder set(String key, String value) throws BackingStoreException {
+			preferences.put(key, value);
+			return this;
+		}
+
+		public TransactionBuilder set(String key, Integer value) throws BackingStoreException {
+			preferences.putInt(key, value);
+			return this;
+		}
+
+		public TransactionBuilder set(String key, Boolean value) throws BackingStoreException {
+			preferences.putBoolean(key, value);
+			return this;
+		}
+
+		public void commit() throws BackingStoreException {
+			preferences.flush();
+		}
+
+		public void cancel() {
+			// nothing to do
+		}
 	}
 
 	public static List<String> getProjectPreferenceValueStringList(IProject project, String key) {

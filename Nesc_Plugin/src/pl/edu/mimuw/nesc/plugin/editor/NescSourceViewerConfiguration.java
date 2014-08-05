@@ -113,11 +113,9 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (textEditor != null) {
-			//Delay changed and non-incremental reconciler used due to
-			//PR 130089
 			CompositeReconcilingStrategy strategy= new CompositeReconcilingStrategy();
 			// A spelling reconcile strategy can be inserted here for spelling reconciling
-			// Should we copy it fromn CDT?
+			// Should we copy it from CDT?
 			strategy.setReconcilingStrategies(new IReconcilingStrategy[] {new NescReconcilingStrategy(textEditor)} );
 			MonoReconciler reconciler= new NescReconciler(textEditor, strategy);
 			reconciler.setIsIncrementalReconciler(false);

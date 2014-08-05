@@ -84,9 +84,12 @@ public final class PathsUtil {
 				activePaths.add(value);
 			}
 		}
-		setProjectPreferenceValue(project, NON_PLATFORM_INCLUDE_PATHS, nonPlatformPaths);
-		setProjectPreferenceValue(project, ADDITIONAL_INCLUDE_PATHS, additionalPaths);
-		setProjectPreferenceValue(project, ACTIVE_INCLUDE_PATHS, activePaths);
+
+		NescProjectPreferences.transaction(project)
+				.set(NON_PLATFORM_INCLUDE_PATHS, nonPlatformPaths)
+				.set(ADDITIONAL_INCLUDE_PATHS, additionalPaths)
+				.set(ACTIVE_INCLUDE_PATHS, activePaths)
+				.commit();
 	}
 
 	/**

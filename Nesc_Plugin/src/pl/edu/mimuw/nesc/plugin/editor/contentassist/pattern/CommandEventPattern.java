@@ -14,7 +14,7 @@ import pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token.Type;
 import com.google.common.base.Optional;
 
 /**
- * Pattern for situation when event of command can be suggested.
+ * Pattern for a situation when an event or a command can be suggested.
  *
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
  *

@@ -5,8 +5,8 @@ import org.eclipse.swt.graphics.Image;
 
 /**
  * <p>
- * Template extension which contains additional field <code>image</code>
- * indicating the image to be displayed in completion proposals list.
+ * Template extension which contains an additional field <code>image</code>
+ * indicating the image to be displayed in a completion proposal list.
  * </p>
  *
  * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>

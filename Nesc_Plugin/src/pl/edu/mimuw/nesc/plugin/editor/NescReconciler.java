@@ -22,7 +22,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
- * Adapted form CDT CReconciler
+ * Adapted from CDT CReconciler.
  */
 public class NescReconciler extends MonoReconciler {
 
@@ -31,16 +31,13 @@ public class NescReconciler extends MonoReconciler {
 
 		SingletonJob(String name, Runnable code) {
 			super(name);
-			fCode= code;
+			fCode = code;
 			setPriority(Job.SHORT);
 			setRule(this);
 			setUser(false);
 			setSystem(true);
 		}
 
-		/*
-		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-		 */
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (!monitor.isCanceled()) {
@@ -49,17 +46,11 @@ public class NescReconciler extends MonoReconciler {
 			return Status.OK_STATUS;
 		}
 
-		/*
-		 * @see org.eclipse.core.runtime.jobs.ISchedulingRule#contains(org.eclipse.core.runtime.jobs.ISchedulingRule)
-		 */
 		@Override
 		public boolean contains(ISchedulingRule rule) {
 			return rule == this;
 		}
 
-		/*
-		 * @see org.eclipse.core.runtime.jobs.ISchedulingRule#isConflicting(org.eclipse.core.runtime.jobs.ISchedulingRule)
-		 */
 		@Override
 		public boolean isConflicting(ISchedulingRule rule) {
 			return rule == this;
@@ -118,14 +109,15 @@ public class NescReconciler extends MonoReconciler {
 
 		public ActivationListener(Control control) {
 			Assert.isNotNull(control);
-			fControl= control;
+			fControl = control;
 		}
 
 		@Override
 		public void shellActivated(ShellEvent e) {
 			if (!fControl.isDisposed() && fControl.isVisible()) {
-				if (hasCModelChanged())
+				if (hasCModelChanged()) {
 					NescReconciler.this.scheduleReconciling();
+				}
 				setEditorActive(true);
 			}
 		}
@@ -145,59 +137,62 @@ public class NescReconciler extends MonoReconciler {
 	/** The shell listener */
 	private ShellListener fActivationListener;
 	/** Tells whether the C model might have changed. */
-	private volatile boolean fHasCModelChanged= false;
+	private volatile boolean fHasCModelChanged = false;
 	/** Tells whether this reconciler's editor is active. */
-	private volatile boolean fIsEditorActive= true;
+	private volatile boolean fIsEditorActive = true;
 	/** Tells whether a reconcile is in progress. */
-	private volatile boolean fIsReconciling= false;
+	private volatile boolean fIsReconciling = false;
 
-	private boolean fInitialProcessDone= false;
+	private boolean fInitialProcessDone = false;
 	private Job fTriggerReconcilerJob;
 
 	/**
 	 * Create a reconciler for the given editor and strategy.
 	 *
-	 * @param editor the text editor
-	 * @param strategy  the Nesc reconciling strategy
+	 * @param editor
+	 *            the text editor
+	 * @param strategy
+	 *            the Nesc reconciling strategy
 	 */
 	public NescReconciler(ITextEditor editor, CompositeReconcilingStrategy strategy) {
 		super(strategy, false);
-		fTextEditor= editor;
+		fTextEditor = editor;
 	}
 
 	@Override
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
 
-		fPartListener= new PartListener();
-		IWorkbenchPartSite site= fTextEditor.getSite();
-		IWorkbenchWindow window= site.getWorkbenchWindow();
+		fPartListener = new PartListener();
+		IWorkbenchPartSite site = fTextEditor.getSite();
+		IWorkbenchWindow window = site.getWorkbenchWindow();
 		window.getPartService().addPartListener(fPartListener);
 
-		fActivationListener= new ActivationListener(textViewer.getTextWidget());
-		Shell shell= window.getShell();
+		fActivationListener = new ActivationListener(textViewer.getTextWidget());
+		Shell shell = window.getShell();
 		shell.addShellListener(fActivationListener);
 
-		fTriggerReconcilerJob= new SingletonJob("Trigger Reconciler", new Runnable() { //$NON-NLS-1$
-			@Override
-			public void run() {
-				forceReconciling();
-			}});
+		fTriggerReconcilerJob = new SingletonJob("Trigger Reconciler", new Runnable() { //$NON-NLS-1$
+					@Override
+					public void run() {
+						forceReconciling();
+					}
+				});
 	}
 
 	@Override
 	public void uninstall() {
 		fTriggerReconcilerJob.cancel();
 
-		IWorkbenchPartSite site= fTextEditor.getSite();
-		IWorkbenchWindow window= site.getWorkbenchWindow();
+		IWorkbenchPartSite site = fTextEditor.getSite();
+		IWorkbenchWindow window = site.getWorkbenchWindow();
 		window.getPartService().removePartListener(fPartListener);
-		fPartListener= null;
+		fPartListener = null;
 
-		Shell shell= window.getShell();
+		Shell shell = window.getShell();
 		if (shell != null && !shell.isDisposed())
 			shell.removeShellListener(fActivationListener);
-		fActivationListener= null;
+		fActivationListener = null;
 
 		super.uninstall();
 	}
@@ -226,7 +221,7 @@ public class NescReconciler extends MonoReconciler {
 	@Override
 	protected void initialProcess() {
 		super.initialProcess();
-		fInitialProcessDone= true;
+		fInitialProcessDone = true;
 		if (!fIsReconciling && isEditorActive() && hasCModelChanged()) {
 			NescReconciler.this.scheduleReconciling();
 		}
@@ -234,12 +229,13 @@ public class NescReconciler extends MonoReconciler {
 
 	@Override
 	protected void process(DirtyRegion dirtyRegion) {
-		fIsReconciling= true;
+		fIsReconciling = true;
 
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				// Without the check this does not work. It should be checked if saving is allowed in such situations
+				// Without the check this does not work. It should be checked if
+				// saving is allowed in such situations
 				if (fTextEditor.isDirty()) {
 					fTextEditor.doSave(null);
 				}
@@ -248,7 +244,7 @@ public class NescReconciler extends MonoReconciler {
 
 		setCModelChanged(false);
 		super.process(dirtyRegion);
-		fIsReconciling= false;
+		fIsReconciling = false;
 	}
 
 	/**
@@ -263,10 +259,11 @@ public class NescReconciler extends MonoReconciler {
 	/**
 	 * Sets whether the C Model has changed or not.
 	 *
-	 * @param state <code>true</code> iff the C model has changed
+	 * @param state
+	 *            <code>true</code> iff the C model has changed
 	 */
 	private synchronized void setCModelChanged(boolean state) {
-		fHasCModelChanged= state;
+		fHasCModelChanged = state;
 	}
 
 	/**
@@ -281,10 +278,11 @@ public class NescReconciler extends MonoReconciler {
 	/**
 	 * Sets whether this reconciler's editor is active.
 	 *
-	 * @param state <code>true</code> iff the editor is active
+	 * @param state
+	 *            <code>true</code> iff the editor is active
 	 */
 	private synchronized void setEditorActive(boolean active) {
-		fIsEditorActive= active;
+		fIsEditorActive = active;
 		if (!active) {
 			fTriggerReconcilerJob.cancel();
 		}

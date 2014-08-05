@@ -140,7 +140,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 	}
 
 	/**
-	 * Adds given proposals and templates into result list.
+	 * Adds given proposals and templates into the result list.
 	 *
 	 * @param viewer
 	 *            current text viewer
@@ -166,7 +166,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 	}
 
 	/**
-	 * Gets patterns that match given token list.
+	 * Gets patterns that match the given token list.
 	 *
 	 * @param tokens
 	 *            tokens
@@ -185,7 +185,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 	}
 
 	/**
-	 * Builds plain completion proposal.
+	 * Builds a plain completion proposal.
 	 *
 	 * @param replacementString
 	 *            replacement string
@@ -204,7 +204,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 	}
 
 	/**
-	 * Builds completion proposal based on template.
+	 * Builds a completion proposal based on the template.
 	 *
 	 * @param viewer
 	 *            current text viewer
