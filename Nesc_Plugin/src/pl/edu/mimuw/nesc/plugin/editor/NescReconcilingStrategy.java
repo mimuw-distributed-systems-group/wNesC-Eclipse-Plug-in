@@ -85,6 +85,10 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 			reconcile(project, file, path);
 		} catch (CoreException e) {
 			e.printStackTrace();
+		} catch (Exception e) {
+			// Prevents from killing the reconciler thread when an unexpected
+			// exception is thrown.
+			e.printStackTrace();
 		}
 		System.out.println("Reconciling done.");
 		if (progressMonitor != null) {
