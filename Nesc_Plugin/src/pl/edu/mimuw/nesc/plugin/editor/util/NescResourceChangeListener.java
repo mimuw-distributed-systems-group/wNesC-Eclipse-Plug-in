@@ -1,5 +1,9 @@
 package pl.edu.mimuw.nesc.plugin.editor.util;
 
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.*;
+
+import java.io.File;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -17,6 +21,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.service.prefs.BackingStoreException;
 
 import pl.edu.mimuw.nesc.FileData;
+import pl.edu.mimuw.nesc.common.util.file.FileUtils;
 import pl.edu.mimuw.nesc.plugin.marker.MarkerHelper;
 import pl.edu.mimuw.nesc.plugin.projects.util.PathsUtil;
 import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
@@ -49,12 +54,6 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 		return IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE;
 	}
 
-	private final MarkerHelper markerHelper;
-
-	private NescResourceChangeListener() {
-		this.markerHelper = new MarkerHelper();
-	}
-
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		switch (event.getType()) {
@@ -79,46 +78,12 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 
 	private void postChange(IResourceChangeEvent event) {
 		IResourceDelta rootDelta = event.getDelta();
-		IResourceDeltaVisitor visitor = new IResourceDeltaVisitor() {
-			@Override
-			public boolean visit(IResourceDelta delta) throws CoreException {
-				final int kind = delta.getKind();
-				final int type = delta.getResource().getType();
-				final IPath path = delta.getResource().getFullPath();
-				final IProject project = delta.getResource().getProject();
-
-				if (type != IResource.FOLDER) {
-					return true;
-				}
-
-				/* Settings directory. */
-				if (path.lastSegment().equals(".settings")) {
-					rebuildProject(project);
-					return false;
-				}
-
-				/*
-				 * NOTE: When any chold of a folder was added, removed etc., but
-				 * the folder itself was not modified, therefore the
-				 * "delta.getKind()" is set to MODIFIED for the folder. In
-				 * consequence, when only a file in the folder is changed, the
-				 * project settings will not be updated
-				 * (refreshProjectDirectories will not be called), since none of
-				 * the source paths was changed.
-				 *
-				 * On the other hand, when folder is created / removed / moved /
-				 * renamed one of the following flags will be set: ADDED,
-				 * REMOVED, MOVED_FROM, MOVED_TO (rename = remove + add).
-				 */
-				if (kind == IResourceDelta.ADDED || kind == IResourceDelta.MOVED_FROM
-						|| kind == IResourceDelta.MOVED_TO || kind == IResourceDelta.REMOVED) {
-					refreshProjectDirectories(project);
-				}
-				return true;
-			}
-		};
+		ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
 		try {
 			rootDelta.accept(visitor);
+			if (visitor.getPostAction() != null) {
+				visitor.getPostAction().run();
+			}
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -132,7 +97,7 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 				System.out.println("Recreate project context...");
 				ProjectManager.recreateProjectContext(project, true);
 				try {
-					markerHelper.updateMarkers(project);
+					// marker are updated automatically after project rebuild
 					updateFiles(project);
 				} catch (CoreException e) {
 					e.printStackTrace();
@@ -157,7 +122,7 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 					final IFile file = (IFile) resource;
 					final FileData data = ProjectManager.getFileData(project, path.toOSString());
 					if (data != null) {
-						markerHelper.updateMarkers(project, file, data);
+						MarkerHelper.updateMarkers(project, file, data);
 					}
 				}
 				return true;
@@ -165,7 +130,6 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 		};
 		project.accept(visitor);
 	}
-
 
 	private void refreshProjectDirectories(final IProject project) {
 		final Job job = new Job("Updating source folder settings...") {
@@ -187,4 +151,84 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 		job.setPriority(Job.INTERACTIVE);
 		job.schedule();
 	}
+
+	private class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+
+		private Runnable postAction;
+
+		public Runnable getPostAction() {
+			return postAction;
+		}
+
+		@Override
+		public boolean visit(IResourceDelta delta) throws CoreException {
+			final int kind = delta.getKind();
+			final int type = delta.getResource().getType();
+			final IPath path = delta.getResource().getFullPath();
+			final IPath fullPath = delta.getResource().getLocation();
+			final IProject project = delta.getResource().getProject();
+
+			/*
+			 * If root configuration is added/removed, rebuild project.
+			 */
+			if (type == IResource.FILE && wasResourceModified(kind)) {
+				final String projectMainDir = project.getLocation().toOSString();
+				final String mainConfigName = getProjectPreferenceValue(project, MAIN_CONFIGURATION);
+				final String mainConfigPath = projectMainDir + File.separator + mainConfigName + ".nc";
+				System.out.println(mainConfigPath + " ? " + path.toString());
+				if (FileUtils.normalizePath(mainConfigPath).equals(fullPath.toOSString())) {
+					postAction = new Runnable() {
+						@Override
+						public void run() {
+							rebuildProject(project);
+						}
+					};
+				}
+			}
+
+			if (type != IResource.FOLDER) {
+				return true;
+			}
+
+			/* Settings directory. */
+			if (path.lastSegment().equals(".settings")) {
+				postAction = new Runnable() {
+					@Override
+					public void run() {
+						rebuildProject(project);
+					}
+				};
+				return false;
+			}
+
+			/*
+			 * NOTE: When any child of a folder was added, removed etc., but the
+			 * folder itself was not modified, therefore the "delta.getKind()"
+			 * is set to MODIFIED for the folder. In consequence, when only a
+			 * file in the folder is changed, the project settings will not be
+			 * updated (refreshProjectDirectories will not be called), since
+			 * none of the source paths was changed.
+			 *
+			 * On the other hand, when folder is created / removed / moved /
+			 * renamed one of the following flags will be set: ADDED, REMOVED,
+			 * MOVED_FROM, MOVED_TO (rename = remove + add).
+			 */
+			if (wasResourceModified(kind)) {
+				if (postAction == null) {
+					postAction = new Runnable() {
+						@Override
+						public void run() {
+							refreshProjectDirectories(project);
+						}
+					};
+				}
+			}
+			return true;
+		}
+
+		private boolean wasResourceModified(int kind) {
+			return (kind == IResourceDelta.ADDED || kind == IResourceDelta.MOVED_FROM
+					|| kind == IResourceDelta.MOVED_TO || kind == IResourceDelta.REMOVED);
+		}
+	};
 }

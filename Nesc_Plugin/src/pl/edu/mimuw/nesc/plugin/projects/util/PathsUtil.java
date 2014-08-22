@@ -28,27 +28,37 @@ public final class PathsUtil {
 	 * @return non-platform include paths
 	 */
 	public static List<Path> getNonPlatformPaths(IProject project) {
+		/* Previously saved values. */
 		List<String> nonPlatformPaths = getProjectPreferenceValueStringList(project, NON_PLATFORM_INCLUDE_PATHS);
+		/* Paths specified explicitly by the user. Should always be on the list. */
 		final List<String> additionalPaths = getProjectPreferenceValueStringList(project, ADDITIONAL_INCLUDE_PATHS);
+		/* List of dirs automatically extracted from the project hierarchy. */
 		final List<String> projectPaths = ResourceUtil.getProjectDirectories(project);
+		/* Paths checked by the user. */
 		final List<String> checkedPaths = getProjectPreferenceValueStringList(project, ACTIVE_INCLUDE_PATHS);
 
+		/* If nonPlatformPaths is empty, this is probably a fresh project
+		 * and proper settings were not set yet. */
 		if (nonPlatformPaths.isEmpty()) {
-			nonPlatformPaths = new ArrayList<>();
+			/* By default all additional and all subfolders should be checked. */
 			nonPlatformPaths.addAll(additionalPaths);
 			nonPlatformPaths.addAll(projectPaths);
+			checkedPaths.addAll(projectPaths);
 		}
 
 		final List<Path> resultPaths = new ArrayList<>();
 
+		/* Iterate old paths to preserve the order. */
 		for (String path : nonPlatformPaths) {
 			if (!additionalPaths.contains(path) && !projectPaths.contains(path)) {
+				// path will be removed
 				continue;
 			}
 			final Path newPath = new Path(path, path, checkedPaths.contains(path), additionalPaths.contains(path));
 			resultPaths.add(newPath);
 		}
 
+		/* Newly created directories are appended to the end of the list. */
 		for (String path : projectPaths) {
 			if (!nonPlatformPaths.contains(path)) {
 				final Path newPath = new Path(path, path, true, false);

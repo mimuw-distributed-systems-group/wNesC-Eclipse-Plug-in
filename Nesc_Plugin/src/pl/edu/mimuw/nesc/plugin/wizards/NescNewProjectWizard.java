@@ -91,7 +91,7 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 		URI location = null;
 		if (!_pageOne.useDefaults()) {
 			location = _pageOne.getLocationURI();
-		} // else location == null
+		}
 
 		/* Nature is set in createProject. */
 		final IProject project = NescProjectSupport.createProject(name, location);
@@ -120,8 +120,6 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 					monitor.beginTask("Creating project context...", IProgressMonitor.UNKNOWN);
 					final Optional<String> msg = ProjectManager.ensureContext(project);
 					monitor.done();
-
-					// Rebuild is done automatically by builder.
 
 					if (msg.isPresent()) {
 						setErrorMessage(msg.get());

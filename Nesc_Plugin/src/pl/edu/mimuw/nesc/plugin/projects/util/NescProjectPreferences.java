@@ -124,7 +124,7 @@ public final class NescProjectPreferences {
 
 	private static List<String> stringToList(String str) {
 		if (str == null || str.isEmpty()) {
-			return Collections.emptyList();
+			return new ArrayList<>();
 		}
 		final String[] parts = str.split(",");
 		final List<String> result = new ArrayList<>(parts.length);

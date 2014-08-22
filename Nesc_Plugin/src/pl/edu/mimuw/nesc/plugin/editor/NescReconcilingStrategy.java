@@ -27,12 +27,10 @@ import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
 public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
 	private final ITextEditor editor;
-	private final MarkerHelper markerHelper;
 	private IProgressMonitor progressMonitor;
 
 	public NescReconcilingStrategy(ITextEditor editor) {
 		this.editor = editor;
-		this.markerHelper = new MarkerHelper();
 	}
 
 	@Override
@@ -61,6 +59,7 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	}
 
 	private void reconcile() {
+		long start = System.currentTimeMillis();
 		System.out.println("Start reconciling preparation...");
 		if (!(editor instanceof NescEditor)) {
 			return;
@@ -90,7 +89,8 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 			// exception is thrown.
 			e.printStackTrace();
 		}
-		System.out.println("Reconciling done.");
+		long end = System.currentTimeMillis();
+		System.out.println("Reconciling done in " + (end - start) + "ms.");
 		if (progressMonitor != null) {
 			progressMonitor.done();
 		}
@@ -98,6 +98,6 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 
 	private void reconcile(IProject project, IFile file, IPath path) throws CoreException {
 		final FileData data = ProjectManager.updateFile(project, path.toOSString());
-		markerHelper.updateMarkers(project, file, data);
+		MarkerHelper.updateMarkers(project, file, data);
 	}
 }

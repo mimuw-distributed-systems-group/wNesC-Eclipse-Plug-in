@@ -20,6 +20,7 @@ import pl.edu.mimuw.nesc.FileData;
 import pl.edu.mimuw.nesc.ProjectData;
 import pl.edu.mimuw.nesc.exception.InvalidOptionsException;
 import pl.edu.mimuw.nesc.plugin.NescPlugin;
+import pl.edu.mimuw.nesc.plugin.marker.MarkerHelper;
 import pl.edu.mimuw.nesc.plugin.projects.util.NescPlatformUtil.NescPlatform;
 
 import com.google.common.base.Optional;
@@ -118,6 +119,7 @@ public final class ProjectManager {
 		}
 		final ProjectData data = NescPlugin.getDefault().getNescFrontend().rebuild(projectContext);
 		setProjectData(project, data);
+		MarkerHelper.updateMarkersJob(project);
 		return data;
 	}
 
@@ -133,7 +135,8 @@ public final class ProjectManager {
 	public static FileData updateFile(IProject project, String filePath) {
 		ensureContextWithRebuild(project);
 		final List<FileData> datas = NescPlugin.getDefault().getNescFrontend()
-				.update(getProjectContext(project), filePath);
+				.update(getProjectContext(project), filePath)
+				.getModifiedFileDatas();
 		for (FileData data : datas) {
 			PROJECT_DATA_MAP.get(project.getName()).getFilesMap().put(data.getFilePath(), data);
 		}

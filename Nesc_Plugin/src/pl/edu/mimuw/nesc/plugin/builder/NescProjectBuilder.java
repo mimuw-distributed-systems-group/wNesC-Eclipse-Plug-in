@@ -9,6 +9,8 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
+
 /**
  * Schedules project builds according to the set of modified resources since
  * last build execution (ResourceDelta).
@@ -25,6 +27,12 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 	public static final String BUILDER_ID = "pl.edu.mimuw.nesc.plugin.builder.NescProjectBuilder";
 
 	public NescProjectBuilder() {
+	}
+
+	@Override
+	protected void clean(IProgressMonitor monitor) throws CoreException {
+		/* Enable the user to reparse the entire project. */
+		ProjectManager.recreateProjectContext(getProject(), true);
 	}
 
 	@Override

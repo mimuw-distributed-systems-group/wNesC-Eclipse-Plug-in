@@ -96,12 +96,6 @@
    		 	class="pl.edu.mimuw.nesc.plugin.preferences.NescPluginMainPreferencesPage"
    		 	name="NesC">
    		 </page>
-   		 <page
-   		 	id="pl.edu.mimuw.nesc.plugin.preferences"
-   		 	class="pl.edu.mimuw.nesc.plugin.preferences.NescPluginEmptyChildPreferencesPage"
-   		 	name="Empty child page"
-   		 	category="pl.edu.mimuw.nesc.plugin.preferences.MainPage">
-   		 </page>
       <page
             category="pl.edu.mimuw.nesc.plugin.preferences.MainPage"
             class="pl.edu.mimuw.nesc.plugin.preferences.NescPluginCommentsTemplatesPreferencePage"
