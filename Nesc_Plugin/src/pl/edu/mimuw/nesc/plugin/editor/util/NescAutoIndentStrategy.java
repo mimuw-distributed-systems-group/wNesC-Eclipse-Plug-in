@@ -15,6 +15,10 @@ import org.eclipse.jface.text.rules.FastPartitioner;
 import pl.edu.mimuw.nesc.plugin.partitioning.FastNescPartitionScanner;
 import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
 
+/**
+ * Adapted from CDT
+ */
+
 public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	
 	private String fPartitioning;
@@ -82,8 +86,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				- closingBracketIncrease;
 
 		// sum up the brackets counts of each line (closing brackets count
-		// negative,
-		// opening positive) until we find a line the brings the count to zero
+		// negative, opening positive) until we find a line the brings the count to zero
 		while (brackcount < 0) {
 			line--;
 			if (line < 0) {
@@ -210,7 +213,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int whiteend = findEndOfWhiteSpace(document, start, end);
 			return document.get(start, whiteend - start);
 		}
-		return ""; //$NON-NLS-1$
+		return "";
 	}
 
 	/**
@@ -262,16 +265,8 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 		// TODO: If we ever introduce a NescIndenter similar to the CIndenter from CDT please consider modyfing this code
 		// to better use the patterns found in CDT
-		// int addIndent = 0;
 		NescHeuristicScanner scanner = new NescHeuristicScanner(document);
 		try {
-			/*
-			ITypedRegion partition= TextUtilities.getPartition(d, fPartitioning, c.offset, false);
-			if (ICPartitions.C_PREPROCESSOR.equals(partition.getType()) && c.offset > 0 && d.getChar(c.offset-1) == '\\') {
-				scanner = new CHeuristicScanner(d, fPartitioning, ICPartitions.C_PREPROCESSOR);
-				addIndent= 1;
-			}
-			*/
 			int line = document.getLineOfOffset(command.offset);
 			IRegion reg = document.getLineInformation(line);
 			int start = reg.getOffset();
@@ -293,7 +288,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				}
 			}
 			
-			/*
+			/* We don't have a dedicated indenter for NesC yet, so we skip this part. 
 			StringBuilder indent= null;
 			CIndenter indenter= new CIndenter(d, scanner, fProject);
 			if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_AUTO_INDENT)) {
@@ -375,7 +370,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			command.text = buf.toString();
 
 		} catch (BadLocationException excp) {
-			//System.out.println(JavaEditorMessages.getString("AutoIndent.error.bad_location_1")); //$NON-NLS-1$
+			// add error log
 		}
 	}
 
@@ -422,7 +417,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				}
 			}
 		} catch (BadLocationException excp) {
-			//System.out.println(JavaEditorMessages.getString("AutoIndent.error.bad_location_2")); //$NON-NLS-1$
+			// add error log
 		}
 	}
 	
@@ -466,8 +461,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			Document temp= new Document(prefix + newText);
 			DocumentRewriteSession session= temp.startRewriteSession(DocumentRewriteSessionType.STRICTLY_SEQUENTIAL);
 			scanner= new NescHeuristicScanner(temp);
-			//indenter= new CIndenter(temp, scanner, fProject);
-			installCPartitioner(temp);
+			installNCPartitioner(temp);
 
 			// Indent the first and second line
 			// compute the relative indentation difference from the second line
@@ -508,7 +502,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 							}
 							return;
 						}
-						removeCPartitioner(temp);
+						removeNCPartitioner(temp);
 					} else {
 						changed= insertLength != 0;
 					}
@@ -528,7 +522,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			command.length= newLength;
 			command.text= newText;
 		} catch (BadLocationException e) {
-			//CUIPlugin.log(e);
+			// log error
 		}
 	}
 	
@@ -540,7 +534,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     	 * in the document.
     	 */
     	Document pasted= new Document(command.text);
-    	installCPartitioner(pasted);
+    	installNCPartitioner(pasted);
     	int firstPeer= command.offset;
 
     	NescHeuristicScanner pScanner= new NescHeuristicScanner(pasted);
@@ -551,13 +545,13 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     	try {
 			switch (afterToken) {
 			case Symbols.TokenRBRACE:
-				pasted.replace(pasted.getLength(), 0, "}"); //$NON-NLS-1$
+				pasted.replace(pasted.getLength(), 0, "}");
 				break;
 			case Symbols.TokenRPAREN:
-				pasted.replace(pasted.getLength(), 0, ")"); //$NON-NLS-1$
+				pasted.replace(pasted.getLength(), 0, ")");
 				break;
 			case Symbols.TokenRBRACKET:
-				pasted.replace(pasted.getLength(), 0, "]"); //$NON-NLS-1$
+				pasted.replace(pasted.getLength(), 0, "]");
 				break;
 			}
 		} catch (BadLocationException e) {
@@ -607,7 +601,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     			    {
     					CIndenter indenter= new CIndenter(document, dScanner, fProject);
     					peer= indenter.findReferencePosition(dPos, false, MatchMode.MATCH_CASE);
-    					if (peer == NescHeuristicScanner.NOT_FOUND)
+    					if (peer == CHeuristicScanner.NOT_FOUND)
     						return firstPeer;
     					firstPeer= peer;
     				}
@@ -626,7 +620,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 *
 	 * @param document the document
 	 */
-	private static void installCPartitioner(Document document) {
+	private static void installNCPartitioner(Document document) {
 		String[] types= new String[] {
 		    INCPartitions.NC_MULTI_LINE_COMMENT,
 			INCPartitions.NC_SINGLE_LINE_COMMENT,
@@ -645,7 +639,7 @@ public class NescAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 *
 	 * @param document the document
 	 */
-	private static void removeCPartitioner(Document document) {
+	private static void removeNCPartitioner(Document document) {
 		document.setDocumentPartitioner(INCPartitions.NC_PARTITIONING, null);
 	}
 	

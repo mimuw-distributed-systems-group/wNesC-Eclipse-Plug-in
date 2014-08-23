@@ -113,10 +113,9 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (textEditor != null) {
-			CompositeReconcilingStrategy strategy= new CompositeReconcilingStrategy();
 			// A spelling reconcile strategy can be inserted here for spelling reconciling
 			// Should we copy it from CDT?
-			strategy.setReconcilingStrategies(new IReconcilingStrategy[] {new NescReconcilingStrategy(textEditor)} );
+			IReconcilingStrategy strategy = new NescReconcilingStrategy(textEditor);
 			MonoReconciler reconciler= new NescReconciler(textEditor, strategy);
 			reconciler.setIsIncrementalReconciler(false);
 			//reconciler.setProgressMonitor(new ProgressMonitorAndCanceler());
@@ -142,8 +141,6 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IRule[] rules = { new SingleLineRule("\"", "\"", textToken),
 				          new SingleLineRule("'", "'", textToken) };
 		((BufferedRuleBasedScanner)stringScanner).setRules(rules);
-		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
-		//((BufferedRuleBasedScanner)multilineCommentScanner).setDefaultReturnToken(defaultToken);
 	}
 
 	protected void initalizeSingelneCommentScanner() {
@@ -151,15 +148,10 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IToken textToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xA5, 0xA8, 0xB8)));
 		IRule[] rules = { new EndOfLineRule("//", textToken)};
 		((BufferedRuleBasedScanner)singlelineCommentScanner).setRules(rules);
-		//IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x00, 0x00, 0x00)));
-		//((BufferedRuleBasedScanner)multilineCommentScanner).setDefaultReturnToken(defaultToken);
 	}
 
 	protected void initializeMultilineCommentScanner() {
 		multilineCommentScanner = new BufferedRuleBasedScanner(scannerBufferSize);
-		//IToken textToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xA5, 0xA8, 0xB8)));
-		//IRule[] rules = { new MultiLineRule("/*", "*/", textToken, '\0', true) };
-		//((BufferedRuleBasedScanner)multilineCommentScanner).setRules(rules);
 		IToken defaultToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xA5, 0xA8, 0xB8)));
 		((BufferedRuleBasedScanner)multilineCommentScanner).setDefaultReturnToken(defaultToken);
 	}
@@ -341,7 +333,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 	@Override
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
-		return new String[] { "//", "//!", "" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return new String[] { "//", "//!", "" };
 	}
 
 	@Override
@@ -361,7 +353,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 				indentPrefixes[i+1]= new String(spaces);
 		}
 
-		indentPrefixes[tabWidth + 1]= ""; //$NON-NLS-1$
+		indentPrefixes[tabWidth + 1]= "";
 
 		return indentPrefixes;
 	}

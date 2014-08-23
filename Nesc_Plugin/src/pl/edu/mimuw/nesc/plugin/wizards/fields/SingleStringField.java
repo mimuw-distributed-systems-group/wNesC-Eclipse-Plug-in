@@ -18,7 +18,7 @@ import pl.edu.mimuw.nesc.plugin.wizards.fields.SingleStringField.StringValue;
  */
 public class SingleStringField extends TableField<StringValue> {
 
-	private static final String ERROR_MSG_EMPTY_VALUE = "Value cannot be empty."; //$NON-NLS-1$
+	private static final String ERROR_MSG_EMPTY_VALUE = "Value cannot be empty.";
 
 	public static Builder builder() {
 		return new Builder();

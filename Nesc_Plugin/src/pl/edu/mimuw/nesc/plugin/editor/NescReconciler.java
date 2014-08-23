@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
@@ -154,7 +155,7 @@ public class NescReconciler extends MonoReconciler {
 	 * @param strategy
 	 *            the Nesc reconciling strategy
 	 */
-	public NescReconciler(ITextEditor editor, CompositeReconcilingStrategy strategy) {
+	public NescReconciler(ITextEditor editor, IReconcilingStrategy strategy) {
 		super(strategy, false);
 		fTextEditor = editor;
 	}

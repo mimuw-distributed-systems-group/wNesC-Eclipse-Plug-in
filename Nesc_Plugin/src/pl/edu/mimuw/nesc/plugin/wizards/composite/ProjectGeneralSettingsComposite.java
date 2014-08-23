@@ -30,15 +30,15 @@ import com.google.common.collect.Lists;
  */
 public class ProjectGeneralSettingsComposite extends Composite {
 
-	private static final String EMTPY_STRING = ""; //$NON-NLS-1$
-	private static final String MAIN_CONFIGURATION_LABEL = "Main configuration:";//$NON-NLS-1$
-	private static final String TINYOS_PROJECT_LABEL = "TinyOS project:";//$NON-NLS-1$
-	private static final String PLATFORM_LABEL = "Platform:";//$NON-NLS-1$
-	private static final String TINYOS_PATH_LABEL = "TinyOS path:";//$NON-NLS-1$
+	private static final String EMTPY_STRING = "";
+	private static final String MAIN_CONFIGURATION_LABEL = "Main configuration:";
+	private static final String TINYOS_PROJECT_LABEL = "TinyOS project:";
+	private static final String PLATFORM_LABEL = "Platform:";
+	private static final String TINYOS_PATH_LABEL = "TinyOS path:";
 
-	private static final String ERROR_MAIN_CONFIG_NOT_SET = "Main configuration is not set.";//$NON-NLS-1$
-	private static final String ERROR_TINYOS_PLATFORM_NOT_SET = "TinyOS platform is not set.";//$NON-NLS-1$
-	private static final String ERROR_TINYOS_PATH_NOT_SET = "TinyOS path is not set.";//$NON-NLS-1$
+	private static final String ERROR_MAIN_CONFIG_NOT_SET = "Main configuration is not set.";
+	private static final String ERROR_TINYOS_PLATFORM_NOT_SET = "TinyOS platform is not set.";
+	private static final String ERROR_TINYOS_PATH_NOT_SET = "TinyOS path is not set.";
 
 	private static final boolean TINYOS_PROJECT_SELECTION_DEFAULT = true;
 

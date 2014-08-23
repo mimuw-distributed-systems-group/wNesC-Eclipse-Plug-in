@@ -326,7 +326,7 @@ public class NescEditor extends TextEditor {
 												 level.fSecondPosition.length,
 												 null);
 							} catch (BadLocationException e) {
-								//CUIPlugin.log(e);
+								// add error log
 							}
 						}
 
@@ -335,7 +335,7 @@ public class NescEditor extends TextEditor {
 							try {
 								document.removePositionCategory(CATEGORY);
 							} catch (BadPositionCategoryException e) {
-								//CUIPlugin.log(e);
+								// add error log
 							}
 						}
 					}

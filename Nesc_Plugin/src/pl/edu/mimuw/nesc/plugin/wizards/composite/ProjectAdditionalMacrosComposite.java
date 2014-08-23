@@ -28,21 +28,21 @@ import com.google.common.collect.Lists;
 public class ProjectAdditionalMacrosComposite extends Composite {
 
 	private static final int COLUMN_WIDTH = 400;
-	private static final String TOSDIR_VARIABLE = "Use ${TOSDIR} variable to refer to TinyOS directory.";//$NON-NLS-1$
+	private static final String TOSDIR_VARIABLE = "Use ${TOSDIR} variable to refer to TinyOS directory.";
 
-	private static final String DEFAULT_INCLUDES_FIELD = "Default includes";//$NON-NLS-1$
-	private static final String DEFAULT_INCLUDES_TIP = "File that should be included to each source and header file.";//$NON-NLS-1$
-	private static final String ADD_DEFAULT_INCLUDE_TITLE = "New file included by default";//$NON-NLS-1$
-	private static final String ADD_DEFAULT_INCLUDE_MESSAGE = "Enter a path of file that should be included to each source and header file.";//$NON-NLS-1$
-	private static final String EDIT_DEFAULT_INCLUDE_TITLE = "Edit path of file included by default";//$NON-NLS-1$
-	private static final String EDIT_DEFAULT_INCLUDE_MESSAGE = "Edit the path of file that should be included to each source and header file.";//$NON-NLS-1$
+	private static final String DEFAULT_INCLUDES_FIELD = "Default includes";
+	private static final String DEFAULT_INCLUDES_TIP = "File that should be included to each source and header file.";
+	private static final String ADD_DEFAULT_INCLUDE_TITLE = "New file included by default";
+	private static final String ADD_DEFAULT_INCLUDE_MESSAGE = "Enter a path of file that should be included to each source and header file.";
+	private static final String EDIT_DEFAULT_INCLUDE_TITLE = "Edit path of file included by default";
+	private static final String EDIT_DEFAULT_INCLUDE_MESSAGE = "Edit the path of file that should be included to each source and header file.";
 
-	private static final String PREDEFINED_MACROS_FIELD = "Predefined macros";//$NON-NLS-1$
-	private static final String PREDEFINED_MACROS_TIP = "Predefined preprocessor macro (optionally with specified value).";//$NON-NLS-1$
-	private static final String ADD_PREDEFINED_MACRO_TITLE = "New predefined macro";//$NON-NLS-1$
-	private static final String ADD_PREDEFINED_MACRO_MESSAGE = "Enter a preprocessor macro (optionally with specified value).";//$NON-NLS-1$
-	private static final String EDIT_PREDEFINED_MACRO_TITLE = "Edit predefined macro";//$NON-NLS-1$
-	private static final String EDIT_PREDEFINED_MACRO_MESSAGE = "Edit the preprocessor macro (optionally with specified value).";//$NON-NLS-1$
+	private static final String PREDEFINED_MACROS_FIELD = "Predefined macros";
+	private static final String PREDEFINED_MACROS_TIP = "Predefined preprocessor macro (optionally with specified value).";
+	private static final String ADD_PREDEFINED_MACRO_TITLE = "New predefined macro";
+	private static final String ADD_PREDEFINED_MACRO_MESSAGE = "Enter a preprocessor macro (optionally with specified value).";
+	private static final String EDIT_PREDEFINED_MACRO_TITLE = "Edit predefined macro";
+	private static final String EDIT_PREDEFINED_MACRO_MESSAGE = "Edit the preprocessor macro (optionally with specified value).";
 
 	private final PageCompositeListener pageCompositeListener;
 
