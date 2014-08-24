@@ -174,8 +174,12 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 			final IPath path = delta.getResource().getFullPath();
 			final IPath fullPath = delta.getResource().getLocation();
 			final IProject project = delta.getResource().getProject();
-			
-			if (!project.hasNature(NescProjectNature.NATURE_ID)) {
+
+			if (type == IResource.ROOT) {
+				return true;
+			}
+
+			if (!project.exists() || !project.isOpen() || !project.hasNature(NescProjectNature.NATURE_ID)) {
 				return false;
 			}
 

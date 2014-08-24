@@ -26,7 +26,7 @@ import pl.edu.mimuw.nesc.plugin.editor.util.NescResourceChangeListener;
 public class NescPlugin extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "NesC_Plugin"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "NesC_Plugin";
 
 	private static Frontend NESC_FRONTEND = NescFrontend.builder().build();
 
@@ -81,7 +81,7 @@ public class NescPlugin extends AbstractUIPlugin {
 	}
 
 	private void buildWorkspace() {
-		final Job job = new Job("Building workspace...") { //$NON-NLS-1$
+		final Job job = new Job("Building workspace...") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
