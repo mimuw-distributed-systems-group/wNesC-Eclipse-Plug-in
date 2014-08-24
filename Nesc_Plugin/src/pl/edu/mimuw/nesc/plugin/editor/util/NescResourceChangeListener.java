@@ -23,6 +23,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import pl.edu.mimuw.nesc.FileData;
 import pl.edu.mimuw.nesc.common.util.file.FileUtils;
 import pl.edu.mimuw.nesc.plugin.marker.MarkerHelper;
+import pl.edu.mimuw.nesc.plugin.natures.NescProjectNature;
 import pl.edu.mimuw.nesc.plugin.projects.util.PathsUtil;
 import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
 
@@ -70,9 +71,15 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 		final IResource resource = event.getResource();
 		if (resource instanceof IProject) {
 			// FIXME: use logger
-			System.out.println("Removing project " + resource.getName());
-			final String projectName = resource.getName();
-			ProjectManager.deleteProject(projectName);
+			try {
+				if (((IProject) resource).hasNature(NescProjectNature.NATURE_ID)) {
+					System.out.println("Removing project " + resource.getName());
+					final String projectName = resource.getName();
+					ProjectManager.deleteProject(projectName);
+				}
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -167,6 +174,10 @@ public class NescResourceChangeListener implements IResourceChangeListener {
 			final IPath path = delta.getResource().getFullPath();
 			final IPath fullPath = delta.getResource().getLocation();
 			final IProject project = delta.getResource().getProject();
+			
+			if (!project.hasNature(NescProjectNature.NATURE_ID)) {
+				return false;
+			}
 
 			/*
 			 * If root configuration is added/removed, rebuild project.
