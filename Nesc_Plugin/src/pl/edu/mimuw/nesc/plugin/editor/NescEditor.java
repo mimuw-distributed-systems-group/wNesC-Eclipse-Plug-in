@@ -36,8 +36,8 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import pl.edu.mimuw.nesc.plugin.editor.util.NescHeuristicScanner;
-import pl.edu.mimuw.nesc.plugin.editor.util.Symbols;
+import pl.edu.mimuw.nesc.plugin.editor.scanner.NescHeuristicScanner;
+import pl.edu.mimuw.nesc.plugin.editor.scanner.Symbols;
 import pl.edu.mimuw.nesc.plugin.partitioning.FastNescPartitioner;
 import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
 

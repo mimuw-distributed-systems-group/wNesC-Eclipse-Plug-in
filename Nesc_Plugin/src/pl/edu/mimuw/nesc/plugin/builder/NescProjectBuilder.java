@@ -9,7 +9,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
+import pl.edu.mimuw.nesc.plugin.frontend.FrontendManager;
 
 /**
  * Schedules project builds according to the set of modified resources since
@@ -32,7 +32,7 @@ public class NescProjectBuilder extends IncrementalProjectBuilder {
 	@Override
 	protected void clean(IProgressMonitor monitor) throws CoreException {
 		/* Enable the user to reparse the entire project. */
-		ProjectManager.recreateProjectContext(getProject(), true);
+		FrontendManager.buildContext(getProject());
 	}
 
 	@Override

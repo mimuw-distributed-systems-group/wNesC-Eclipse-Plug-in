@@ -1,6 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.wizards;
 
-import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
+import pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectSupport;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;

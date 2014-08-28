@@ -18,7 +18,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import pl.edu.mimuw.nesc.FileData;
 import pl.edu.mimuw.nesc.ProjectData;
 import pl.edu.mimuw.nesc.ast.Location;
-import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
+import pl.edu.mimuw.nesc.plugin.frontend.FrontendManager;
 import pl.edu.mimuw.nesc.problem.NescError;
 import pl.edu.mimuw.nesc.problem.NescIssue;
 import pl.edu.mimuw.nesc.problem.NescWarning;
@@ -51,7 +51,7 @@ public final class MarkerHelper {
 		project.accept(new ProjectResourceVisitor(project));
 
 		/* Set errors for the project scope. */
-		final ProjectData data = ProjectManager.getProjectData(project);
+		final ProjectData data = FrontendManager.getProjectData(project);
 		if (data == null) {
 			return;
 		}
@@ -223,9 +223,9 @@ public final class MarkerHelper {
 		@Override
 		public boolean visit(IResource resource) throws CoreException {
 			if (resource.getType() == IResource.FILE) {
-				final FileData data = ProjectManager.getFileData(project, resource.getRawLocation().toOSString());
-				if (data != null) {
-					updateMarkers(project, (IFile) resource, data);
+				final Optional<FileData> data = FrontendManager.getFileData(project, resource.getRawLocation().toOSString());
+				if (data.isPresent()) {
+					updateMarkers(project, (IFile) resource, data.get());
 				}
 			}
 			return true;

@@ -15,7 +15,7 @@ import org.osgi.framework.BundleContext;
 import pl.edu.mimuw.nesc.Frontend;
 import pl.edu.mimuw.nesc.NescFrontend;
 import pl.edu.mimuw.nesc.plugin.editor.util.AutosaveListener;
-import pl.edu.mimuw.nesc.plugin.editor.util.NescResourceChangeListener;
+import pl.edu.mimuw.nesc.plugin.resources.NescResourceChangeListener;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -28,7 +28,7 @@ public class NescPlugin extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "NesC_Plugin";
 
-	private static Frontend NESC_FRONTEND = NescFrontend.builder().build();
+	private static Frontend NESC_FRONTEND = NescFrontend.builder().standalone(false).build();
 
 	// The shared instance
 	private static NescPlugin plugin;

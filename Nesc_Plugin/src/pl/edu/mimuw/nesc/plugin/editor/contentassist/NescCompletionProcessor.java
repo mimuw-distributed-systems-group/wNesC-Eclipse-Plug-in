@@ -34,7 +34,7 @@ import pl.edu.mimuw.nesc.plugin.editor.contentassist.pattern.VariablePattern;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.ContextScanner;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.DefaultPartitionScanner;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.scanner.Token;
-import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
+import pl.edu.mimuw.nesc.plugin.frontend.FrontendManager;
 
 /**
  * Completion proposals processor for nesc code.
@@ -63,7 +63,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 
 	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
-		final FileData fileData = ProjectManager.getFileData(getProject(), getCurrentFilePath());
+		final FileData fileData = FrontendManager.getFileData(getProject(), getCurrentFilePath()).orNull();
 		/* Hardly possible? situation when FileData is unavailable. */
 		if (fileData == null) {
 			System.out.println("FileData is unavailable");
@@ -77,7 +77,7 @@ public class NescCompletionProcessor extends CompletionProcessorBase {
 			proposals = Collections.emptyList();
 		}
 		Collections.sort(proposals, COMPARATOR);
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 
 	@Override

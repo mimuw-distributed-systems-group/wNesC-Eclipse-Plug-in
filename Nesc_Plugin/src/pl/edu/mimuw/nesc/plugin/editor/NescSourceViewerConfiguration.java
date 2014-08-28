@@ -40,10 +40,10 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.NescCompletionProcessor;
 import pl.edu.mimuw.nesc.plugin.editor.contentassist.PreprocessorCompletionProcessor;
-import pl.edu.mimuw.nesc.plugin.editor.util.NescAutoIndentStrategy;
-import pl.edu.mimuw.nesc.plugin.editor.util.NumberRule;
-import pl.edu.mimuw.nesc.plugin.editor.util.OperatorRule;
-import pl.edu.mimuw.nesc.plugin.editor.util.WhitespaceRule;
+import pl.edu.mimuw.nesc.plugin.editor.scanner.NescAutoIndentStrategy;
+import pl.edu.mimuw.nesc.plugin.editor.scanner.NumberRule;
+import pl.edu.mimuw.nesc.plugin.editor.scanner.OperatorRule;
+import pl.edu.mimuw.nesc.plugin.editor.scanner.WhitespaceRule;
 import pl.edu.mimuw.nesc.plugin.marker.NescQuickAssistProcessor;
 import pl.edu.mimuw.nesc.plugin.partitioning.INCPartitions;
 import pl.edu.mimuw.nesc.plugin.scanners.NescWordDetector;
@@ -199,6 +199,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IWordDetector wordDetector = new NescWordDetector();
 		WordRule words  = new WordRule(wordDetector, defaultToken);
 		IToken keywordToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x9E, 0x53, 0xAE)));
+		// FIXME: use Keywords from frontend
 		// keywords
 		words.addWord("as", keywordToken);
 		words.addWord("abstract", keywordToken);

@@ -107,7 +107,7 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectGeneralSettingsPage"
+            class="pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectGeneralSettingsPage"
             id="pl.edu.mimuw.nesc.projects.NescProjectPage"
             name="NesC Project">
             <enabledWhen>
@@ -117,7 +117,7 @@
             </enabledWhen>
       </page>
       <page
-            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectAdditionalMacrosPage"
+            class="pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectAdditionalMacrosPage"
             id="pl.edu.mimuw.nesc.projects.NescProjectPage.AdditionalPaths"
             name="Additional includes and macros"
             category="pl.edu.mimuw.nesc.projects.NescProjectPage">
@@ -128,7 +128,7 @@
             </enabledWhen>
       </page>
       <page
-            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectSourceFoldersPage"
+            class="pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectSourceFoldersPage"
             id="pl.edu.mimuw.nesc.projects.NescProjectPage.ProjectSourceFolders"
             name="Project source paths"
             category="pl.edu.mimuw.nesc.projects.NescProjectPage">
@@ -140,7 +140,7 @@
       </page>
       <page
             category="pl.edu.mimuw.nesc.projects.NescProjectPage"
-            class="pl.edu.mimuw.nesc.plugin.projects.NescProjectCommentsTemplatesSettingsPage"
+            class="pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectCommentsTemplatesSettingsPage"
             id="pl.edu.mimuw.nesc.projects.NescProjectPage.CommentsTemplates"
             name="Comments Templates">
             <enabledWhen>

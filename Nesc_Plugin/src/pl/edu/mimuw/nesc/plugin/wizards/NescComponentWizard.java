@@ -6,7 +6,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
+import pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectSupport;
 
 /**
  * Wizard that allows creating new nesC components.

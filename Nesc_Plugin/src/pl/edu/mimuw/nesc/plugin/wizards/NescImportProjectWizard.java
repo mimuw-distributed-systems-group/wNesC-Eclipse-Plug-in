@@ -22,9 +22,9 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.osgi.service.prefs.BackingStoreException;
 
-import pl.edu.mimuw.nesc.plugin.projects.NescProjectSupport;
+import pl.edu.mimuw.nesc.plugin.frontend.FrontendManager;
+import pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectSupport;
 import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
-import pl.edu.mimuw.nesc.plugin.projects.util.ProjectManager;
 
 import com.google.common.base.Optional;
 
@@ -113,7 +113,7 @@ public class NescImportProjectWizard extends Wizard implements IImportWizard {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("Creating project context...", IProgressMonitor.UNKNOWN);
-					final Optional<String> msg = ProjectManager.ensureContext(project);
+					final Optional<String> msg = FrontendManager.ensureContext(project);
 					monitor.done();
 
 					// Rebuild is done automatically by builder.
