@@ -122,7 +122,7 @@ public class DirectorySelector extends Composite {
 	}
 
 	public String getSelectedPath() {
-		return path;
+		return path == null ? "" : path;
 	}
 
 	public void setPath(String path) {

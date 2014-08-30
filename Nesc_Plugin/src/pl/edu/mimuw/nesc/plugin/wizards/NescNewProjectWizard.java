@@ -1,17 +1,14 @@
 package pl.edu.mimuw.nesc.plugin.wizards;
 
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_DEFAULT_FILES;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.ADDITIONAL_PREDEFINED_MACROS;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.MAIN_CONFIGURATION;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PATH;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PLATFORM;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PREDEFINED_PLATFORM;
-import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.TINYOS_PROJECT;
+import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -25,6 +22,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import pl.edu.mimuw.nesc.plugin.frontend.FrontendManager;
 import pl.edu.mimuw.nesc.plugin.projects.pages.NescProjectSupport;
 import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
+import pl.edu.mimuw.nesc.plugin.variable.PathVariable;
 
 import com.google.common.base.Optional;
 
@@ -67,7 +65,6 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 		_pageOne.setTitle("NesC Project");
 		_pageOne.setDescription("New NesC project.");
 		addPage(_pageOne);
-
 		_pageTwo = new NescWizardNewProjectGeneralSettingsPage(PAGE_NAME);
 		_pageTwo.setTitle("Project setup");
 		_pageTwo.setDescription("Set the main configuration name and optionally choose the platform.");
@@ -99,17 +96,28 @@ public class NescNewProjectWizard extends Wizard implements INewWizard {
 		try {
 			NescProjectPreferences.transaction(project)
 					.set(MAIN_CONFIGURATION, _pageTwo.getMainConfiguration())
-					.set(TINYOS_PROJECT, _pageTwo.getTinyOsProject())
 					.set(TINYOS_PLATFORM, _pageTwo.getTinyOsPlatform())
 					.set(TINYOS_PREDEFINED_PLATFORM, _pageTwo.isPlatformPredefined())
 					.set(TINYOS_PATH, _pageTwo.getTinyOsPath())
+					.set(NCLIB_PATH, _pageTwo.getNescLibPath())
+					.set(CLIB_PATH, _pageTwo.getClibPath())
+					.set(HWLIB_PATH, _pageTwo.getHwlibPath())
 					.set(ADDITIONAL_DEFAULT_FILES, _pageThree.getDefaultIncludes())
 					.set(ADDITIONAL_PREDEFINED_MACROS, _pageThree.getPredefinedMacros())
 					.commit();
 
+			final IPathVariableManager pathManager = project.getPathVariableManager();
+			pathManager.setURIValue(PathVariable.OSDIR_NAME, new URI(_pageTwo.getTinyOsPath()));
+			pathManager.setURIValue(PathVariable.NCLIBDIR_NAME, new URI(_pageTwo.getNescLibPath()));
+			pathManager.setURIValue(PathVariable.CLIBDIR_NAME, new URI(_pageTwo.getClibPath()));
+			pathManager.setURIValue(PathVariable.HWLIBDIR_NAME, new URI(_pageTwo.getHwlibPath()));
+
 			setErrorMessage(null);
 		} catch (BackingStoreException e) {
 			setErrorMessage("Failed to write project configuration on disk");
+		} catch (CoreException | URISyntaxException  e) {
+			setErrorMessage("Failed to save project configuration");
+			e.printStackTrace();
 		}
 
 		/* Build context after saving project settings. */

@@ -51,10 +51,6 @@ public class NescWizardNewProjectGeneralSettingsPage extends WizardPage {
 		return generalSettingsComposite.getMainConfiguration();
 	}
 
-	public boolean getTinyOsProject() {
-		return generalSettingsComposite.isTinyOsProject();
-	}
-
 	public String getTinyOsPlatform() {
 		return generalSettingsComposite.getTinyOsPlatform();
 	}
@@ -65,5 +61,17 @@ public class NescWizardNewProjectGeneralSettingsPage extends WizardPage {
 
 	public String getTinyOsPath() {
 		return generalSettingsComposite.getTinyOsPath();
+	}
+
+	public String getNescLibPath() {
+		return generalSettingsComposite.getNescLibPath();
+	}
+
+	public String getClibPath() {
+		return generalSettingsComposite.getClibPath();
+	}
+
+	public String getHwlibPath() {
+		return generalSettingsComposite.getHwlibPath();
 	}
 }

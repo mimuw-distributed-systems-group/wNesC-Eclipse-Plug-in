@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -16,6 +13,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
+import pl.edu.mimuw.nesc.plugin.preferences.NescPluginPreferences;
 import pl.edu.mimuw.nesc.plugin.projects.util.NescPlatformUtil;
 
 import com.google.common.base.Function;
@@ -32,23 +30,28 @@ public class ProjectGeneralSettingsComposite extends Composite {
 
 	private static final String EMTPY_STRING = "";
 	private static final String MAIN_CONFIGURATION_LABEL = "Main configuration:";
-	private static final String TINYOS_PROJECT_LABEL = "TinyOS project:";
 	private static final String PLATFORM_LABEL = "Platform:";
-	private static final String TINYOS_PATH_LABEL = "TinyOS path:";
+	private static final String TINYOS_LOC_LABEL = "TinyOS path:";
+	private static final String NESCLIB_LOC_LABEL = "nclib path:";
+	private static final String CLIB_LOC_LABEL = "clib path:";
+	private static final String HWLIB_LOC_LABEL = "hwlib path:";
 
 	private static final String ERROR_MAIN_CONFIG_NOT_SET = "Main configuration is not set.";
 	private static final String ERROR_TINYOS_PLATFORM_NOT_SET = "TinyOS platform is not set.";
 	private static final String ERROR_TINYOS_PATH_NOT_SET = "TinyOS path is not set.";
-
-	private static final boolean TINYOS_PROJECT_SELECTION_DEFAULT = true;
+	private static final String ERROR_NESCLIB_PATH_NOT_SET = "NesC lib path is not set.";
+	private static final String ERROR_CLIB_PATH_NOT_SET = "C lib path is not set.";
+	private static final String ERROR_HWLIB_PATH_NOT_SET = "Hardware lib path is not set.";
 
 	private final PageCompositeListener pageCompositeListener;
 	private final List<PlatformItem> platforms;
 
 	private Text mainConfiguration;
-	private Button tinyOsProject;
 	private Combo tinyOsPlatform;
-	private DirectorySelector tinyOsPathSelector;
+	private DirectorySelector tinyOsLocSelector;
+	private DirectorySelector nescLibLocSelector;
+	private DirectorySelector clibLocSelector;
+	private DirectorySelector hwlibLocSelector;
 
 	private Listener pageModifyListener = new Listener() {
 		@Override
@@ -80,46 +83,40 @@ public class ProjectGeneralSettingsComposite extends Composite {
 		mainConfiguration.setText(EMTPY_STRING);
 		mainConfiguration.addListener(SWT.Modify, pageModifyListener);
 
-		/* TinyOS project checkbox. */
-		Label labelTinyOS = new Label(this, SWT.NONE);
-		labelTinyOS.setText(TINYOS_PROJECT_LABEL);
-		tinyOsProject = new Button(this, SWT.CHECK);
-		tinyOsProject.setSelection(TINYOS_PROJECT_SELECTION_DEFAULT);
-		tinyOsProject.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				final boolean isSelected = ((Button) e.widget).getSelection();
-				if (tinyOsPlatform != null) {
-					tinyOsPlatform.setEnabled(isSelected);
-				}
-				if (tinyOsPathSelector != null) {
-					tinyOsPathSelector.setEnabled(isSelected);
-				}
-				// FIXME: hack: modify listener for check button does not work?
-				pageModifyListener.handleEvent(null);
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		});
-		// FIXME: modify listener for check button does not work?
-		// tinyOsProject.addListener(SWT.Modify, pageModifyListener);
-
 		/* Platform selector. */
 		Label labelPlatform = new Label(this, SWT.NONE);
 		labelPlatform.setText(PLATFORM_LABEL);
 		tinyOsPlatform = new Combo(this, SWT.READ_ONLY);
 		tinyOsPlatform.setItems(getPlatformNames(platforms));
-		tinyOsPlatform.setEnabled(TINYOS_PROJECT_SELECTION_DEFAULT);
 		tinyOsPlatform.addListener(SWT.Modify, pageModifyListener);
 
 		/* TinyOS directory selector. */
 		Label tinyOsPath = new Label(this, SWT.NONE);
-		tinyOsPath.setText(TINYOS_PATH_LABEL);
-		tinyOsPathSelector = new DirectorySelector(this);
-		tinyOsPathSelector.setEnabled(TINYOS_PROJECT_SELECTION_DEFAULT);
-		tinyOsPathSelector.addListener(SWT.Modify, pageModifyListener);
+		tinyOsPath.setText(TINYOS_LOC_LABEL);
+		tinyOsLocSelector = new DirectorySelector(this);
+		tinyOsLocSelector.addListener(SWT.Modify, pageModifyListener);
+		tinyOsLocSelector.setPath(NescPluginPreferences.getString(NescPluginPreferences.OS_LOC));
+
+		/* NesC directory selector. */
+		Label nescLibPath = new Label(this, SWT.NONE);
+		nescLibPath.setText(NESCLIB_LOC_LABEL);
+		nescLibLocSelector = new DirectorySelector(this);
+		nescLibLocSelector.addListener(SWT.Modify, pageModifyListener);
+		nescLibLocSelector.setPath(NescPluginPreferences.getString(NescPluginPreferences.NCLIB_LOC));
+
+		/* C directory selector. */
+		Label clibPath = new Label(this, SWT.NONE);
+		clibPath.setText(CLIB_LOC_LABEL);
+		clibLocSelector = new DirectorySelector(this);
+		clibLocSelector.addListener(SWT.Modify, pageModifyListener);
+		clibLocSelector.setPath(NescPluginPreferences.getString(NescPluginPreferences.CLIB_LOC));
+
+		/* Hardware directory selector. */
+		Label hwlibPath = new Label(this, SWT.NONE);
+		hwlibPath.setText(HWLIB_LOC_LABEL);
+		hwlibLocSelector = new DirectorySelector(this);
+		hwlibLocSelector.addListener(SWT.Modify, pageModifyListener);
+		hwlibLocSelector.setPath(NescPluginPreferences.getString(NescPluginPreferences.HWLIB_LOC));
 
 		/* Required to avoid an error in the system. */
 		pageCompositeListener.setPageComplete(validatePage());
@@ -130,13 +127,6 @@ public class ProjectGeneralSettingsComposite extends Composite {
 			return EMTPY_STRING;
 		}
 		return emptyStringIfNull(mainConfiguration.getText());
-	}
-
-	public boolean isTinyOsProject() {
-		if (tinyOsProject == null) {
-			return false;
-		}
-		return tinyOsProject.getSelection();
 	}
 
 	public String getTinyOsPlatform() {
@@ -162,22 +152,37 @@ public class ProjectGeneralSettingsComposite extends Composite {
 	}
 
 	public String getTinyOsPath() {
-		if (tinyOsPathSelector == null) {
+		if (tinyOsLocSelector == null) {
 			return EMTPY_STRING;
 		}
-		return emptyStringIfNull(tinyOsPathSelector.getSelectedPath());
+		return emptyStringIfNull(tinyOsLocSelector.getSelectedPath());
 	}
 
-	public void setData(String mainConfiguration, boolean tinyOsProject, String platform, boolean predefinedPlatform,
-			String platformPath) {
+	public String getNescLibPath() {
+		if (nescLibLocSelector == null) {
+			return EMTPY_STRING;
+		}
+		return emptyStringIfNull(nescLibLocSelector.getSelectedPath());
+	}
+
+	public String getClibPath() {
+		if (clibLocSelector == null) {
+			return EMTPY_STRING;
+		}
+		return emptyStringIfNull(clibLocSelector.getSelectedPath());
+	}
+
+	public String getHwlibPath() {
+		if (hwlibLocSelector == null) {
+			return EMTPY_STRING;
+		}
+		return emptyStringIfNull(hwlibLocSelector.getSelectedPath());
+	}
+
+	public void setData(String mainConfiguration, String platform, boolean predefinedPlatform, String platformPath,
+			String nescLibPath, String clibPath, String hwlibPath) {
 		if (this.mainConfiguration != null) {
 			this.mainConfiguration.setText(mainConfiguration);
-		}
-		if (this.tinyOsProject != null) {
-			this.tinyOsProject.setSelection(tinyOsProject);
-		}
-		if (!tinyOsProject) {
-			return;
 		}
 		if (this.tinyOsPlatform != null) {
 			boolean platformExists = false;
@@ -195,8 +200,17 @@ public class ProjectGeneralSettingsComposite extends Composite {
 				pageCompositeListener.setPageComplete(false);
 			}
 		}
-		if (this.tinyOsPathSelector != null) {
-			this.tinyOsPathSelector.setPath(platformPath);
+		if (this.tinyOsLocSelector != null) {
+			this.tinyOsLocSelector.setPath(platformPath);
+		}
+		if (this.nescLibLocSelector != null) {
+			this.nescLibLocSelector.setPath(nescLibPath);
+		}
+		if (this.clibLocSelector != null) {
+			this.clibLocSelector.setPath(clibPath);
+		}
+		if (this.hwlibLocSelector != null) {
+			this.hwlibLocSelector.setPath(hwlibPath);
 		}
 	}
 
@@ -205,15 +219,25 @@ public class ProjectGeneralSettingsComposite extends Composite {
 			pageCompositeListener.setErrorMessage(ERROR_MAIN_CONFIG_NOT_SET);
 			return false;
 		}
-		if (isTinyOsProject()) {
-			if (getTinyOsPlatform().isEmpty()) {
-				pageCompositeListener.setErrorMessage(ERROR_TINYOS_PLATFORM_NOT_SET);
-				return false;
-			}
-			if (getTinyOsPath().isEmpty()) {
-				pageCompositeListener.setErrorMessage(ERROR_TINYOS_PATH_NOT_SET);
-				return false;
-			}
+		if (getTinyOsPlatform().isEmpty()) {
+			pageCompositeListener.setErrorMessage(ERROR_TINYOS_PLATFORM_NOT_SET);
+			return false;
+		}
+		if (getTinyOsPath().isEmpty()) {
+			pageCompositeListener.setErrorMessage(ERROR_TINYOS_PATH_NOT_SET);
+			return false;
+		}
+		if (getNescLibPath().isEmpty()) {
+			pageCompositeListener.setErrorMessage(ERROR_NESCLIB_PATH_NOT_SET);
+			return false;
+		}
+		if (getClibPath().isEmpty()) {
+			pageCompositeListener.setErrorMessage(ERROR_CLIB_PATH_NOT_SET);
+			return false;
+		}
+		if (getHwlibPath().isEmpty()) {
+			pageCompositeListener.setErrorMessage(ERROR_HWLIB_PATH_NOT_SET);
+			return false;
 		}
 		/* Page is valid. */
 		pageCompositeListener.setErrorMessage(null);

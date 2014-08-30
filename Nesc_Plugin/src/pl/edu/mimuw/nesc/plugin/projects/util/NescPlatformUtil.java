@@ -1,11 +1,10 @@
 package pl.edu.mimuw.nesc.plugin.projects.util;
 
-import static pl.edu.mimuw.nesc.plugin.projects.util.EnvironmentVariableResolver.resolveTosDirVariable;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +12,13 @@ import java.util.List;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import pl.edu.mimuw.nesc.common.util.file.FileUtils;
 import pl.edu.mimuw.nesc.plugin.NescPlugin;
 import pl.edu.mimuw.nesc.plugin.preferences.NescPluginPreferences;
+import pl.edu.mimuw.nesc.plugin.resources.PathsUtil;
 
 /**
  * Utility class with methods for retrieving available platforms and loading
@@ -81,22 +82,21 @@ public final class NescPlatformUtil {
 	 * specification file either in predefined platforms directory or in
 	 * directory specified by user.
 	 *
+	 * @param project project
 	 * @param platformName
 	 *            platform's name
 	 * @param predefinedPlatform
 	 *            indicates where platform specification should be searched
-	 * @param tinyOsPath
-	 *            absolute path to TinyOS sources (to tos/ subdirectory),
-	 *            necessary to resolve references to <code>${TOSDIR}</code>
-	 *            variable
 	 * @return object describing platform
 	 * @throws ConfigurationException
 	 *             when configuration file is malformed or does not exist
 	 * @throws IOException
 	 *             when directory of predefined platforms does not exist
+	 * @throws URISyntaxException
+	 * 			   when paths are invalid
 	 */
-	public static NescPlatform loadPlatformProperties(String platformName, boolean predefinedPlatform, String tinyOsPath)
-			throws ConfigurationException, IOException {
+	public static NescPlatform loadPlatformProperties(IProject project, String platformName,
+			boolean predefinedPlatform) throws ConfigurationException, IOException, URISyntaxException {
 		final Configuration config;
 		if (predefinedPlatform) {
 			final URL url = new URL("platform:/plugin/Nesc_Plugin/resources/predefined_platforms/" + platformName
@@ -109,9 +109,9 @@ public final class NescPlatformUtil {
 			config = new PropertiesConfiguration(file);
 		}
 
-		final String[] includes = resolveTosDirVariable(config.getStringArray(INCLUDES), tinyOsPath);
+		final String[] includes = PathsUtil.resolvePaths(project, config.getStringArray(INCLUDES));
 		final String[] macros = config.getStringArray(MACROS);
-		final String[] paths = resolveTosDirVariable(config.getStringArray(PATHS), tinyOsPath);
+		final String[] paths = PathsUtil.resolvePaths(project, config.getStringArray(PATHS));
 		return new NescPlatform(paths, includes, macros);
 	}
 

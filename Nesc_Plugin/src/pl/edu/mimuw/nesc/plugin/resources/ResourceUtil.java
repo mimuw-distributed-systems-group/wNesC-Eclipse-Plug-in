@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 
-import pl.edu.mimuw.nesc.plugin.projects.util.EnvironmentVariableResolver;
-
 /**
  * Utility class with methods for extracting data involving project's resources.
  *
@@ -49,7 +47,7 @@ public final class ResourceUtil {
 
 	private static String getDisplayString(String rootPath, String filePath) {
 		final StringBuilder builder = new StringBuilder();
-		builder.append(EnvironmentVariableResolver.PROJECT_DIR);
+		builder.append("PROJECT_LOC");
 		final String shortenPath = filePath.substring(rootPath.length());
 		if (!shortenPath.startsWith(File.separator)) {
 			builder.append(File.separator);

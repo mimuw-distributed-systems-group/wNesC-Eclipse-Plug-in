@@ -19,11 +19,13 @@ import pl.edu.mimuw.nesc.plugin.NescPlugin;
  */
 public final class NescProjectPreferences {
 
-	public static final String MAIN_CONFIGURATION = "main-configuration";
-	public static final String TINYOS_PROJECT = "is-TinyOS-project";
-	public static final String TINYOS_PLATFORM = "TinyOS-platform";
+	public static final String MAIN_CONFIGURATION = "pl.edu.mimuw.nesc.plugin.main_configuration";
+	public static final String TINYOS_PLATFORM = "pl.edu.mimuw.nesc.plugin.platform";
 	public static final String TINYOS_PREDEFINED_PLATFORM = "pl.edu.mimuw.nesc.plugin.predefined_platform";
-	public static final String TINYOS_PATH = "pl.edu.mimuw.nesc.plugin.TinyOS-path";
+	public static final String TINYOS_PATH = "pl.edu.mimuw.nesc.plugin.tinyos_path";
+	public static final String NCLIB_PATH = "pl.edu.mimuw.nesc.plugin.nclib_path";
+	public static final String CLIB_PATH = "pl.edu.mimuw.nesc.plugin.clib_path";
+	public static final String HWLIB_PATH = "pl.edu.mimuw.nesc.plugin.hwlib_path";
 	public static final String ADDITIONAL_DEFAULT_FILES = "pl.edu.mimuw.nesc.plugin.additional_default_files";
 	public static final String ADDITIONAL_PREDEFINED_MACROS = "pl.edu.mimuw.nesc.plugin.additional_predefined_macros";
 	public static final String ADDITIONAL_INCLUDE_PATHS = "pl.edu.mimuw.nesc.plugin.additional_include_paths";

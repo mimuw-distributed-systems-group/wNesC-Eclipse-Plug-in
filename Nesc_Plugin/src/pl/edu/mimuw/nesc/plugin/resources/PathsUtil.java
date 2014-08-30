@@ -1,18 +1,16 @@
 package pl.edu.mimuw.nesc.plugin.resources;
 
-import static pl.edu.mimuw.nesc.plugin.projects.util.EnvironmentVariableResolver.*;
 import static pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.osgi.service.prefs.BackingStoreException;
 
-import pl.edu.mimuw.nesc.plugin.projects.util.EnvironmentVariableResolver;
 import pl.edu.mimuw.nesc.plugin.projects.util.NescProjectPreferences;
-
-import com.google.common.base.Optional;
 
 /**
  * Helper class for handling project's source paths.
@@ -118,41 +116,41 @@ public final class PathsUtil {
 		saveNonPlatformPaths(project, getNonPlatformPaths(project));
 	}
 
+	public static List<String> resolvePaths(IProject project, List<String> paths) throws URISyntaxException {
+		final List<String> result = new ArrayList<>();
+		for (String path : paths) {
+			result.add(project.getPathVariableManager().resolveURI(new URI(path)).getPath());
+		}
+		return result;
+	}
+
+	public static String[] resolvePaths(IProject project, String[] paths) throws URISyntaxException {
+		final String[] result = new String[paths.length];
+		for (int i = 0; i < paths.length; ++i) {
+			result[i] = project.getPathVariableManager().resolveURI(new URI(paths[i])).getPath();
+		}
+		return result;
+	}
+
 	/**
 	 * Returns the list of non-platform include paths of given project with
 	 * resolved environment variables.
 	 *
 	 * @param project
 	 *            current project
-	 * @param tinyOsPath
-	 *            optional path to tinyOS sources; if <code>tinyOsPath</code> is
-	 *            not present, paths with reference to the <code>TOSDIR</code>
-	 *            will be omitted
 	 * @return list of resolved non-platform source paths
+	 * @throws URISyntaxException
 	 */
-	public static List<String> getResolvedNonPlatformPaths(IProject project, Optional<String> tinyOsPath) {
+	public static List<String> getResolvedNonPlatformPaths(IProject project) throws URISyntaxException {
 		final List<Path> nonPlatformPaths = getNonPlatformPaths(project);
-
 		List<String> additionalPaths = new ArrayList<>();
-
 		for (Path path : nonPlatformPaths) {
 			if (!path.isActive()) {
 				continue;
 			}
-			if (!tinyOsPath.isPresent() && path.getValue().contains(EnvironmentVariableResolver.TOSDIR_REGEXP)) {
-				continue;
-			}
 			additionalPaths.add(path.getValue());
 		}
-
-		if (tinyOsPath.isPresent()) {
-			additionalPaths = resolveTosDirVariable(additionalPaths, tinyOsPath.get());
-		}
-
-		final String projectPath = project.getLocation().toOSString();
-		additionalPaths = resolveProjectDirVariable(additionalPaths, projectPath);
-
-		return additionalPaths;
+		return resolvePaths(project, additionalPaths);
 	}
 
 	/**
