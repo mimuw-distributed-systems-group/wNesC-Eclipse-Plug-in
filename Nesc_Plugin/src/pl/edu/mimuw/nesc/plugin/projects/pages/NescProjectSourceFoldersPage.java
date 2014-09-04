@@ -2,6 +2,7 @@ package pl.edu.mimuw.nesc.plugin.projects.pages;
 
 import static org.eclipse.swt.SWT.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +76,7 @@ public class NescProjectSourceFoldersPage extends NescPropertyPage {
 		initializeTables(container);
 		initializeButtons(container);
 
-		directorySelector = new DirectorySelector(baseContainer, "Add");
+		directorySelector = new DirectorySelector(baseContainer, "Add", "Add recursively");
 		directorySelector.getAdditionalButton().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -88,12 +89,53 @@ public class NescProjectSourceFoldersPage extends NescPropertyPage {
 				final TableItem tableItem = new TableItem(table, NONE);
 				tableItem.setText(str);
 				tableItem.setData(TABLE_ITEM_PROPERTY_CUSTOM_DATA, path);
+				tableItem.setChecked(true);
 				directorySelector.setPath("");
 			}
 		});
-
+		directorySelector.getAdditionalButton2().addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				final String str = directorySelector.getSelectedPath();
+				if (str.isEmpty()) {
+					setErrorMessage(ERROR_MSG_EMPTY_VALUE);
+					return;
+				}
+				final List<String> paths = getPathsRecursively(str);
+				for (String p : paths) {
+					final Path path = new Path(p, p, true, true);
+					final TableItem tableItem = new TableItem(table, NONE);
+					tableItem.setText(p);
+					tableItem.setData(TABLE_ITEM_PROPERTY_CUSTOM_DATA, path);
+					tableItem.setChecked(true);
+				}
+				directorySelector.setPath("");
+			}
+		});
 		initializeValues();
 		return baseContainer;
+	}
+
+	private List<String> getPathsRecursively(String path) {
+		final List<String> result = new ArrayList<>();
+		final File rootFile = new File(path);
+		result.add(path);
+		getPathsRecursively(rootFile, result);
+		return result;
+	}
+
+	private void getPathsRecursively(File rootFile, List<String> result) {
+		final File[] files = rootFile.listFiles();
+		if (files == null) {
+			return;
+		}
+		for (File child : files) {
+			if (child.isDirectory()) {
+				final String path = child.getAbsolutePath();
+				result.add(path);
+				getPathsRecursively(child, result);
+			}
+		}
 	}
 
 	private void initializeTables(Composite parent) {
@@ -254,6 +296,7 @@ public class NescProjectSourceFoldersPage extends NescPropertyPage {
 					final TableItem tableItem = new TableItem(table, NONE);
 					tableItem.setText(str);
 					tableItem.setData(TABLE_ITEM_PROPERTY_CUSTOM_DATA, path);
+					tableItem.setChecked(true);
 				}
 			}
 		});

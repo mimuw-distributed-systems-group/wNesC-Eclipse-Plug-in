@@ -24,31 +24,40 @@ import com.google.common.base.Optional;
  */
 public class DirectorySelector extends Composite {
 
-	private static final String BROWSE = "Browse...";//$NON-NLS-1$
-	private static final String SELECT_DIRECTORY = "Select directory";//$NON-NLS-1$
+	private static final String BROWSE = "Browse...";
+	private static final String SELECT_DIRECTORY = "Select directory";
 
 	private final Optional<String> additionalButtonLabel;
+	private final Optional<String> additionalButtonLabel2;
 
 	private Text pathText;
 	private Button browseButton;
 	private Button additionalButton;
+	private Button additionalButton2;
 
 	private String path;
 
 	public DirectorySelector(Composite parent) {
-		this(parent, Optional.<String>absent());
+		this(parent, Optional.<String> absent(), Optional.<String> absent());
 	}
 
 	public DirectorySelector(Composite parent, String additionalButtonLabel) {
-		this(parent, Optional.of(additionalButtonLabel));
+		this(parent, Optional.of(additionalButtonLabel), Optional.<String> absent());
 	}
 
-	private DirectorySelector(Composite parent, Optional<String> additionalButtonLabel) {
+	public DirectorySelector(Composite parent, String additionalButtonLabel, String additionalButtonLabel2) {
+		this(parent, Optional.of(additionalButtonLabel), Optional.of(additionalButtonLabel2));
+	}
+
+	private DirectorySelector(Composite parent, Optional<String> additionalButtonLabel,
+			Optional<String> additionalButtonLabel2) {
 		super(parent, SWT.NONE);
 		this.additionalButtonLabel = additionalButtonLabel;
+		this.additionalButtonLabel2 = additionalButtonLabel2;
 
 		GridData parentData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		GridLayout layout = new GridLayout(additionalButtonLabel.isPresent() ? 3 : 2, false);
+		int columns = 2 + (additionalButtonLabel.isPresent() ? 1 : 0) + (additionalButtonLabel2.isPresent() ? 1 : 0);
+		GridLayout layout = new GridLayout(columns, false);
 		layout.marginHeight = layout.marginWidth = 0;
 		this.setLayout(layout);
 		this.setLayoutData(parentData);
@@ -97,10 +106,19 @@ public class DirectorySelector extends Composite {
 			additionalButton = new Button(this, SWT.PUSH);
 			additionalButton.setText(additionalButtonLabel.get());
 		}
+
+		if (additionalButtonLabel2.isPresent()) {
+			additionalButton2 = new Button(this, SWT.PUSH);
+			additionalButton2.setText(additionalButtonLabel2.get());
+		}
 	}
 
 	public Button getAdditionalButton() {
 		return additionalButton;
+	}
+
+	public Button getAdditionalButton2() {
+		return additionalButton2;
 	}
 
 	public String getSelectedPath() {

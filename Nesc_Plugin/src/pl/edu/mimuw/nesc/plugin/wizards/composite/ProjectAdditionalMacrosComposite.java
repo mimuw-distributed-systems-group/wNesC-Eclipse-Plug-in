@@ -30,7 +30,7 @@ public class ProjectAdditionalMacrosComposite extends Composite {
 	private static final int COLUMN_WIDTH = 400;
 	private static final String TOSDIR_VARIABLE = "Use ${TOSDIR} variable to refer to TinyOS directory.";
 
-	private static final String DEFAULT_INCLUDES_FIELD = "Default includes";
+	private static final String DEFAULT_INCLUDES_FIELD = "Files included by default";
 	private static final String DEFAULT_INCLUDES_TIP = "File that should be included to each source and header file.";
 	private static final String ADD_DEFAULT_INCLUDE_TITLE = "New file included by default";
 	private static final String ADD_DEFAULT_INCLUDE_MESSAGE = "Enter a path of file that should be included to each source and header file.";
