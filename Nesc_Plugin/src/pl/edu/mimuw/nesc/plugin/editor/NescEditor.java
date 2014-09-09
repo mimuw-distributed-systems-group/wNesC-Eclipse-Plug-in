@@ -6,6 +6,7 @@ import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -46,6 +47,8 @@ public class NescEditor extends TextEditor {
 	public static final String EDITOR_ID = "pl.edu.mimuw.nesc.NesCEditor";
 
 	private NescSourceViewerConfiguration sourceViewerConfiguration = null;
+	
+	private PreferenceStore prefStore = null;
 
 	private class ExitPolicy implements IExitPolicy {
 		final char fExitCharacter;
@@ -354,7 +357,9 @@ public class NescEditor extends TextEditor {
 
 	public NescEditor() {
 		super();
-		sourceViewerConfiguration = new NescSourceViewerConfiguration(null, this, INCPartitions.NC_PARTITIONING);
+		prefStore = new PreferenceStore();
+		prefStore.setDefault(PREFERENCE_HYPERLINKS_ENABLED, true);
+		sourceViewerConfiguration = new NescSourceViewerConfiguration(prefStore, this, INCPartitions.NC_PARTITIONING);
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package pl.edu.mimuw.nesc.plugin.editor;
 
 import java.util.Arrays;
+import java.util.Map;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DefaultTextHover;
@@ -12,6 +14,7 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
@@ -78,7 +81,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 	@Override
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler= new PresentationReconciler();
-		reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+		//reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
 		RuleBasedScanner scanner = getCodeScanner();
 
@@ -104,7 +107,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		reconciler.setRepairer(dr, INCPartitions.NC_CHARACTER);
 
 		dr= new DefaultDamagerRepairer(getPreprocessorScanner());
-		reconciler.setDamager(new PartitionDamager(), INCPartitions.NC_PREPROCESSOR);
+		reconciler.setDamager(dr, INCPartitions.NC_PREPROCESSOR);
 		reconciler.setRepairer(dr, INCPartitions.NC_PREPROCESSOR);
 
 		return reconciler;
@@ -177,7 +180,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		if (preprocessorScanner != null) {
 			return preprocessorScanner;
 		}
-		IToken textToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0x9E, 0x53, 0xAE)));
+		IToken textToken = new Token(new TextAttribute(new Color(Display.getCurrent(), 0xFF, 0x00, 0x00)));//0x9E, 0x53, 0xAE)));
 		RuleBasedScanner scanner = new BufferedRuleBasedScanner(scannerBufferSize);
 		IRule[] rules = { new EndOfLineRule("#", textToken, '\\', true) };
 		scanner.setRules(rules);
@@ -418,6 +421,14 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		return assistant;
 	}
+	
+	@Override
+	protected Map<String, IAdaptable> getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
+		@SuppressWarnings("unchecked")
+		Map<String, IAdaptable> targets = super.getHyperlinkDetectorTargets(sourceViewer);
+		targets.put("pl.edu.mimuw.nesc.nescCode", textEditor);
+		return targets;
+	}
 
 	@Override
 	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
@@ -429,7 +440,7 @@ public class NescSourceViewerConfiguration extends TextSourceViewerConfiguration
 		}
 		return new IAutoEditStrategy[] { strategy };
 	}
-	/* TODO: Currently this breaks colouring. It should be enabled at some point. Probably...
+	/* TODO: Currently this breaks colouring. It should be enabled at some point. Probably... 
 	@Override
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
 		if (documentPartitioning != null)

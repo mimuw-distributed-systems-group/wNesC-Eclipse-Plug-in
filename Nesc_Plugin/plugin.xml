@@ -237,4 +237,24 @@
 			super="org.eclipse.ui.workbench.texteditor.error"
 			markerType="pl.edu.mimuw.nesc.plugin.marker.ErrorMarker" />
 	</extension>
+ <extension
+       point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
+    <hyperlinkDetector
+          class="pl.edu.mimuw.nesc.plugin.editor.NescHyperlinkDetector"
+          id="NescHyperlinkDetector"
+          modifierKeys="Ctrl"
+          name="hyperlinkDetector"
+          targetId="pl.edu.mimuw.nesc.nescCode">
+    </hyperlinkDetector>
+ </extension>
+ <extension
+       point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectorTargets">
+    <target
+          id="pl.edu.mimuw.nesc.nescCode"
+          name="nescCodeHyperlinkTarget">
+       <context
+             type="org.eclipse.ui.texteditor.ITextEditor">
+       </context>
+    </target>
+ </extension>
 </plugin>
