@@ -124,7 +124,12 @@ public class NescReconcilingStrategy implements IReconcilingStrategy, IReconcili
 
 	private void reconcile(IProject project, IFile file, IPath path) throws CoreException {
 		final ProjectData projectData = FrontendManager.updateFile(project, path.toOSString());
-		MarkerHelper.updateMarkers(project, file, projectData.getRootFileData());
-		// TODO: update markers for all files.
+		if (projectData.getRootFileData().isPresent()) {
+			MarkerHelper.updateMarkers(project, file, projectData.getRootFileData().get());
+			// TODO: update markers for all files.
+		} else {
+			System.err.println("Root file is absent!");
+		}
+
 	}
 }
