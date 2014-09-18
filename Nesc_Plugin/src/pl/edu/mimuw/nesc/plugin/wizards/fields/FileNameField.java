@@ -1,7 +1,6 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.swt.widgets.Composite;
 
 /**
  * Field that allows entering a name of a file.
@@ -10,17 +9,19 @@ import org.eclipse.swt.widgets.Composite;
  */
 public final class FileNameField extends TextField {
     /**
-     * Initializes this field and creates all its controls.
-     *
-     * @param parent Composite that will contain controls of this field.
-     * @param fieldName Name of the field.
-     * @param layoutData Object that affects layout of the composite created by
-     *                   this field.
-     * @throws NullPointerException One of the arguments (except
-     *                              <code>layoutData</code>) is null.
+     * @return Newly created builder for this class.
      */
-    public FileNameField(Composite parent, String fieldName, Object layoutData) {
-        super(parent, fieldName, layoutData);
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Initializes this field and creates all of its controls.
+     *
+     * @param builder Builder for this class.
+     */
+    private FileNameField(Builder builder) {
+        super(builder);
     }
 
     @Override
@@ -38,5 +39,45 @@ public final class FileNameField extends TextField {
         }
 
         return null;
+    }
+
+    /**
+     * Builder for this part of the fields hierarchy.
+     *
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
+     */
+    public static final class Builder extends TextField.Builder<FileNameField> {
+        /**
+         * Data for this object.
+         */
+        private String fieldName;
+
+        /**
+         * Constructor only for the class of the object that will be built.
+         */
+        private Builder() {
+        }
+
+        /**
+         * Set the name of the field.
+         *
+         * @param fieldName Name that will be associated with the created field.
+         * @return <code>this</code>
+         */
+        public Builder fieldName(String fieldName) {
+            this.fieldName = fieldName;
+            return this;
+        }
+
+        @Override
+        protected void beforeBuild() {
+            super.beforeBuild();
+            setFieldName(fieldName);
+        }
+
+        @Override
+        protected FileNameField create() {
+            return new FileNameField(this);
+        }
     }
 }

@@ -42,36 +42,26 @@ public final class ComponentKindField extends AbstractField {
     private final Button genericConfigurationRadio;
 
     /**
+     * @return Builder that allows creation of a component kind field.
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * Initializes the field and creates its controls.
      *
-     * @param parent Composite that will contain controls of this field.
-     * @param layoutData Layout data object that affects the layout of the
-     *                   composite created for this field. May be null.
-     * @throws NullPointerException <code>parent</code> is null.
+     * @param builder Builder for this field.
      */
-    public ComponentKindField(Composite parent, Object layoutData) {
-        super(parent, FIELD_NAME, FIELD_COLUMNS_COUNT, layoutData);
+    private ComponentKindField(Builder builder) {
+        super(builder);
 
-        // Create radio buttons for this field
-        final Composite radiosComposite = new Composite(getComposite(), NONE);
-        radiosComposite.setLayout(new GridLayout(3, false));
-        moduleRadio = new Button(radiosComposite, RADIO);
-        moduleRadio.setText(LABEL_MODULE);
-        configurationRadio = new Button(radiosComposite, RADIO);
-        configurationRadio.setText(LABEL_CONFIGURATION);
-        binaryComponentRadio = new Button(radiosComposite, RADIO);
-        binaryComponentRadio.setText(LABEL_BINARY_COMPONENT);
-        genericModuleRadio = new Button(radiosComposite, RADIO);
-        genericModuleRadio.setText(LABEL_GENERIC_MODULE);
-        genericConfigurationRadio = new Button(radiosComposite, RADIO);
-        genericConfigurationRadio.setText(LABEL_GENERIC_CONFIGURATION);
-
-        // Set the initial value
-        moduleRadio.setSelection(true);
-        configurationRadio.setSelection(false);
-        binaryComponentRadio.setSelection(false);
-        genericModuleRadio.setSelection(false);
-        genericConfigurationRadio.setSelection(false);
+        builder.buildControls(getComposite());
+        this.moduleRadio = builder.moduleRadio;
+        this.configurationRadio = builder.configurationRadio;
+        this.binaryComponentRadio = builder.binaryComponentRadio;
+        this.genericModuleRadio = builder.genericModuleRadio;
+        this.genericConfigurationRadio = builder.genericConfigurationRadio;
     }
 
     @Override
@@ -187,6 +177,68 @@ public final class ComponentKindField extends AbstractField {
         @Override
         public void accept(Visitor visitor) {
             visitor.visit(this);
+        }
+    }
+
+    /**
+     * Builder for the component kind field.
+     *
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
+     */
+    public static final class Builder extends AbstractField.Builder<ComponentKindField> {
+        /**
+         * Objects that will be created by this builder.
+         */
+        private Button moduleRadio;
+        private Button configurationRadio;
+        private Button binaryComponentRadio;
+        private Button genericModuleRadio;
+        private Button genericConfigurationRadio;
+
+        /**
+         * Constructor only for the class of the object that will be built.
+         */
+        private Builder() {
+            super(FIELD_COLUMNS_COUNT);
+        }
+
+        @Override
+        protected void beforeBuild() {
+            super.beforeBuild();
+            setFieldName(FIELD_NAME);
+        }
+
+        @Override
+        protected ComponentKindField create() {
+            return new ComponentKindField(this);
+        }
+
+        /**
+         * Creates all controls needed by this field.
+         *
+         * @param parent Parent composite for the radio buttons.
+         */
+        private void buildControls(Composite parent) {
+            // Create radio buttons for this field
+            final Composite radiosComposite = new Composite(parent, NONE);
+            radiosComposite.setLayout(new GridLayout(3, false));
+            moduleRadio = new Button(radiosComposite, RADIO);
+            moduleRadio.setText(LABEL_MODULE);
+            configurationRadio = new Button(radiosComposite, RADIO);
+            configurationRadio.setText(LABEL_CONFIGURATION);
+            binaryComponentRadio = new Button(radiosComposite, RADIO);
+            binaryComponentRadio.setText(LABEL_BINARY_COMPONENT);
+            genericModuleRadio = new Button(radiosComposite, RADIO);
+            genericModuleRadio.setText(LABEL_GENERIC_MODULE);
+            genericConfigurationRadio = new Button(radiosComposite, RADIO);
+            genericConfigurationRadio.setText(LABEL_GENERIC_CONFIGURATION);
+
+            // Set the initial value
+            moduleRadio.setSelection(true);
+            configurationRadio.setSelection(false);
+            binaryComponentRadio.setSelection(false);
+            genericModuleRadio.setSelection(false);
+            genericConfigurationRadio.setSelection(false);
         }
     }
 }

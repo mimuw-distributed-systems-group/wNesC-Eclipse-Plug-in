@@ -1,5 +1,6 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
+import com.google.common.base.Optional;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -28,16 +29,15 @@ public abstract class TextField extends AbstractField {
     /**
      * Creates all controls for this field.
      *
-     * @param parent Composite that will contain controls of this field.
-     * @param fieldName Name of the field.
-     * @param layoutData Object that affects layout of the composite created for
-     *                   this field.
-     * @throws NullPointerException One of the arguments (except
-     *                              <code>layoutData</code>) is null.
+     * @param builder Builder for this class.
      */
-    protected TextField(Composite parent, String fieldName, Object layoutData) {
-        super(parent, fieldName, FIELD_COLUMNS_COUNT, layoutData);
-        text = createText(getComposite());
+    protected TextField(Builder<? extends TextField> builder) {
+        super(builder);
+        this.text = builder.buildText(getComposite());
+
+        if (builder.modifyListener.isPresent()) {
+            addModifyListener(builder.modifyListener.get());
+        }
     }
 
     @Override
@@ -67,17 +67,49 @@ public abstract class TextField extends AbstractField {
     }
 
     /**
-     * Creates and returns a text control that is created as the child of the
-     * given parent.
+     * Builder that creates the fragment of the object that belongs to this
+     * class.
      *
-     * @param parent Composite that will be the parent for the returned text
-     *               control.
-     * @return Newly created Text control.
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
      */
-    private static Text createText(Composite parent) {
-        final Text result = new Text(parent, SINGLE | BORDER);
-        result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    public static abstract class Builder<F extends TextField> extends AbstractField.Builder<F> {
+        /**
+         * Fields for this object.
+         */
+        private Optional<ModifyListener> modifyListener = Optional.absent();
 
-        return result;
+        /**
+         * Set the count of field columns.
+         */
+        protected Builder() {
+            super(FIELD_COLUMNS_COUNT);
+        }
+
+        /**
+         * Set the optional initial modify listener.
+         *
+         * @param modifyListener Modify listener to set. Can be null - then no
+         *                       modify listener will be set.
+         * @return <code>this</code>
+         */
+        public Builder<F> modifyListener(ModifyListener modifyListener) {
+            this.modifyListener = Optional.fromNullable(modifyListener);
+            return this;
+        }
+
+        /**
+         * Creates and returns a text control that is created as the child of the
+         * given parent.
+         *
+         * @param parent Composite that will be the parent for the returned text
+         *               control.
+         * @return Newly created Text control.
+         */
+        private Text buildText(Composite parent) {
+            final Text result = new Text(parent, SINGLE | BORDER);
+            result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+            return result;
+        }
     }
 }

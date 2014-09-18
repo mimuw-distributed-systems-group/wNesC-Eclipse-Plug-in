@@ -84,9 +84,17 @@ public class NescHeaderFileWizardPage extends WizardPage {
 
         // Create all fields
         final GridData layoutObject = new GridData(GridData.FILL_HORIZONTAL);
-        sourceFolderField = new SourceFolderField(pageComposite, layoutObject,
-                NescWizardSupport.getInitialSourceFolderFullPath(), getShell());
-        fileNameField = new FileNameField(pageComposite, LABEL_FILENAME, layoutObject);
+        sourceFolderField = SourceFolderField.builder()
+                .initialValue(NescWizardSupport.getInitialSourceFolderFullPath())
+                .parentShell(getShell())
+                .parentComposite(pageComposite)
+                .layoutData(layoutObject)
+                .build();
+        fileNameField = FileNameField.builder()
+                .fieldName(LABEL_FILENAME)
+                .parentComposite(pageComposite)
+                .layoutData(layoutObject)
+                .build();
         fields = new WizardField[] { sourceFolderField, fileNameField };
 
         // Create the guard checkbox

@@ -67,23 +67,27 @@ public class ProjectAdditionalMacrosComposite extends Composite {
 		final GridData centerLayoutData = new GridData(FILL, FILL, true, true);
 
 		defaultIncludes = SingleStringField.builder()
-				.parent(this, centerLayoutData, getShell())
 				.fieldName("")
 				.label(DEFAULT_INCLUDES_FIELD)
 				.tip(DEFAULT_INCLUDES_TIP)
 				.width(COLUMN_WIDTH)
 				.addValueStrings(ADD_DEFAULT_INCLUDE_TITLE, ADD_DEFAULT_INCLUDE_MESSAGE)
 				.editValueStrings(EDIT_DEFAULT_INCLUDE_TITLE, EDIT_DEFAULT_INCLUDE_MESSAGE)
+				.parentShell(getShell())
+				.parentComposite(this)
+				.layoutData(centerLayoutData)
 				.build();
 
 		predefinedMacros = SingleStringField.builder()
-				.parent(this, centerLayoutData, getShell())
 				.fieldName("")
 				.label(PREDEFINED_MACROS_FIELD)
 				.tip(PREDEFINED_MACROS_TIP)
 				.width(COLUMN_WIDTH)
 				.addValueStrings(ADD_PREDEFINED_MACRO_TITLE, ADD_PREDEFINED_MACRO_MESSAGE)
 				.editValueStrings(EDIT_PREDEFINED_MACRO_TITLE, EDIT_PREDEFINED_MACRO_MESSAGE)
+				.parentShell(getShell())
+				.parentComposite(this)
+				.layoutData(centerLayoutData)
 				.build();
 
 		defaultIncludes.align(new AbstractField[] { predefinedMacros });

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -31,9 +30,8 @@ public class SingleStringField extends TableField<StringValue> {
 	private final String editValueMessage;
 
 	private SingleStringField(Builder builder) {
-		super(builder.parent, builder.fieldName, builder.layoutData,
-				new ColumnSpecification[] { new ColumnSpecification(builder.label, builder.width, builder.tip) });
-		this.shell = builder.shell;
+		super(builder);
+		this.shell = builder.parentShell;
 		this.addValueTitle = builder.addValueTitle;
 		this.addValueMessage = builder.addValueMessage;
 		this.editValueTitle = builder.editValueTitle;
@@ -132,12 +130,9 @@ public class SingleStringField extends TableField<StringValue> {
 	 * @author Grzegorz Kołakowski <gk291583@students.mimuw.edu.pl>
 	 *
 	 */
-	public static class Builder {
+	public static class Builder extends TableField.Builder<StringValue, SingleStringField> {
 
-		private Composite parent;
-		private Shell shell;
 		private String fieldName;
-		private Object layoutData;
 		private String label;
 		private int width;
 		private String tip;
@@ -148,13 +143,6 @@ public class SingleStringField extends TableField<StringValue> {
 		private String editValueMessage;
 
 		public Builder() {
-		}
-
-		public Builder parent(Composite parent, Object layoutData, Shell parentShell) {
-			this.parent = parent;
-			this.layoutData = layoutData;
-			this.shell = parentShell;
-			return this;
 		}
 
 		public Builder width(int width) {
@@ -189,13 +177,16 @@ public class SingleStringField extends TableField<StringValue> {
 			return this;
 		}
 
-		public SingleStringField build() {
-			verify();
-			return new SingleStringField(this);
+		@Override
+		protected void beforeBuild() {
+			super.beforeBuild();
+			setFieldName(fieldName);
+			setColumnsSpec(new ColumnSpecification[] { new ColumnSpecification(label, width, tip) });
 		}
 
-		private void verify() {
-			// TODO Auto-generated method stub
+		@Override
+		protected SingleStringField create() {
+			return new SingleStringField(this);
 		}
 	}
 }

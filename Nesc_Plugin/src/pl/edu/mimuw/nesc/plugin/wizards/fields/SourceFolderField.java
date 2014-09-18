@@ -1,5 +1,6 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
+import com.google.common.base.Optional;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -20,6 +21,7 @@ import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import pl.edu.mimuw.nesc.plugin.natures.NescProjectNature;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.swt.SWT.*;
 
 /**
@@ -28,7 +30,7 @@ import static org.eclipse.swt.SWT.*;
  *
  * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
  */
-public class SourceFolderField extends AbstractField {
+public final class SourceFolderField extends AbstractField {
     /**
      * Text that the browse button will contain.
      */
@@ -53,7 +55,7 @@ public class SourceFolderField extends AbstractField {
     /**
      * Shell that will be used as parent for dialogs.
      */
-    private final Shell shell;
+    private final Shell parentShell;
 
     /**
      * Control that allow users enter the value of this field.
@@ -66,26 +68,60 @@ public class SourceFolderField extends AbstractField {
     private final Button browseButton;
 
     /**
-     * Initializes the field with given values.
-     *
-     * @param parent Composite that this field will be contained in.
-     * @param layoutData Layout data object that will be associated with the
-     *                   newly created composite for this field. It can be null.
-     * @param defaultValue Initial value to set for this field.
-     * @param shell Shell that will be used as parent for dialogs.
-     * @throws NullPointerException One of the arguments is null
-     *                              (except <code>layoutData</code>).
+     * Action performed when the browse button is clicked.
      */
-    public SourceFolderField(Composite parent, Object layoutData, String defaultValue, Shell shell) {
-        super(parent, FIELD_NAME, FIELD_COLUMNS_COUNT, layoutData);
+    private final SelectionListener browseOnClick = new SelectionListener() {
+        @Override
+        public void widgetSelected(SelectionEvent event) {
+            // Create configure and show the dialog
+            final ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(parentShell,
+                    new WorkbenchLabelProvider(), new BaseWorkbenchContentProvider());
+            dialog.setTitle(TITLE_FOLDER_SELECTION);
+            dialog.setMessage(BODY_FOLDER_SELECTION);
+            dialog.addFilter(NescProjectsFilter.getInstance());
+            dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
+            dialog.open();
 
-        if (defaultValue == null || shell == null) {
-            throw new NullPointerException("SourceFolderField.<init>: null argument");
+            final Object[] result = dialog.getResult();
+            if (result != null) {
+                // Update the path to the selected one
+                if (result[0] instanceof IResource) {
+                    final IResource selectedResource = (IResource) result[0];
+                    text.setText(selectedResource.getFullPath().toString());
+                }
+            }
         }
 
-        text = createText(getComposite(), defaultValue);
-        this.shell = shell;
-        browseButton = createButton();
+        @Override
+        public void widgetDefaultSelected(SelectionEvent event) {
+            widgetSelected(event);
+        }
+    };
+
+    /**
+     * Get the builder for this class.
+     *
+     * @return Newly created builder for objects of this class.
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Initializes this field.
+     *
+     * @param builder Builder for this class.
+     */
+    private SourceFolderField(Builder builder) {
+        super(builder);
+
+        this.parentShell = builder.parentShell;
+        this.text = builder.buildText(getComposite());
+        this.browseButton = builder.buildBrowseButton(getComposite(), browseOnClick);
+
+        if (builder.modifyListener.isPresent()) {
+            addModifyListener(builder.modifyListener.get());
+        }
     }
 
     @Override
@@ -196,58 +232,104 @@ public class SourceFolderField extends AbstractField {
     }
 
     /**
-     * Creates and returns the text control for this field.
+     * Builder for this part of the fields hierarchy.
      *
-     * @param parent Control that the returned one will be contained in.
-     * @param defaultValue Initial value that the control will contain.
-     * @return The newly created text control.
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
      */
-    private static Text createText(Composite parent, String defaultValue) {
-        final Text result = new Text(parent, BORDER | SINGLE);
-        result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        result.setText(defaultValue);
+    public static final class Builder extends AbstractField.Builder<SourceFolderField> {
+        /**
+         * Data needed for building of a source folder field.
+         */
+        private String defaultValue;
+        private Shell parentShell;
+        private Optional<ModifyListener> modifyListener = Optional.absent();
 
-        return result;
-    }
+        /**
+         * Constructor only for class of the objects that will be created.
+         */
+        private Builder() {
+            super(FIELD_COLUMNS_COUNT);
+        }
 
-    /**
-     * Creates and configures the button that will allow the user choosing
-     * a folder in a nesC project.
-     *
-     * @return The newly created button control.
-     */
-    private Button createButton() {
-        final Button result = new Button(getComposite(), NONE);
-        result.setText(LABEL_BROWSE);
+        /**
+         * Set the initial value of this field.
+         *
+         * @param defaultValue Initial value to set for this field.
+         * @return <code>this</code>
+         */
+        public Builder initialValue(String defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
 
-        result.addSelectionListener(new SelectionListener() {
-            @Override
-            public void widgetSelected(SelectionEvent event) {
-                // Create configure and show the dialog
-                final ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(shell,
-                        new WorkbenchLabelProvider(), new BaseWorkbenchContentProvider());
-                dialog.setTitle(TITLE_FOLDER_SELECTION);
-                dialog.setMessage(BODY_FOLDER_SELECTION);
-                dialog.addFilter(NescProjectsFilter.getInstance());
-                dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
-                dialog.open();
+        /**
+         * Set the parent shell used for dialogs.
+         *
+         * @param parentShell Shell that will be used as parent for dialogs.
+         * @return <code>this</code>
+         */
+        public Builder parentShell(Shell parentShell) {
+            this.parentShell = parentShell;
+            return this;
+        }
 
-                final Object[] result = dialog.getResult();
-                if (result != null) {
-                    // Update the path to the selected one
-                    if (result[0] instanceof IResource) {
-                        final IResource selectedResource = (IResource) result[0];
-                        text.setText(selectedResource.getFullPath().toString());
-                    }
-                }
-            }
+        /**
+         * Set the modify listener to add on creation.
+         *
+         * @param listener Listener to add on creation. Can be null if no
+         *                 listener is to be added.
+         * @return <code>this</code>
+         */
+        public Builder modifyListener(ModifyListener listener) {
+            this.modifyListener = Optional.fromNullable(listener);
+            return this;
+        }
 
-            @Override
-            public void widgetDefaultSelected(SelectionEvent event) {
-                widgetSelected(event);
-            }
-        });
+        @Override
+        protected void beforeBuild() {
+            super.beforeBuild();
+            setFieldName(FIELD_NAME);
+        }
 
-        return result;
+        @Override
+        protected void validate() {
+            super.validate();
+            checkNotNull(defaultValue, "the initial value cannot be null");
+            checkNotNull(parentShell, "the parent shell cannot be null");
+        }
+
+        @Override
+        protected SourceFolderField create() {
+            return new SourceFolderField(this);
+        }
+
+        /**
+         * Creates and returns the text control for this field.
+         *
+         * @param parent Control that the returned one will be contained in.
+         * @param defaultValue Initial value that the control will contain.
+         * @return The newly created text control.
+         */
+        private Text buildText(Composite parent) {
+            final Text result = new Text(parent, BORDER | SINGLE);
+            result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+            result.setText(defaultValue);
+
+            return result;
+        }
+
+        /**
+         * Creates and configures the button that will allow the user choosing
+         * a folder in a NesC project.
+         *
+         * @return The newly created button control.
+         */
+        private Button buildBrowseButton(Composite parent, SelectionListener browseListener) {
+            final Button result = new Button(parent, NONE);
+            result.setText(LABEL_BROWSE);
+            result.addSelectionListener(browseListener);
+
+            return result;
+        }
     }
 }

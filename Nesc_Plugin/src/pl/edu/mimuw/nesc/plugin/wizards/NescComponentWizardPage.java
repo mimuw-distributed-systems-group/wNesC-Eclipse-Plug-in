@@ -96,16 +96,31 @@ public final class NescComponentWizardPage extends WizardPage {
         // Create all fields for this page
         final GridData layoutData = new GridData(GridData.FILL_HORIZONTAL),
                        centerLayoutData = new GridData(FILL, FILL, true, true);
-        sourceFolderField = new SourceFolderField(pageComposite, layoutData,
-                NescWizardSupport.getInitialSourceFolderFullPath(), getShell());
-        componentNameField = new IdentifierField(pageComposite, NAME_COMPONENT_NAME_FIELD,
-                layoutData);
-        componentKindField = new ComponentKindField(pageComposite, null);
-        genericParametersField = new GenericParametersField(pageComposite, centerLayoutData,
-                getShell());
-        genericParametersField.setEnabled(false);
-        usesProvidesField = new UsesProvidesField(pageComposite, centerLayoutData,
-                getShell());
+        sourceFolderField = SourceFolderField.builder()
+                .initialValue(NescWizardSupport.getInitialSourceFolderFullPath())
+                .parentShell(getShell())
+                .parentComposite(pageComposite)
+                .layoutData(layoutData)
+                .build();
+        componentNameField = IdentifierField.builder()
+                .fieldName(NAME_COMPONENT_NAME_FIELD)
+                .parentComposite(pageComposite)
+                .layoutData(layoutData)
+                .build();
+        componentKindField = ComponentKindField.builder()
+                .parentComposite(pageComposite)
+                .build();
+        genericParametersField = GenericParametersField.builder()
+                .enabled(false)
+                .parentShell(getShell())
+                .parentComposite(pageComposite)
+                .layoutData(centerLayoutData)
+                .build();
+        usesProvidesField = UsesProvidesField.builder()
+                .parentShell(getShell())
+                .parentComposite(pageComposite)
+                .layoutData(centerLayoutData)
+                .build();
         fields = new WizardField[] { sourceFolderField, componentNameField,
                 componentKindField, genericParametersField, usesProvidesField };
         createCheckboxes(pageComposite);

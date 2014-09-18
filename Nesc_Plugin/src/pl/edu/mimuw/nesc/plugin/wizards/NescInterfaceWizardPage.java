@@ -114,15 +114,25 @@ public class NescInterfaceWizardPage extends WizardPage {
         // Create controls for all data that will be gathered
         final GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
         final ModifyListener errorStatusUpdater = new ErrorModifyListener();
-        sourceFolderField = new SourceFolderField(composite, gridData,
-                NescWizardSupport.getInitialSourceFolderFullPath(), getShell());
-        sourceFolderField.addModifyListener(errorStatusUpdater);
-        interfaceNameField = new IdentifierField(composite, NAME_INTERFACE_NAME_FIELD, gridData);
-        interfaceNameField.addModifyListener(errorStatusUpdater);
+        sourceFolderField = SourceFolderField.builder()
+                .initialValue(NescWizardSupport.getInitialSourceFolderFullPath())
+                .modifyListener(errorStatusUpdater)
+                .parentShell(getShell())
+                .parentComposite(composite)
+                .layoutData(gridData)
+                .build();
+        interfaceNameField = IdentifierField.builder()
+                .fieldName(NAME_INTERFACE_NAME_FIELD)
+                .modifyListener(errorStatusUpdater)
+                .parentComposite(composite)
+                .layoutData(gridData)
+                .build();
         createTypeParametersField();
+
         commentsCheckbox = new Button(composite, CHECK);
         commentsCheckbox.setText(LABEL_COMMENTS_CHECKBOX);
         commentsCheckbox.setSelection(true);
+
         fields = new WizardField[] { sourceFolderField, interfaceNameField };
 
         // Final operations

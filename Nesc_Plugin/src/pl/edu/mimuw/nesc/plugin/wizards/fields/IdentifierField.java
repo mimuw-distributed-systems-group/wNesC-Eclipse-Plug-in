@@ -1,7 +1,5 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
-import org.eclipse.swt.widgets.Composite;
-
 /**
  * Class that represents a wizard field that allows entering an identifier,
  * e.g. a nesC interface, module or component name.
@@ -11,18 +9,21 @@ import org.eclipse.swt.widgets.Composite;
 public final class IdentifierField extends TextField {
 
     /**
-     * Initializes the field with given values and creates its controls.
+     * Get the builder for this class.
      *
-     * @param parent Composite this one will be in.
-     * @param fieldName Description of the value that this field will allow to
-     *                  enter.
-     * @param layoutData Layout data object to associate with the created
-     *                   composite. It can be null.
-     * @throws NullPointerException One of the arguments (other than
-     *                              <code>layoutData</code>) is null.
+     * @return Newly created builder that will build an object of this class.
      */
-    public IdentifierField(Composite parent, String fieldName, Object layoutData) {
-        super(parent, fieldName, layoutData);
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Initializes this object.
+     *
+     * @param builder A builder object for this class.
+     */
+    private IdentifierField(Builder builder) {
+        super(builder);
     }
 
     @Override
@@ -42,6 +43,46 @@ public final class IdentifierField extends TextField {
                 + fieldName.toLowerCase() + ".";
         default:
             throw new RuntimeException("Unsupported identifier validation result.");
+        }
+    }
+
+    /**
+     * Builder for this part of the fields hierarchy.
+     *
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
+     */
+    public static final class Builder extends TextField.Builder<IdentifierField> {
+        /**
+         * Fields for this object.
+         */
+        private String fieldName;
+
+        /**
+         * Constructor only for the class of the object being built.
+         */
+        private Builder() {
+        }
+
+        /**
+         * Set the name of the field that will be created.
+         *
+         * @param fieldName Name that will be associated with the created field.
+         * @return <code>this</code>
+         */
+        public Builder fieldName(String fieldName) {
+            this.fieldName = fieldName;
+            return this;
+        }
+
+        @Override
+        protected void beforeBuild() {
+            super.beforeBuild();
+            setFieldName(fieldName);
+        }
+
+        @Override
+        protected IdentifierField create() {
+            return new IdentifierField(this);
         }
     }
 }

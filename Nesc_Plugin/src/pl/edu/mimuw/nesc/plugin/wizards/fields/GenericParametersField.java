@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Class that represents a field for choosing generic parameters of a component.
@@ -50,21 +51,23 @@ public final class GenericParametersField extends TableField<GenericParametersFi
     private final Shell shell;
 
     /**
-     * @param parent Control that the field will be placed in.
-     * @param layoutData Object that affects the layout of the composite
-     *                   created for this field.
-     * @param parentShell Parent of the data dialog for this field.
-     * @throws NullPointerException A parameter is null (except
-     *                              <code>layoutData</code>).
+     * Get a builder for this class.
+     *
+     * @return Newly created builder for objects of this class.
      */
-    public GenericParametersField(Composite parent, Object layoutData, Shell parentShell) {
-        super(parent, FIELD_NAME, layoutData, FIELD_COLUMN_SPEC);
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        if (parentShell == null) {
-            throw new NullPointerException("Parent shell is null.");
-        }
-
-        shell = parentShell;
+    /**
+     * Initializes this field.
+     *
+     * @param builder Builder for objects of this class.
+     */
+    private GenericParametersField(Builder builder) {
+        super(builder);
+        this.shell = builder.parentShell;
+        setEnabled(builder.enabled);
     }
 
     @Override
@@ -254,6 +257,54 @@ public final class GenericParametersField extends TableField<GenericParametersFi
         public enum Type {
             TYPE_PARAM,
             CONSTANT_PARAM
+        }
+    }
+
+    /**
+     * Builder for this part of the fields hierarchy.
+     *
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
+     */
+    public static final class Builder extends TableField.Builder<GenericParameter, GenericParametersField> {
+        /**
+         * Data for building objects of the outer class.
+         */
+        private boolean enabled = true;
+
+        /**
+         * Constructor only for the outer class.
+         */
+        private Builder() {
+        }
+
+        /**
+         * Set if the created control will be initially enabled.
+         *
+         * @param enabled Value that specifies if the created control will be
+         *                initially enabled.
+         * @return <code>this</code>
+         */
+        public Builder enabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+
+        @Override
+        protected void beforeBuild() {
+            super.beforeBuild();
+            setFieldName(FIELD_NAME);
+            setColumnsSpec(FIELD_COLUMN_SPEC);
+        }
+
+        @Override
+        protected void validate() {
+            super.validate();
+            checkNotNull(parentShell, "the parent shell cannot be null");
+        }
+
+        @Override
+        protected GenericParametersField create() {
+            return new GenericParametersField(this);
         }
     }
 }

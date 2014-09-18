@@ -1,5 +1,7 @@
 package pl.edu.mimuw.nesc.plugin.wizards.fields;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.swt.SWT.CENTER;
 import static org.eclipse.swt.SWT.LEFT;
 import static org.eclipse.swt.SWT.NONE;
@@ -35,27 +37,12 @@ public abstract class AbstractField implements WizardField {
     /**
      * Creates a composite for this field.
      *
-     * @param parent Parent for the composite for this field.
-     * @param fieldName Name associated with this field.
-     * @param columnsCount Number of columns in the grid layout that the
-     *                     composite for this field will contain.
-     * @param layoutData Layout data object to associate with the newly created
-     *                   composite for this field.
+     * @param builder Builder for this class.
      */
-    protected AbstractField(Composite parent, String fieldName, int columnsCount, Object layoutData) {
-        if (parent == null || fieldName == null) {
-            throw new NullPointerException("AbstractField.<init>: null argument.");
-        } else if (columnsCount < 1) {
-            throw new IllegalArgumentException("AbstractField.<init>: number of columns must be positive.");
-        }
-
-        this.composite = createComposite(parent, columnsCount);
-        if (layoutData != null) {
-            this.composite.setLayoutData(layoutData);
-        }
-
-        this.name = fieldName;
-        this.label = createLabel(composite, fieldName);
+    protected AbstractField(Builder<? extends AbstractField> builder) {
+        this.composite = builder.buildComposite();
+        this.name = builder.fieldName;
+        this.label = builder.buildLabel(composite);
     }
 
     @Override
@@ -119,35 +106,144 @@ public abstract class AbstractField implements WizardField {
     }
 
     /**
-     * Creates and configures the composite of this field.
+     * <p>The base class for builders of all fields. The process of building the
+     * resulting object is as follows:</p>
+     * <ol>
+     *    <li><code>beforeBuild</code> method is called</li>
+     *    <li><code>validate</code> method is called</li>
+     *    <li><code>create</code> method is called</li>
+     * </ol>
+     * <p>It follows the Builder design pattern.</p>
      *
-     * @return The newly created and configured composite.
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
      */
-    private static Composite createComposite(Composite parent, int columnsCount) {
-        final Composite result = new Composite(parent, NONE);
-        final GridLayout layout = new GridLayout();
-        layout.numColumns = columnsCount;
-        result.setLayout(layout);
+    public static abstract class Builder<F extends AbstractField> {
+        /**
+         * <code>true</code> if and only if the field name has been already set.
+         */
+        private boolean fieldNameSet = false;
 
-        return result;
-    }
+        /**
+         * Data for the creation of the field.
+         */
+        private Composite parentComposite;
+        private Object layoutData;
+        private String fieldName;
+        private final int columnsCount;
 
-    /**
-     * Creates and returns a label for this field. It is created as a child of
-     * the given composite.
-     *
-     * @param fieldName Text in this label (a colon will be appended if text
-     * 					is not empty).
-     * @return Label for this field.
-     */
-    private static Label createLabel(Composite parent, String fieldName) {
-        final Label result = new Label(parent, NONE);
-        if ("".equals(fieldName)) {
-        	result.setText(fieldName);
-        } else {
-        	result.setText(fieldName + ":");
+        /**
+         * @param columnsCount Number of columns in the grid layout that the
+         *                     composite for this field will contain.
+         */
+        protected Builder(int columnsCount) {
+            this.columnsCount = columnsCount;
         }
 
-        return result;
+        /**
+         * @param parent Parent for the composite for this field.
+         * @return <code>this</code>
+         */
+        public Builder<F> parentComposite(Composite parent) {
+            this.parentComposite = parent;
+            return this;
+        }
+
+        /**
+         * @param layoutData Layout data object to associate with the newly created
+         *                   composite for this field.
+         * @return <code>this</code>
+         */
+        public Builder<F> layoutData(Object layoutData) {
+            this.layoutData = layoutData;
+            return this;
+        }
+
+        /**
+         * This method should be called in a <code>beforeBuild</code> override.
+         * @param fieldName Name associated with this field.
+         * @throws IllegalArgumentException The name of the field has been
+         *                                  already set.
+         */
+        protected void setFieldName(String fieldName) {
+            checkState(!fieldNameSet, "the name of the field can be set exactly once");
+            this.fieldName = fieldName;
+            this.fieldNameSet = true;
+        }
+
+        /**
+         * This method is called directly before the building process begins and
+         * can make some additional work. It should make a call to the same
+         * method from the superclass
+         */
+        protected void beforeBuild() {
+        }
+
+        /**
+         * Checks if the fields of this builder are correctly set. If no, an
+         * exception should be thrown. This method should make a call to the
+         * same method from the superclass.
+         */
+        protected void validate() {
+            checkNotNull(parentComposite, "the parent composite cannot be null");
+            checkNotNull(fieldName, "the field name cannot be null");
+            checkState(columnsCount >= 1, "the number of columns must be positive");
+        }
+
+        /**
+         * This method is called at the very end of the building process. It
+         * should cause creation of the object.
+         *
+         * @return Instance that has been built by this builder.
+         */
+        protected abstract F create();
+
+        /**
+         * Performs the building work. An exception can be thrown if the builder
+         * has been incorrectly configured.
+         *
+         * @return The instance created by this builder.
+         */
+        public final F build() {
+            beforeBuild();
+            validate();
+            return create();
+        }
+
+        /**
+         * Creates and configures the composite of this field.
+         *
+         * @return The newly created and configured composite.
+         */
+        private Composite buildComposite() {
+            final Composite result = new Composite(parentComposite, NONE);
+            final GridLayout layout = new GridLayout();
+            layout.numColumns = columnsCount;
+            result.setLayout(layout);
+
+            if (layoutData != null) {
+                result.setLayoutData(layoutData);
+            }
+
+            return result;
+        }
+
+        /**
+         * Creates and returns a label for this field. It is created as a child of
+         * the given composite.
+         *
+         * @param fieldName Text in this label (a colon will be appended if text
+         *                                  is not empty).
+         * @return Label for this field.
+         */
+        private Label buildLabel(Composite parent) {
+            final Label result = new Label(parent, NONE);
+            if ("".equals(fieldName)) {
+                    result.setText(fieldName);
+            } else {
+                    result.setText(fieldName + ":");
+            }
+
+            return result;
+        }
     }
 }

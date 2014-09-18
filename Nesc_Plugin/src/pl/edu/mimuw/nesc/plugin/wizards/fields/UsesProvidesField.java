@@ -8,9 +8,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
@@ -50,23 +51,22 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
     private final Shell shell;
 
     /**
+     * Get the builder for an object of this class.
+     *
+     * @return Newly created builder for objects of this class.
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * Initializes the field - creates all necessary controls.
      *
-     * @param parent Composite that will contain this fields controls.
-     * @param layoutData Layout data object that affects the layout of the
-     *                   composite created for this field.
-     * @param shell Parent shell for showing dialogs.
-     * @throws NullPointerException <code>parent</code> or <code>shell</code>
-     *                              is null.
+     * @param builder Builder for this class.
      */
-    public UsesProvidesField(Composite parent, Object layoutData, Shell shell) {
-        super(parent, FIELD_NAME, layoutData, FIELD_COLUMN_SPEC);
-
-        if (shell == null) {
-            throw new NullPointerException("Shell cannot be null.");
-        }
-
-        this.shell = shell;
+    private UsesProvidesField(Builder builder) {
+        super(builder);
+        this.shell = builder.parentShell;
     }
 
     @Override
@@ -429,6 +429,37 @@ public final class UsesProvidesField extends TableField<UsesProvides> {
             String getInstanceParams() {
                 return instanceParams;
             }
+        }
+    }
+
+    /**
+     * Builder for this part of the fields hierarchy.
+     *
+     * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
+     */
+    public static final class Builder extends TableField.Builder<UsesProvides, UsesProvidesField> {
+        /**
+         * Constructor only for the class of object this builder creates.
+         */
+        private Builder() {
+        }
+
+        @Override
+        protected void beforeBuild() {
+            super.beforeBuild();
+            setFieldName(FIELD_NAME);
+            setColumnsSpec(FIELD_COLUMN_SPEC);
+        }
+
+        @Override
+        protected void validate() {
+            super.validate();
+            checkNotNull(parentShell, "the parent shell cannot be null");
+        }
+
+        @Override
+        protected UsesProvidesField create() {
+            return new UsesProvidesField(this);
         }
     }
 }
