@@ -238,23 +238,23 @@ public final class SourceFolderField extends AbstractField {
      */
     public static final class Builder extends AbstractField.Builder<SourceFolderField> {
         /**
-         * Data needed for building of a source folder field.
+         * Data needed for building a source folder field.
          */
         private String defaultValue;
         private Shell parentShell;
         private Optional<ModifyListener> modifyListener = Optional.absent();
 
         /**
-         * Constructor only for class of the objects that will be created.
+         * Constructor only for class of the objects that will be built.
          */
         private Builder() {
             super(FIELD_COLUMNS_COUNT);
         }
 
         /**
-         * Set the initial value of this field.
+         * Set the initial value of the field.
          *
-         * @param defaultValue Initial value to set for this field.
+         * @param defaultValue Initial value to set for the field.
          * @return <code>this</code>
          */
         public Builder initialValue(String defaultValue) {
@@ -307,7 +307,6 @@ public final class SourceFolderField extends AbstractField {
          * Creates and returns the text control for this field.
          *
          * @param parent Control that the returned one will be contained in.
-         * @param defaultValue Initial value that the control will contain.
          * @return The newly created text control.
          */
         private Text buildText(Composite parent) {
@@ -322,6 +321,9 @@ public final class SourceFolderField extends AbstractField {
          * Creates and configures the button that will allow the user choosing
          * a folder in a NesC project.
          *
+         * @param parent Parent that will be used for the created button.
+         * @param browseListener Listener that will be added to the listeners
+         *                       set of the created button.
          * @return The newly created button control.
          */
         private Button buildBrowseButton(Composite parent, SelectionListener browseListener) {

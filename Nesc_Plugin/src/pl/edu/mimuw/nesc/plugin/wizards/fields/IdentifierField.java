@@ -53,7 +53,7 @@ public final class IdentifierField extends TextField {
      */
     public static final class Builder extends TextField.Builder<IdentifierField> {
         /**
-         * Fields for this object.
+         * Data for the creation of the field.
          */
         private String fieldName;
 

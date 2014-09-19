@@ -48,7 +48,7 @@ public final class FileNameField extends TextField {
      */
     public static final class Builder extends TextField.Builder<FileNameField> {
         /**
-         * Data for this object.
+         * Data for the creation of the field.
          */
         private String fieldName;
 

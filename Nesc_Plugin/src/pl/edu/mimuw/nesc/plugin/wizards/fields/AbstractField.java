@@ -6,6 +6,7 @@ import static org.eclipse.swt.SWT.CENTER;
 import static org.eclipse.swt.SWT.LEFT;
 import static org.eclipse.swt.SWT.NONE;
 
+import com.google.common.base.Optional;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -106,16 +107,20 @@ public abstract class AbstractField implements WizardField {
     }
 
     /**
-     * <p>The base class for builders of all fields. The process of building the
+     * <p>The base class for builders of fields. The process of building the
      * resulting object is as follows:</p>
      * <ol>
      *    <li><code>beforeBuild</code> method is called</li>
      *    <li><code>validate</code> method is called</li>
      *    <li><code>create</code> method is called</li>
      * </ol>
-     * <p>It follows the Builder design pattern.</p>
+     * <p>The result of the <code>create</code> method call is considered the
+     * built object and returned by <code>build</code> method.</p>
+     * <p>The design of this class follows the builder pattern.</p>
      *
      * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
+     * @see Builder#beforeBuild
+     * @see Builder#validate
      */
     public static abstract class Builder<F extends AbstractField> {
         /**
@@ -126,21 +131,23 @@ public abstract class AbstractField implements WizardField {
         /**
          * Data for the creation of the field.
          */
-        private Composite parentComposite;
-        private Object layoutData;
-        private String fieldName;
         private final int columnsCount;
+        private Composite parentComposite;
+        private String fieldName;
+        private Optional<Object> layoutData = Optional.absent();
 
         /**
          * @param columnsCount Number of columns in the grid layout that the
-         *                     composite for this field will contain.
+         *                     composite for the field will contain.
          */
         protected Builder(int columnsCount) {
             this.columnsCount = columnsCount;
         }
 
         /**
-         * @param parent Parent for the composite for this field.
+         * Set the parent of the composite for the field.
+         *
+         * @param parent Parent for the composite for the field.
          * @return <code>this</code>
          */
         public Builder<F> parentComposite(Composite parent) {
@@ -149,20 +156,25 @@ public abstract class AbstractField implements WizardField {
         }
 
         /**
-         * @param layoutData Layout data object to associate with the newly created
-         *                   composite for this field.
+         * Set the layout data object that will be associated with the new
+         * composite for the field.
+         *
+         * @param layoutData Layout data object to associate with the newly
+         *                   created composite for the field. If it is null,
+         *                   then no layout data object will be used.
          * @return <code>this</code>
          */
         public Builder<F> layoutData(Object layoutData) {
-            this.layoutData = layoutData;
+            this.layoutData = Optional.fromNullable(layoutData);
             return this;
         }
 
         /**
          * This method should be called in a <code>beforeBuild</code> override.
-         * @param fieldName Name associated with this field.
-         * @throws IllegalArgumentException The name of the field has been
-         *                                  already set.
+         *
+         * @param fieldName Name to be associated with the field.
+         * @throws IllegalStateException The name of the field has been
+         *                               already set.
          */
         protected void setFieldName(String fieldName) {
             checkState(!fieldNameSet, "the name of the field can be set exactly once");
@@ -173,7 +185,7 @@ public abstract class AbstractField implements WizardField {
         /**
          * This method is called directly before the building process begins and
          * can make some additional work. It should make a call to the same
-         * method from the superclass
+         * method from the superclass.
          */
         protected void beforeBuild() {
         }
@@ -210,7 +222,7 @@ public abstract class AbstractField implements WizardField {
         }
 
         /**
-         * Creates and configures the composite of this field.
+         * Creates and configures the composite for the field.
          *
          * @return The newly created and configured composite.
          */
@@ -220,20 +232,20 @@ public abstract class AbstractField implements WizardField {
             layout.numColumns = columnsCount;
             result.setLayout(layout);
 
-            if (layoutData != null) {
-                result.setLayoutData(layoutData);
+            if (layoutData.isPresent()) {
+                result.setLayoutData(layoutData.get());
             }
 
             return result;
         }
 
         /**
-         * Creates and returns a label for this field. It is created as a child of
-         * the given composite.
+         * Creates and returns a label for the field. It is created as a child
+         * of the given composite.
          *
-         * @param fieldName Text in this label (a colon will be appended if text
-         *                                  is not empty).
-         * @return Label for this field.
+         * @param parent Composite that will be used as the parent for the
+         *               created label.
+         * @return Label for the field.
          */
         private Label buildLabel(Composite parent) {
             final Label result = new Label(parent, NONE);

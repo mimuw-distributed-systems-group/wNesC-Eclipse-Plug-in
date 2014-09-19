@@ -292,9 +292,9 @@ public abstract class TableField<T> extends AbstractField {
      */
     public static abstract class Builder<T, F extends TableField<T>> extends AbstractField.Builder<F> {
         /**
-         * Remember if the columns set has been already set. Separate field is
-         * necessary to remember a call to <code>setColumnsSpec</code> with
-         * <code>null</code> as argument.
+         * Remember if the columns specification has been already set. Separate
+         * field is necessary to remember a call to <code>setColumnsSpec</code>
+         * with <code>null</code> as the argument.
          */
         private boolean columnsSpecSet = false;
 
@@ -333,6 +333,8 @@ public abstract class TableField<T> extends AbstractField {
          * <code>beforeBuild</code> method.
          *
          * @param columnsSpec Column specification that will be used.
+         * @throws IllegalStateException The columns specification has been
+         *                               already set.
          */
         protected void setColumnsSpec(ColumnSpecification[] columnsSpec) {
             checkState(!columnsSpecSet, "the column specification can only be set once");
@@ -352,7 +354,6 @@ public abstract class TableField<T> extends AbstractField {
          * Its parent is set to <code>parent</code> argument.
          *
          * @param parent Parent of the newly created object.
-         * @return Newly created table object.
          */
         private void buildTable(Composite parent) {
             table = new Table(parent, BORDER | SINGLE | FULL_SELECTION);
@@ -377,6 +378,9 @@ public abstract class TableField<T> extends AbstractField {
         /**
          * Creates buttons to let the user interact with the list and events for
          * them.
+         *
+         * @param parent Composite that will be used as the parent for the newly
+         *               created composite for buttons.
          */
         private void buildButtons(Composite parent) {
             // Create composite for buttons
@@ -400,6 +404,18 @@ public abstract class TableField<T> extends AbstractField {
          * Adds the given listeners to the previously created objects.
          * Earlier calls to <code>buildButtons</code> and
          * <code>buildTable</code> are required.
+         *
+         * @param addListener Listener that will be added to the set of
+         *                    selection listeners associated with the add
+         *                    button.
+         * @param editListener Listener that will be added to the set of
+         *                     selection listeners associated with the edit
+         *                     button.
+         * @param removeListener Listener that will be added to the set of
+         *                       selection listeners associated with the remove
+         *                       button.
+         * @param enableListener Listener that will be added to the set of
+         *                       selection listeners associated with the table.
          */
         private void attachListeners(SelectionListener addListener, SelectionListener editListener,
                 SelectionListener removeListener, SelectionListener enableListener) {

@@ -67,19 +67,18 @@ public abstract class TextField extends AbstractField {
     }
 
     /**
-     * Builder that creates the fragment of the object that belongs to this
-     * class.
+     * Builder for this part of the fields hierarchy.
      *
      * @author Michał Ciszewski <michal.ciszewski@students.mimuw.edu.pl>
      */
     public static abstract class Builder<F extends TextField> extends AbstractField.Builder<F> {
         /**
-         * Fields for this object.
+         * Data for creation of the field.
          */
         private Optional<ModifyListener> modifyListener = Optional.absent();
 
         /**
-         * Set the count of field columns.
+         * Initialize the superclass properly.
          */
         protected Builder() {
             super(FIELD_COLUMNS_COUNT);
