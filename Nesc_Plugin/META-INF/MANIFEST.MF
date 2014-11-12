@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: NesC_Plugin
 Bundle-SymbolicName: Nesc_Plugin;singleton:=true
-Bundle-Version: 0.3.20140825.mighty_mecha
+Bundle-Version: 0.4.20141112.smart_soulmate
 Bundle-Activator: pl.edu.mimuw.nesc.plugin.NescPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

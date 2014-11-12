@@ -216,7 +216,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 							new NescDeclaration.Visitor<Environment, Void>() {
 								@Override
 								public Environment visit(ConfigurationDeclaration configurationDecl, Void arg) {
-									return configurationDecl.getAstConfiguration().getSpecificationEnvironment();
+									return configurationDecl.getAstComponent().getSpecificationEnvironment();
 								}
 
 								@Override
@@ -227,7 +227,7 @@ class ObjectProposalBuilder extends ProposalBuilder {
 
 								@Override
 								public Environment visit(ModuleDeclaration moduleDecl, Void arg) {
-									return moduleDecl.getAstModule().getSpecificationEnvironment();
+									return moduleDecl.getAstComponent().getSpecificationEnvironment();
 								}
 							}, null);
 
